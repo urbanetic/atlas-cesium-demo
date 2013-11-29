@@ -4,7 +4,7 @@ define([
   'atlas-cesium/cesium/Core/GeometryInstance',
   'atlas-cesium/cesium/Core/PolygonGeometry',
   'atlas-cesium/cesium/Scene/EllipsoidSurfaceAppearance',
-  'atlas-cesium/cesium/Core/MaterialAppearance',
+  'atlas-cesium/cesium/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Core/Color'
 ], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
 
