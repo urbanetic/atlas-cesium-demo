@@ -1,0 +1,19 @@
+<html>
+<head>
+<title>atlas-cesium demo</title>
+<link rel="stylesheet" href="./atlas-cesium/cesium/Widgets/Viewer/Viewer.css">
+<script src="./atlas-cesium/lib/require.js"></script>
+<script>
+  var poly = "POLYGON ((1 2, 3 4))";
+  require(['./atlas-cesium/CesiumAtlas'], function (CesiumAtlas) {
+    cesiumAtlas = new CesiumAtlas();
+    cesiumAtlas.attachTo(document.getElementById('cesium'));
+
+    cesiumAtlas.addPolygon(1, poly);
+  });
+</script>
+</head>
+<body>
+<div id="cesium"></div>
+</body>
+</html>
