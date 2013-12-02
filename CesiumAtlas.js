@@ -8,12 +8,12 @@ define([
   'atlas-cesium/model/Polygon',
   // Extends
   'atlas/Atlas'
-], function (extend, DomManager, RenderManager, Atlas, Polygon) {
+], function (extend, DomManager, RenderManager, Polygon, Atlas) {
 
   var CesiumAtlas = function () {
     CesiumAtlas.base.constructor.call(this);
-    this.managers.render = new RenderManager();
-    this.managers.dom = new DomManager(this.managers.render);
+    this.managers['render'] = new RenderManager();
+    this.managers['dom'] = new DomManager(this.managers.render);
   };
   extend(Atlas, CesiumAtlas);
 
@@ -22,20 +22,21 @@ define([
   };
 
   CesiumAtlas.prototype.addPolygon = function (id, vertices, args) {
-    if (id === undefined) {
+    console.log('creating id', id);
+    if (typeof id === 'undefined') {
       throw new DeveloperError('Can not create entity without an ID');
     }
-
-    var polygon;
-    if (typeof vertices === 'String') {
-      // Assume vertices is a valid WKT string
-      polygon = Polygon.fromWKT(id, vertices, args);
+    var polygon = new Polygon(id, vertices, args);
+    console.log('poly is visible', polygon.isVisible());
+    if (polygon instanceof Polygon) {
+      console.log('constructed polygon', polygon);
+      this.managers['render'].addEntity(polygon);
+      this.managers['render'].show(id);
     } else {
-      polygon = new Polygon(id, vertices, args);
+      console.log('have', polygon);
+      throw 'Error constructing polygon';
     }
-    this.managers.render.add(polygon);
-    this.managers.render.show(id);
-    return polygon;    
+    return polygon;
   };
 
   return CesiumAtlas;
