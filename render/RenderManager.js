@@ -4,8 +4,10 @@
 define([
   'atlas/util/Extends',
   'atlas/render/RenderManager',
-  'atlas-cesium/cesium/Widgets/Viewer/Viewer'
-], function (extend, RenderManagerCore, CesiumViewer) {
+  'atlas-cesium/cesium/Widgets/Viewer/Viewer',
+  'atlas-cesium/cesium/Scene/Primitive'
+], function (extend, RenderManagerCore, CesiumViewer, Primitive) {
+  "use strict";
 
   /**
    * 
@@ -37,15 +39,20 @@ define([
   };
 
   RenderManager.prototype.show = function (id) {
-    if (this._entities[id] !== undefined) {
-      if (!this._entities[id].isVisible) {
-        if (this._entities[id].primitive) {
+    if (typeof this._entities[id] === 'undefined') {
+      console.debug('entity #' + id + ' does not exist');
+    } else {
+      if (this._entities[id].isVisible() && this._entities[id].isRenderable()) {
+        console.debug('entity ' + id + ' already visible and correctly rendered');
+      } else {
+        console.log('showing entity', this._entities[id]);
+        if (this._entities[id].isRenderable()) {
           // If the Cesium primitive is already created, set it to be shown...
           this._entities[id].primitive.show = true;
         } else {
           // otherwise, need to create and show primitive.
-          this.entites[id].primitive = this._createPrimitive(id);
-          this._widget.scene.getPrimitives().add(this.entites[id].primitive);
+          this._createPrimitive(id);
+          this._widget.scene.getPrimitives().add(this._entities[id].primitive);
           this._entities[id]._visible = true;
         }
       }
@@ -65,13 +72,13 @@ define([
 
   RenderManager.prototype._createPrimitive = function (id) {
     // TODO(bpstudds): Enable many terrain heights, we only have one currently.
-    if (!this.entities[id].isRenderable) {
-      this.entities[id].build(this._widget.centralBody.getEllipsoid(),
+    if (!this._entities[id].isRenderable()) {
+      this._entities[id].build(this._widget.centralBody.getEllipsoid(),
           /*miniumumTerrainElevation*/ 0);
     }
-    geometry = this.entities[id].getGeometry;
-    appearance = this.entities[id].getAppearance;
-    this.entites[id].primitive = 
+    var geometry = this._entities[id].getGeometry();
+    var appearance = this._entities[id].getAppearance();
+    this._entities[id].primitive =
         new Primitive({geometryInstances: geometry, appearance: appearance});
   };
 
