@@ -3,14 +3,16 @@ define([
   'atlas/model/Polygon',
   'atlas-cesium/cesium/Core/GeometryInstance',
   'atlas-cesium/cesium/Core/PolygonGeometry',
+  'atlas-cesium/cesium/Core/Cartographic',
   'atlas-cesium/cesium/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Core/Color'
-], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
+], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
+  "use strict";
 
   var Polygon = function (id, vertices, args) {
     // Call base constructor
-    Polygon.base.constructor.call(this, args);
+    Polygon.base.constructor.call(this, id, vertices, args);
     /*=====
     Inherited from atlas/model/Polygon
     this._vertices
@@ -51,36 +53,40 @@ define([
    *        in the area covered by this polygon.
    */
   Polygon.prototype.build = function (ellipsoid, minTerrainElevation) {
+    console.log('building polygon');
     this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
     this._minTerrainElevation = minTerrainElevation || 0;
     // For 3D extruded polygons, ensure polygon is not closed as it causes
     // rendering to hang.
-    if (extrusionHeight > 0) {
+    if (this._height > 0) {
       if (this._cartesians[0] == this._cartesians[this._cartesians.length - 1]) {
         vertices.pop();
       }
     }
     // Generate geometry data.
-    this._geometry = new Cesium.GeometryInstance({
-      id: parseInt(args.id, 10),
-      geometry: new Cesium.PolygonGeometry({
+    this._geometry = new GeometryInstance({
+      id: this._id,
+      geometry: new PolygonGeometry({
         polygonHierarchy: {positions: this._cartesians},
         height: this._minTerrainElevation + this._elevation,
         extrudedHeight: this._minTerrainElevation + this._elevation + this._height
       })
     });
     // Generate appearance data
-    if (this._height > 0) {
+    console.debug('build polygon with height', this._height);
+    if (this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
       this._appearance = new MaterialAppearance({closed: true});
     }
-    cesiumColour = new CesiumColour(this._style.fillColour.red,
-                                    this._style.fillColour.green,
-                                    this._style.fillColour.blue,
-                                    this._style.fillColour.alpha);
+    var cesiumColour = new CesiumColour(this._style.fillColour.red,
+        this._style.fillColour.green,
+        this._style.fillColour.blue,
+        this._style.fillColour.alpha);
     this._appearance.material.uniforms.color = cesiumColour;
-    this._renderable = true;
+    this._setRenderable(true);
+    console.log('created geometry', this._geometry);
+    console.log('created appearance', this._appearance);
   };
 
   /**
@@ -103,4 +109,5 @@ define([
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
   };
 
+  return Polygon;
 });
