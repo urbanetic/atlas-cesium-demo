@@ -32,8 +32,11 @@ define([
     }
     this._widget = new CesiumViewer(elem, {
       animation: false,
+      baseLayerPicker: false,
       fullscreenButton: false,
+      geocoder: false,
       homeButton: false,
+      sceneModePicker: false,
       timeline: false
     });
   };
