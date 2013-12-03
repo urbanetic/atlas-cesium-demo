@@ -1,12 +1,12 @@
 define([
   'atlas/util/Extends',
   'atlas/model/Polygon',
-  'atlas-cesium/cesium/Core/GeometryInstance',
-  'atlas-cesium/cesium/Core/PolygonGeometry',
-  'atlas-cesium/cesium/Core/Cartographic',
-  'atlas-cesium/cesium/Scene/EllipsoidSurfaceAppearance',
-  'atlas-cesium/cesium/Scene/MaterialAppearance',
-  'atlas-cesium/cesium/Core/Color'
+  'atlas-cesium/cesium/Source/Core/GeometryInstance',
+  'atlas-cesium/cesium/Source/Core/PolygonGeometry',
+  'atlas-cesium/cesium/Source/Core/Cartographic',
+  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
+  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
+  'atlas-cesium/cesium/Source/Core/Color'
 ], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
   "use strict";
 

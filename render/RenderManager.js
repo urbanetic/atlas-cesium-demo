@@ -4,8 +4,8 @@
 define([
   'atlas/util/Extends',
   'atlas/render/RenderManager',
-  'atlas-cesium/cesium/Widgets/Viewer/Viewer',
-  'atlas-cesium/cesium/Scene/Primitive'
+  'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
+  'atlas-cesium/cesium/Source/Scene/Primitive'
 ], function (extend, RenderManagerCore, CesiumViewer, Primitive) {
   "use strict";
 
