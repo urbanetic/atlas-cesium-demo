@@ -3,11 +3,12 @@ define([
   'atlas/model/Polygon',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
+  'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Core/Color'
-], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
+], function (extend, PolygonCore, GeometryInstance, PolygonGeometry, Primitive, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour) {
   "use strict";
 
   var Polygon = function (id, vertices, args) {
@@ -15,6 +16,7 @@ define([
     Polygon.base.constructor.call(this, id, vertices, args);
     /*=====
     Inherited from atlas/model/Polygon
+    this._renderManager
     this._vertices
     this._height
     this._elevation
@@ -29,7 +31,7 @@ define([
     =====*/
 
     /**
-     * An array of Cesiu cartesian coordinates describing the position of the Polygon
+     * An array of Cesium cartesian coordinates describing the position of the Polygon
      * on the Cesium globe.
      * @see  {@link http://cesiumjs.org/Cesium/Build/Documentation/Cartesian3.html}
      * @type {Cartesian3}
@@ -41,9 +43,58 @@ define([
      * @type {Number}
      */
     this._minTerrainElevation = 0.0;
+
+    this._primitive = null;
   };
   extend(PolygonCore, Polygon);
 
+  /**
+   * Returns whether this Polygon is visible. Overrides the default Atlas implementation
+   * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
+   * @return {Boolean} - Whether the Polygon is visible.
+   */
+  Polygon.prototype.isVisible = function () {
+    if (this._primitive === null) {
+      return false;
+    } else {
+      return this._primitive.show;
+    }
+  };
+
+  Polygon.prototype.show = function () {
+    if (this.isVisible() && this.isRenderable()) {
+      console.debug('entity ' + this._id + 'already visible and correctly rendered');
+    } else {
+      console.debug('showing entity '+this._id);
+      if (this.isRenderable()) {
+        this._primitive.show = true;
+      } else {
+        this._createPrimitive();
+        this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+      }
+    }
+    return this.isRenderable() && this._primitive.show;
+  };
+
+  Polygon.prototype.hide = function () {
+    if (this.isVisible()) {
+      this._primitive.show = false;
+    }
+    return this.isRenderable() && this._primitive.show();
+  };
+
+
+    Polygon.prototype._createPrimitive = function () {
+    var rm = this._renderManager;
+    if (!this.isRenderable()) {
+      this._build(rm._widget.centralBody.getEllipsoid(),
+          rm.getMinimumTerrainHeight(this._vertices));
+    }
+    var geometry = this.getGeometry();
+    var appearance = this.getAppearance();
+    this._primitive =
+        new Primitive({geometryInstances: geometry, appearance: appearance});
+  };
 
   /**
    * Builds the geometry and appearance data required to render the Polygon in
@@ -52,7 +103,7 @@ define([
    * @param {number} minTerrainElevation - The minimum height of the terrain 
    *        in the area covered by this polygon.
    */
-  Polygon.prototype.build = function (ellipsoid, minTerrainElevation) {
+  Polygon.prototype._build = function (ellipsoid, minTerrainElevation) {
     console.log('building polygon');
     this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
     this._minTerrainElevation = minTerrainElevation || 0;
