@@ -3,10 +3,12 @@
  */
 define([
   'atlas/util/Extends',
-  'atlas/render/RenderManager',
+  'atlas-cesium/model/Feature',
+  // Cesium imports.
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
-  'atlas-cesium/cesium/Source/Scene/Primitive'
-], function (extend, RenderManagerCore, CesiumViewer, Primitive) {
+  // Base class
+  'atlas/render/RenderManager'
+], function (extend, Feature, CesiumViewer, RenderManagerCore) {
   "use strict";
 
   /**
@@ -15,12 +17,13 @@ define([
    * @alias atlas-cesium/render/RenderManager
    * @constructor
    */
-  var RenderManager = function () {
+  var RenderManager = function (atlasManagers) {
     /*=====
     Inherited from RenderManagerCore
-    this.entities
+    this._entities;
+    this._atlasManagers;
     =====*/
-    RenderManager.base.constructor.call(this);
+    RenderManager.base.constructor.call(this, atlasManagers);
 
     this._widget = null;
   };
@@ -39,52 +42,60 @@ define([
       sceneModePicker: false,
       timeline: false
     });
+    console.debug('in RenderManager', this._widget);
+  };
+
+  RenderManager.prototype.bindEvents = function () {
+    this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
+      if (!(args.id in this._entities)) {
+        this.addFeature(args.id, args.vertices, args.args);
+      }
+      this.show(args.id);
+    }).bind(this));
+  };
+
+  RenderManager.prototype.getMinimumTerrainHeight = function (vertices) {
+    // TODO(bpstudds): Actually calculate the minimum terrain height.
+    return 500;
   };
 
   RenderManager.prototype.show = function (id) {
-    if (typeof this._entities[id] === 'undefined') {
-      console.debug('entity #' + id + ' does not exist');
-    } else {
-      if (this._entities[id].isVisible() && this._entities[id].isRenderable()) {
-        console.debug('entity ' + id + ' already visible and correctly rendered');
-      } else {
-        console.log('showing entity', this._entities[id]);
-        if (this._entities[id].isRenderable()) {
-          // If the Cesium primitive is already created, set it to be shown...
-          this._entities[id].primitive.show = true;
-        } else {
-          // otherwise, need to create and show primitive.
-          this._createPrimitive(id);
-          this._widget.scene.getPrimitives().add(this._entities[id].primitive);
-          this._entities[id]._visible = true;
-        }
-      }
+    if (id in this._entities) {
+      this._entities[id].show();
     }
+    // if (typeof this._entities[id] === 'undefined') {
+    //   console.debug('entity #' + id + ' does not exist');
+    // } else {
+    //   if (this._entities[id].isVisible() && this._entities[id].isRenderable()) {
+    //     console.debug('entity ' + id + ' already visible and correctly rendered');
+    //   } else {
+    //     console.log('showing entity', this._entities[id]);
+    //     if (this._entities[id].isRenderable()) {
+    //       // If the Cesium primitive is already created, set it to be shown...
+    //       this._entities[id].primitive.show = true;
+    //     } else {
+    //       // otherwise, need to create and show primitive.
+    //       this._createPrimitive(id);
+    //       this._widget.scene.getPrimitives().add(this._entities[id].primitive);
+    //       this._entities[id]._visible = true;
+    //     }
+    //   }
+    // }
   };
 
   RenderManager.prototype.hide = function (id) {
-    if (this._entities[id] !== undefined) {
-      if (this._entities[id].isVisisble) {
-        if (this._entities[id].primitive) {
-          this._entities[id]._visible = false;
-          this._entities[id].primitive.show = false;
-        }
-      }
+    if (id in this._entities) {
+      this._entities[id].show();
     }
+    // if (this._entities[id] !== undefined) {
+    //   if (this._entities[id].isVisisble) {
+    //     if (this._entities[id].primitive) {
+    //       this._entities[id]._visible = false;
+    //       this._entities[id].primitive.show = false;
+    //     }
+    //   }
+    // }
   };
-
-  RenderManager.prototype._createPrimitive = function (id) {
-    // TODO(bpstudds): Enable many terrain heights, we only have one currently.
-    if (!this._entities[id].isRenderable()) {
-      this._entities[id].build(this._widget.centralBody.getEllipsoid(),
-          /*miniumumTerrainElevation*/ 0);
-    }
-    var geometry = this._entities[id].getGeometry();
-    var appearance = this._entities[id].getAppearance();
-    this._entities[id].primitive =
-        new Primitive({geometryInstances: geometry, appearance: appearance});
-  };
-
 
   return RenderManager;
 });
