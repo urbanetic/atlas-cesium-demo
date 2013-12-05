@@ -3,11 +3,12 @@ define([
   'atlas/dom/DomManager'
 ], function (extend, DomManagerCore) {
 
-  var DomManager = function(rm) {
-    DomManager.base.constructor.call(this, rm);
+  var DomManager = function(atlasManagers) {
+    DomManager.base.constructor.call(this, atlasManagers);
+    console.debug('in DomManager', atlasManagers);
     /*
     Inherits from DomManagerCore
-    this._renderManager
+    this._atlasManagers
     this._currentNode
     this._rendered
     this._visible
@@ -16,7 +17,7 @@ define([
   extend(DomManagerCore, DomManager);
 
   DomManager.prototype.populateDom = function (elem) {
-    this._renderManager.createWidget(elem);
+    this._atlasManagers.render.createWidget(elem);
     this._rendered = true;
     this._visible = true;
   };
