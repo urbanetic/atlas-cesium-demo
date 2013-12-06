@@ -21,6 +21,8 @@ define([
     this._managers.events = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
     this._managers.dom = new DomManager(this._managers);
+
+    this._managers.render.bindEvents();
     console.log(this.addFeature);
   };
   extend(Atlas, CesiumAtlas);
@@ -30,17 +32,18 @@ define([
   // };
 
   Atlas.prototype.addFeature = function (id, args) {
-    if (typeof id === 'undefined') {
-      throw new DeveloperError('Can add Feature without specifying id');
-    } else {
-      // Add EventManger to the args for the feature.
-      args.eventManager = this._managers.event;
-      // Add the RenderManager to the args for the feature.
-      args.renderManager = this._managers.render;
-      var feature = new Feature(id, args);
-      this._managers.render.addEntity(feature);
-      return feature;
-    }
+    return this._managers.render.addFeature(id, args);
+    // if (typeof id === 'undefined') {
+    //   throw new DeveloperError('Can add Feature without specifying id');
+    // } else {
+    //   // Add EventManger to the args for the feature.
+    //   args.eventManager = this._managers.event;
+    //   // Add the RenderManager to the args for the feature.
+    //   args.renderManager = this._managers.render;
+    //   var feature = new Feature(id, args);
+    //   this._managers.render.addEntity(feature);
+    //   return feature;
+    // }
   };
 
   CesiumAtlas.prototype.addPolygon = function (id, vertices, args) {
