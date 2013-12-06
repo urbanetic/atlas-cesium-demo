@@ -61,17 +61,17 @@ define([
     }
   };
 
-  Polygon.prototype.show = function () {
+  Polygon.prototype.show = function (height) {
     if (this.isVisible() && this.isRenderable()) {
-      console.debug('entity ' + this._id + 'already visible and correctly rendered');
+      console.log('entity ' + this._id + 'already visible and correctly rendered');
     } else {
-      console.debug('showing entity '+this._id);
-      if (this.isRenderable()) {
-        this._primitive.show = true;
-      } else {
+      if (!this.isRenderable()) {
         this._createPrimitive();
+        console.debug('created primtive', this._primitive);
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
       }
+      console.log('showing entity '+this._id);
+      this._primitive.show = true;
     }
     return this.isRenderable() && this._primitive.show;
   };
@@ -83,17 +83,21 @@ define([
     return this.isRenderable() && this._primitive.show();
   };
 
-
-    Polygon.prototype._createPrimitive = function () {
+  Polygon.prototype._createPrimitive = function () {
     var rm = this._renderManager;
-    if (!this.isRenderable()) {
+    if (this.isRenderable()) {
+      // Nothing needs to be done.
+    } else {
+      console.debug('building polygon with height', this._height);
       this._build(rm._widget.centralBody.getEllipsoid(),
           rm.getMinimumTerrainHeight(this._vertices));
+      console.debug('polygon built');
+      console.debug('building primitive');
+      this._primitive =
+          new Primitive({geometryInstances: this.getGeometry(), 
+              appearance: this.getAppearance()});
     }
-    var geometry = this.getGeometry();
-    var appearance = this.getAppearance();
-    this._primitive =
-        new Primitive({geometryInstances: geometry, appearance: appearance});
+    this._renderable = (this._primtive instanceof Primitive);
   };
 
   /**
@@ -104,7 +108,6 @@ define([
    *        in the area covered by this polygon.
    */
   Polygon.prototype._build = function (ellipsoid, minTerrainElevation) {
-    console.log('building polygon');
     this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
     this._minTerrainElevation = minTerrainElevation || 0;
     // For 3D extruded polygons, ensure polygon is not closed as it causes
@@ -124,8 +127,7 @@ define([
       })
     });
     // Generate appearance data
-    console.debug('build polygon with height', this._height);
-    if (this._height === 0) {
+    if (1 || this._height !== undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
       this._appearance = new MaterialAppearance({closed: true});
@@ -136,8 +138,8 @@ define([
         this._style.fillColour.alpha);
     this._appearance.material.uniforms.color = cesiumColour;
     this._setRenderable(true);
-    console.log('created geometry', this._geometry);
-    console.log('created appearance', this._appearance);
+    console.log('  created geometry', this._geometry);
+    console.log('  created appearance', this._appearance);
   };
 
   /**

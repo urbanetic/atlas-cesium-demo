@@ -14,8 +14,8 @@ define([
      * @override
      * @type {Polygon}
      */
-    this.footprint = null;
-    if (args.vertices !== 'undefined') {
+    this._footprint = null;
+    if (args.vertices !== undefined) {
       this._footprint = new Polygon(id + 'p', args.vertices, args);
     }
 
@@ -24,10 +24,10 @@ define([
      * @override
      * @type {Mesh}
      */
-    this.mesh = null;
-    console.debug(args);
-    if (args.mesh === 'undefined') {
-      this._mesh = new Mesh(id + 'p', args.mesh, args);
+    this._mesh = null;
+    // TODO(bpstudds): Buggy, fix this.
+    if (args.mesh !== undefined) {
+      this._mesh = new Mesh(id + 'm', args.mesh, args);
     }
 
   };
