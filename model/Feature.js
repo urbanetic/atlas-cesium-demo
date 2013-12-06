@@ -25,7 +25,6 @@ define([
      * @type {Mesh}
      */
     this._mesh = null;
-    // TODO(bpstudds): Buggy, fix this.
     if (args.mesh !== undefined) {
       this._mesh = new Mesh(id + 'm', args.mesh, args);
     }
