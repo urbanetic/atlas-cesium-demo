@@ -97,7 +97,7 @@ define([
           new Primitive({geometryInstances: this.getGeometry(), 
               appearance: this.getAppearance()});
     }
-    this._renderable = (this._primtive instanceof Primitive);
+    this._renderable = (this._primitive instanceof Primitive);
   };
 
   /**
@@ -114,7 +114,7 @@ define([
     // rendering to hang.
     if (this._height > 0) {
       if (this._cartesians[0] == this._cartesians[this._cartesians.length - 1]) {
-        vertices.pop();
+        this._cartesians.pop();
       }
     }
     // Generate geometry data.
@@ -127,7 +127,7 @@ define([
       })
     });
     // Generate appearance data
-    if (1 || this._height !== undefined || this._height === 0) {
+    if (this._height === undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
       this._appearance = new MaterialAppearance({closed: true});
@@ -137,7 +137,6 @@ define([
         this._style.fillColour.blue,
         this._style.fillColour.alpha);
     this._appearance.material.uniforms.color = cesiumColour;
-    this._setRenderable(true);
     console.log('  created geometry', this._geometry);
     console.log('  created appearance', this._appearance);
   };
@@ -155,8 +154,8 @@ define([
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
       cartographics[i] = Cartographic.fromDegrees(
-          /*longitude*/ coords[i][1],
-          /*latitude*/  coords[i][0]
+          /*longitude*/ coords[i].x,
+          /*latitude*/  coords[i].y
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);

@@ -1,9 +1,11 @@
 define([
   'doh/runner',
   'dam/TestCase',
+  'atlas/events/EventManager',
+  'atlas-cesium/model/Feature',
   /* Code under test */
   '../RenderManager',
-], function (doh, TestCase, RenderManager) {
+], function (doh, TestCase, EventManager, Feature, RenderManager) {
 
   /* Test globals go here */
   
@@ -14,25 +16,37 @@ define([
     name: 'atlas-cesium/render/RenderManager',
 
     setUp: function () {
-      console.debug('what');
       // summary:
       atlasManagers = {
         dom: {},
         event: {},
         render: {}
       };
-      console.debug(atlasManagers);
+      //eventManager = new EventManager(atlasManagers);
       renderManager = new RenderManager(atlasManagers);
     },
 
     tearDown: function () {
       renderManager = null;
+      atlasManagers = {
+        dom: {},
+        event: {},
+        render: {}
+      };
     },
 
     testCreate: function () {
       doh.assertTrue(renderManager instanceof RenderManager);
       doh.assertTrue(atlasManagers.render == renderManager);
     },
+
+    testAddFeature: function () {
+      var args = {
+        id: 12345
+      };
+      renderManager.addFeature(args.id, args);
+      doh.assertTrue(renderManager._entities[args.id] instanceof Feature);
+    }
   }).register(doh);
 });
 

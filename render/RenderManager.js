@@ -42,26 +42,26 @@ define([
       sceneModePicker: false,
       timeline: false
     });
-    console.debug('in RenderManager', this._widget);
   };
 
   RenderManager.prototype.bindEvents = function () {
     this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
       console.debug('in RenderManager', 'bound event called');
       if (!(args.id in this._entities)) {
-        this.addFeature(args.id, args.vertices, args.args);
+        this.addFeature(args.id, args);
       }
-      this.show(args.id);
+      this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
+      this._entities[args.id].show();
     }).bind(this));
   };
 
   RenderManager.prototype.getMinimumTerrainHeight = function (vertices) {
     // TODO(bpstudds): Actually calculate the minimum terrain height.
-    return 500;
+    return 0;
   };
 
   RenderManager.prototype.addFeature = function (id, args) {
-    if (typeof id === 'undefined') {
+    if (id === undefined) {
       throw new DeveloperError('Can add Feature without specifying id');
     } else {
       // Add EventManger to the args for the feature.
@@ -69,6 +69,7 @@ define([
       // Add the RenderManager to the args for the feature.
       args.renderManager = this;
       var feature = new Feature(id, args);
+      console.debug('adding feature with args', args);
       this.addEntity(feature);
       return feature;
     }

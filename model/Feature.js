@@ -7,6 +7,10 @@ define([
 ], function (extend, Polygon, Mesh, FeatureCore) {
 
   var Feature = function (/*Number*/ id, /*Object*/ args) {
+    if (typeof id === 'object') {
+      args = id;
+      id = args.id;
+    }
     Feature.base.constructor.call(this, id, args);
 
     /**
@@ -16,7 +20,7 @@ define([
      */
     this._footprint = null;
     if (args.vertices !== undefined) {
-      this._footprint = new Polygon(id + 'p', args.vertices, args);
+      this._footprint = new Polygon(id + 'polygon', args.vertices, args);
     }
 
     /**
@@ -25,9 +29,8 @@ define([
      * @type {Mesh}
      */
     this._mesh = null;
-    // TODO(bpstudds): Buggy, fix this.
     if (args.mesh !== undefined) {
-      this._mesh = new Mesh(id + 'm', args.mesh, args);
+      this._mesh = new Mesh(id + 'mesh', args.mesh, args);
     }
 
   };
