@@ -130,7 +130,7 @@ define([
     if (this._height === undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
-      this._appearance = new MaterialAppearance({closed: true});
+      this._appearance = new MaterialAppearance({closed: false, translucent: false, faceForward : false});
     }
     var cesiumColour = new CesiumColour(this._style.fillColour.red,
         this._style.fillColour.green,
@@ -153,9 +153,9 @@ define([
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
-      cartographics[i] = Cartographic.fromDegrees(
-          /*longitude*/ coords[i].x,
-          /*latitude*/  coords[i].y
+      cartographics.push(Cartographic.fromDegrees(
+        /*longitude*/ coords[i].y,
+        /*latitude*/  coords[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);

@@ -53,7 +53,6 @@ define([
       }
       //this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
       this._entities[args.id].show();
-      console.log(this._widget.scene.getPrimitives());
     }).bind(this));
   };
 
@@ -71,7 +70,7 @@ define([
       // Add the RenderManager to the args for the feature.
       args.renderManager = this;
       var feature = new Feature(id, args);
-      console.debug('adding feature', args.id, 'with args', args);
+      console.debug('cesium-atlas adding feature', args.id, feature);
       this.addEntity(feature);
     }
   };
