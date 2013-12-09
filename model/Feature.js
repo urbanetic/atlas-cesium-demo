@@ -19,8 +19,8 @@ define([
      * @type {Polygon}
      */
     this._footprint = null;
-    if (args.vertices !== undefined) {
-      this._footprint = new Polygon(id + 'polygon', args.vertices, args);
+    if (args.footprint !== undefined) {
+      this._footprint = new Polygon(id + 'polygon', args.footprint, args);
     }
 
     /**

@@ -45,13 +45,15 @@ define([
   };
 
   RenderManager.prototype.bindEvents = function () {
-    this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
-      console.debug('in RenderManager', 'entity/show called with', args);
+    console.debug('in renderManager', 'binding events');
+    this._atlasManagers.event.addEventHandler('extern', 'entity/show', (function (event, args) {
+      console.debug('in RenderManager', 'entity/show called');
       if (!(args.id in this._entities)) {
         this.addFeature(args.id, args);
       }
       //this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
       this._entities[args.id].show();
+      console.log(this._widget.scene.getPrimitives());
     }).bind(this));
   };
 
@@ -69,14 +71,14 @@ define([
       // Add the RenderManager to the args for the feature.
       args.renderManager = this;
       var feature = new Feature(id, args);
-      console.debug('adding feature with args', args);
+      console.debug('adding feature', args.id, 'with args', args);
       this.addEntity(feature);
-      return feature;
     }
   };
 
   RenderManager.prototype.show = function (id) {
     if (id in this._entities) {
+      console.log('in RenderManager', 'showing', this._entities[id]);
       this._entities[id].show();
     }
     // if (typeof this._entities[id] === 'undefined') {
