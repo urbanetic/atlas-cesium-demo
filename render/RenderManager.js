@@ -46,7 +46,7 @@ define([
 
   RenderManager.prototype.bindEvents = function () {
     this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
-      console.debug('in RenderManager', 'bound event called');
+      console.debug('in RenderManager', 'landuse/show called with', args);
       if (!(args.id in this._entities)) {
         this.addFeature(args.id, args);
       }
