@@ -1,6 +1,7 @@
 define([
   'atlas/util/Extends',
   'atlas/model/Polygon',
+  'atlas-cesium/cesium/Renderer/Context',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
@@ -121,7 +122,7 @@ define([
     this._geometry = new GeometryInstance({
       id: this._id,
       geometry: new PolygonGeometry({
-        polygonHierarchy: {positions: this._cartesians},
+        positions: this._cartesians,
         height: this._minTerrainElevation + this._elevation,
         extrudedHeight: this._minTerrainElevation + this._elevation + this._height
       })
@@ -130,7 +131,15 @@ define([
     if (this._height === undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
-      this._appearance = new MaterialAppearance({closed: false, translucent: false, faceForward : false});
+      var context = this._renderManager._widget.scene.getContext();
+      var renderState = context.createRenderState({frontFace : WindingOrder.CLOCKWISE});
+      console.log('the render state thing', renderState);
+      this._appearance = new MaterialAppearance({
+        closed: true, 
+        translucent: true, 
+        faceForward : true,
+        renderState: renderState
+      });
     }
     var cesiumColour = new CesiumColour(this._style.fillColour.red,
         this._style.fillColour.green,
@@ -153,7 +162,7 @@ define([
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
-      cartographics.push(Cartographic.fromDegrees(
+      cartographics.unshift(Cartographic.fromDegrees(
         /*longitude*/ coords[i].y,
         /*latitude*/  coords[i].x)
       );
