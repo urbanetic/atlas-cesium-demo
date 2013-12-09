@@ -18,12 +18,11 @@ define([
     /* Inherited from Atlas
     this._managers;
     */
-    this._managers.events = new EventManager(this._managers);
+    this._managers.event = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
     this._managers.dom = new DomManager(this._managers);
 
     this._managers.render.bindEvents();
-    console.log(this.addFeature);
   };
   extend(Atlas, CesiumAtlas);
 
@@ -33,7 +32,7 @@ define([
 
   Atlas.prototype.addFeature = function (id, args) {
     return this._managers.render.addFeature(id, args);
-    // if (typeof id === 'undefined') {
+    // if (id === undefined) {
     //   throw new DeveloperError('Can add Feature without specifying id');
     // } else {
     //   // Add EventManger to the args for the feature.
@@ -48,7 +47,7 @@ define([
 
   CesiumAtlas.prototype.addPolygon = function (id, vertices, args) {
     console.log('creating id', id);
-    if (typeof id === 'undefined') {
+    if (id === undefined) {
       throw new DeveloperError('Can not create entity without an ID');
     }
     var polygon = new Polygon(id, vertices, args);
