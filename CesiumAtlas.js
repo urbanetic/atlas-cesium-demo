@@ -18,10 +18,12 @@ define([
     /* Inherited from Atlas
     this._managers;
     */
+    // Create Managers.
     this._managers.event = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
     this._managers.dom = new DomManager(this._managers);
 
+    // Initialise managers as required.
     this._managers.render.bindEvents();
   };
   extend(Atlas, CesiumAtlas);

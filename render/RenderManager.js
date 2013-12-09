@@ -48,7 +48,7 @@ define([
     this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
       console.debug('in RenderManager', 'bound event called');
       if (!(args.id in this._entities)) {
-        this.addFeature(args.id, args.vertices, args.args);
+        this.addFeature(args.id, args);
       }
       this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
       this._entities[args.id].show();
@@ -69,6 +69,7 @@ define([
       // Add the RenderManager to the args for the feature.
       args.renderManager = this;
       var feature = new Feature(id, args);
+      console.debug('adding feature with args', args);
       this.addEntity(feature);
       return feature;
     }
