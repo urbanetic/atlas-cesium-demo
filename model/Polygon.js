@@ -133,15 +133,18 @@ define([
       var context = this._renderManager._widget.scene.getContext();
       // var renderState = context.createRenderState({frontFace : WindingOrder.CLOCKWISE});
       // console.log('the render state thing', renderState);
+      // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
+      //                 This may require sorting of vertices before rendering.
       this._appearance = new MaterialAppearance({
-        closed: true, 
-        translucent: true
+        closed: false, 
+        translucent: false,
+        faceForward: true
       });
     }
     var cesiumColour = new CesiumColour(this._style.fillColour.red,
         this._style.fillColour.green,
         this._style.fillColour.blue,
-        this._style.fillColour.alpha);
+        1 /*this._style.fillColour.alpha*/);
     this._appearance.material.uniforms.color = cesiumColour;
     console.log('  created geometry', this._geometry);
     console.log('  created appearance', this._appearance);
