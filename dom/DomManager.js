@@ -5,7 +5,6 @@ define([
 
   var DomManager = function(atlasManagers) {
     DomManager.base.constructor.call(this, atlasManagers);
-    console.debug('in DomManager', atlasManagers);
     /*
     Inherits from DomManagerCore
     this._atlasManagers
