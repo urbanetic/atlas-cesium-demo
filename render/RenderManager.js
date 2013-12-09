@@ -46,11 +46,11 @@ define([
 
   RenderManager.prototype.bindEvents = function () {
     this._atlasManagers.event.addEventHandler('extern', 'landuse/show', (function (event, args) {
-      console.debug('in RenderManager', 'landuse/show called with', args);
+      console.debug('in RenderManager', 'entity/show called with', args);
       if (!(args.id in this._entities)) {
         this.addFeature(args.id, args);
       }
-      this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
+      //this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
       this._entities[args.id].show();
     }).bind(this));
   };
