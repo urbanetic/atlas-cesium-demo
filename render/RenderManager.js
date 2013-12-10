@@ -12,7 +12,7 @@ define([
   "use strict";
 
   /**
-   * 
+   *
    * @extends {atlas/render/RenderManager}
    * @alias atlas-cesium/render/RenderManager
    * @constructor
@@ -46,14 +46,28 @@ define([
 
   RenderManager.prototype.bindEvents = function () {
     console.debug('in renderManager', 'binding events');
-    this._atlasManagers.event.addEventHandler('extern', 'entity/show', (function (event, args) {
-      console.debug('in RenderManager', 'entity/show called');
-      if (!(args.id in this._entities)) {
-        this.addFeature(args.id, args);
+    var handlers = [
+      {
+        type: 'extern',
+        name: 'entity/show',
+        handler: function (event, args) {
+          if (!(args.id in this._entities)) {
+            this.addFeature(args.id, args);
+          }
+          this._entities[args.id].show();
+        }.bind(this)
+      },
+      {
+        type: 'extern',
+        name: 'entity/hide',
+        handler: function (event, args) {
+          if (!(args.id in this._entities)) {
+            this._entities[args.id].hide();
+          }
+        }.bind(this)
       }
-      //this._entities[args.id]._displayMode = (args.displayMode || 'footprint');
-      this._entities[args.id].show();
-    }).bind(this));
+    ];
+    this._atlasManagers.event.addEventHandlers(handlers);
   };
 
   RenderManager.prototype.getMinimumTerrainHeight = function (vertices) {
