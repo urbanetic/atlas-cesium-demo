@@ -50,7 +50,7 @@ define([
       {
         type: 'extern',
         name: 'entity/show',
-        handler: function (event, args) {
+        callback: function (event, args) {
           if (!(args.id in this._entities)) {
             this.addFeature(args.id, args);
           }
@@ -60,7 +60,7 @@ define([
       {
         type: 'extern',
         name: 'entity/hide',
-        handler: function (event, args) {
+        callback: function (event, args) {
           if (!(args.id in this._entities)) {
             this._entities[args.id].hide();
           }
