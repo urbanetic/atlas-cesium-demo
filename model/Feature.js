@@ -14,7 +14,7 @@ define([
     Feature.base.constructor.call(this, id, args);
 
     /**
-     * The 2d {@link Polygon} footprint of this Feature.
+     * The 2D {@link Polygon} footprint of this Feature.
      * @override
      * @type {Polygon}
      */

@@ -54,14 +54,10 @@ define([
    * @return {Boolean} - Whether the Polygon is visible.
    */
   Polygon.prototype.isVisible = function () {
-    if (this._primitive === null) {
-      return false;
-    } else {
-      return this._primitive.show;
-    }
+    return this._primitive && this._primitive.show;
   };
 
-  Polygon.prototype.show = function (height) {
+  Polygon.prototype.show = function () {
     if (this.isVisible() && this.isRenderable()) {
       console.log('entity ' + this._id + 'already visible and correctly rendered');
     } else {
@@ -76,12 +72,14 @@ define([
     return this.isRenderable() && this._primitive.show;
   };
 
+
   Polygon.prototype.hide = function () {
     if (this.isVisible()) {
       this._primitive.show = false;
     }
     return this.isRenderable() && this._primitive.show();
   };
+
 
   Polygon.prototype._createPrimitive = function () {
     var rm = this._renderManager;
@@ -130,9 +128,6 @@ define([
     if (this._height === undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
-      var context = this._renderManager._widget.scene.getContext();
-      // var renderState = context.createRenderState({frontFace : WindingOrder.CLOCKWISE});
-      // console.log('the render state thing', renderState);
       // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
       //                 This may require sorting of vertices before rendering.
       this._appearance = new MaterialAppearance({
@@ -144,7 +139,7 @@ define([
     var cesiumColour = new CesiumColour(this._style.fillColour.red,
         this._style.fillColour.green,
         this._style.fillColour.blue,
-        1 /*this._style.fillColour.alpha*/);
+        1 /*force opaque because of bug this._style.fillColour.alpha*/);
     this._appearance.material.uniforms.color = cesiumColour;
     console.log('  created geometry', this._geometry);
     console.log('  created appearance', this._appearance);

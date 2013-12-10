@@ -47,8 +47,8 @@ define([
   RenderManager.prototype.bindEvents = function () {
     console.debug('in renderManager', 'binding events');
     var handlers = [
-      {
-        type: 'extern',
+      { // Define an event handler for showing an entity.
+        source: 'extern',
         name: 'entity/show',
         callback: function (event, args) {
           if (!(args.id in this._entities)) {
@@ -57,8 +57,8 @@ define([
           this._entities[args.id].show();
         }.bind(this)
       },
-      {
-        type: 'extern',
+      { // Define an event handler for hiding an entity.
+        source: 'extern',
         name: 'entity/hide',
         callback: function (event, args) {
           if (!(args.id in this._entities)) {
@@ -67,6 +67,7 @@ define([
         }.bind(this)
       }
     ];
+    // Add the event handlers to the EventManager.
     this._atlasManagers.event.addEventHandlers(handlers);
   };
 
@@ -77,7 +78,7 @@ define([
 
   RenderManager.prototype.addFeature = function (id, args) {
     if (id === undefined) {
-      throw new DeveloperError('Can add Feature without specifying id');
+      throw new DeveloperError('Can not add Feature without specifying id');
     } else {
       // Add EventManger to the args for the feature.
       args.eventManager = this._atlasManagers.event;
@@ -94,38 +95,12 @@ define([
       console.log('in RenderManager', 'showing', this._entities[id]);
       this._entities[id].show();
     }
-    // if (typeof this._entities[id] === 'undefined') {
-    //   console.debug('entity #' + id + ' does not exist');
-    // } else {
-    //   if (this._entities[id].isVisible() && this._entities[id].isRenderable()) {
-    //     console.debug('entity ' + id + ' already visible and correctly rendered');
-    //   } else {
-    //     console.log('showing entity', this._entities[id]);
-    //     if (this._entities[id].isRenderable()) {
-    //       // If the Cesium primitive is already created, set it to be shown...
-    //       this._entities[id].primitive.show = true;
-    //     } else {
-    //       // otherwise, need to create and show primitive.
-    //       this._createPrimitive(id);
-    //       this._widget.scene.getPrimitives().add(this._entities[id].primitive);
-    //       this._entities[id]._visible = true;
-    //     }
-    //   }
-    // }
   };
 
   RenderManager.prototype.hide = function (id) {
     if (id in this._entities) {
-      this._entities[id].show();
+      this._entities[id].hide();
     }
-    // if (this._entities[id] !== undefined) {
-    //   if (this._entities[id].isVisisble) {
-    //     if (this._entities[id].primitive) {
-    //       this._entities[id]._visible = false;
-    //       this._entities[id].primitive.show = false;
-    //     }
-    //   }
-    // }
   };
 
   return RenderManager;
