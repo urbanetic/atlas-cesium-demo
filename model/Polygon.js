@@ -54,20 +54,20 @@ define([
    * @return {Boolean} - Whether the Polygon is visible.
    */
   Polygon.prototype.isVisible = function () {
-    if (this._primitive === null) {
-      return false;
-    } else {
-      return this._primitive.show;
-    }
+    return this._primitive && this._primitive.show;
   };
 
-  Polygon.prototype.show = function (height) {
+  /**
+   * Shows the Polygon. If the current rendering data is out of data, the polygon is
+   * rebuilt and then rendered.
+   */
+  Polygon.prototype.show = function () {
     if (this.isVisible() && this.isRenderable()) {
-      console.log('entity ' + this._id + 'already visible and correctly rendered');
+      console.debug('entity ' + this._id + 'already visible and correctly rendered');
     } else {
       if (!this.isRenderable()) {
+        // Re-build the polygon if the render data has been invalidated.
         this._createPrimitive();
-        console.debug('created primtive', this._primitive);
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
       }
       console.log('showing entity '+this._id);
@@ -76,38 +76,43 @@ define([
     return this.isRenderable() && this._primitive.show;
   };
 
+  /**
+   * Hides the Polygon.
+   */
   Polygon.prototype.hide = function () {
     if (this.isVisible()) {
       this._primitive.show = false;
     }
-    return this.isRenderable() && this._primitive.show();
+    return this._primitive.show();
   };
 
+  /**
+   * Generates the data structures required to render a Polygon
+   * in Cesium.
+   */
   Polygon.prototype._createPrimitive = function () {
-    var rm = this._renderManager;
+    console.debug('creating primitive for entity', this._id);
     if (this.isRenderable()) {
       // Nothing needs to be done.
     } else {
-      console.debug('building polygon with height', this._height);
-      this._build(rm._widget.centralBody.getEllipsoid(),
-          rm.getMinimumTerrainHeight(this._vertices));
-      console.debug('polygon built');
-      console.debug('building primitive');
+      this._build(this._renderManager._widget.centralBody.getEllipsoid(),
+          this._renderManager.getMinimumTerrainHeight(this._vertices));
       this._primitive =
           new Primitive({geometryInstances: this.getGeometry(), 
               appearance: this.getAppearance()});
     }
+    // Check that the primitive has been correctly created.
     this._renderable = (this._primitive instanceof Primitive);
   };
 
   /**
    * Builds the geometry and appearance data required to render the Polygon in
    * Cesium.
-   *
    * @param {number} minTerrainElevation - The minimum height of the terrain 
    *        in the area covered by this polygon.
    */
   Polygon.prototype._build = function (ellipsoid, minTerrainElevation) {
+    console.debug('building entity', this._id);
     this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
     this._minTerrainElevation = minTerrainElevation || 0;
     // For 3D extruded polygons, ensure polygon is not closed as it causes
@@ -120,8 +125,8 @@ define([
     // Generate geometry data.
     this._geometry = new GeometryInstance({
       id: this._id,
-      geometry: new PolygonGeometry({
-        polygonHierarchy: {positions: this._cartesians},
+      geometry: PolygonGeometry.fromPositions({
+        positions: this._cartesians,
         height: this._minTerrainElevation + this._elevation,
         extrudedHeight: this._minTerrainElevation + this._elevation + this._height
       })
@@ -130,15 +135,19 @@ define([
     if (this._height === undefined || this._height === 0) {
       this._appearance = new EllipsoidSurfaceAppearance();
     } else {
-      this._appearance = new MaterialAppearance({closed: true});
+      // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
+      //                 This may require sorting of vertices before rendering.
+      this._appearance = new MaterialAppearance({
+        closed: false, 
+        translucent: false,
+        faceForward: true
+      });
     }
     var cesiumColour = new CesiumColour(this._style.fillColour.red,
         this._style.fillColour.green,
         this._style.fillColour.blue,
-        this._style.fillColour.alpha);
+        1 /*force opaque because of bug this._style.fillColour.alpha*/);
     this._appearance.material.uniforms.color = cesiumColour;
-    console.log('  created geometry', this._geometry);
-    console.log('  created appearance', this._appearance);
   };
 
   /**
@@ -153,9 +162,9 @@ define([
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
-      cartographics[i] = Cartographic.fromDegrees(
-          /*longitude*/ coords[i].x,
-          /*latitude*/  coords[i].y
+      cartographics.push(Cartographic.fromDegrees(
+        /*longitude*/ coords[i].y,
+        /*latitude*/  coords[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
