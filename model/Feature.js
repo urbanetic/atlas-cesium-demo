@@ -27,7 +27,7 @@ define([
    * @alias atlas-cesium/model/Feature
    * @constructor
    */
-  var Feature = function (/*Number*/ id, /*Object*/ args) {
+  var Feature = function (id, args) {
     if (typeof id === 'object') {
       args = id;
       id = args.id;
