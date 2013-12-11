@@ -92,7 +92,6 @@ define([
    */
   Polygon.prototype._createPrimitive = function () {
     console.debug('creating primitive for entity', this._id);
-    var rm = this._renderManager;
     if (this.isRenderable()) {
       // Nothing needs to be done.
     } else {

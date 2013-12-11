@@ -23,7 +23,7 @@ define([
       // summary:
       id = 12345;
       args = {
-        vertices: "POLYGON ((1 2, 3 4))",
+        footprint: "POLYGON ((1 2, 3 4))",
         renderManager: {},
         eventManager: {}
       };
