@@ -33,36 +33,18 @@ define([
   // };
 
   Atlas.prototype.addFeature = function (id, args) {
-    return this._managers.render.addFeature(id, args);
-    // if (id === undefined) {
-    //   throw new DeveloperError('Can add Feature without specifying id');
-    // } else {
-    //   // Add EventManger to the args for the feature.
-    //   args.eventManager = this._managers.event;
-    //   // Add the RenderManager to the args for the feature.
-    //   args.renderManager = this._managers.render;
-    //   var feature = new Feature(id, args);
-    //   this._managers.render.addEntity(feature);
-    //   return feature;
-    // }
-  };
-
-  CesiumAtlas.prototype.addPolygon = function (id, vertices, args) {
-    console.log('creating id', id);
-    if (id === undefined) {
-      throw new DeveloperError('Can not create entity without an ID');
-    }
-    var polygon = new Polygon(id, vertices, args);
-    console.log('poly is visible', polygon.isVisible());
-    if (polygon instanceof Polygon) {
-      console.log('constructed polygon', polygon);
-      this._managers.render.addEntity(polygon);
-      this._managers.render.show(id);
-    } else {
-      console.log('have', polygon);
-      throw 'Error constructing polygon';
-    }
-    return polygon;
+    //return this._managers.render.addFeature(id, args);
+     if (id === undefined) {
+       throw new DeveloperError('Can add Feature without specifying id');
+     } else {
+       // Add EventManger to the args for the feature.
+       args.eventManager = this._managers.event;
+       // Add the RenderManager to the args for the feature.
+       args.renderManager = this._managers.render;
+       var feature = new Feature(id, args);
+       this._managers.render.addEntity(feature);
+       //return feature;
+     }
   };
 
   return CesiumAtlas;
