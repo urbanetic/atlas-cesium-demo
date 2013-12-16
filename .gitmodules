@@ -1,6 +1,6 @@
 [submodule "atlas"]
 	path = atlas
-	url = /home/brendan/Documents/mutopia/mutopia-git/atlas/atlas
+	url = https://bitbucket.org/mutopia/atlas.git
 [submodule "atlas-cesium"]
 	path = atlas-cesium
-	url = /home/brendan/Documents/mutopia/mutopia-git/atlas/atlas-cesium
+	url = https://bitbucket.org/mutopia/atlas-cesium.git
