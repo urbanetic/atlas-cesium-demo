@@ -4,11 +4,11 @@ define([
   'atlas/events/EventManager',
   'atlas-cesium/model/Feature',
   /* Code under test */
-  '../RenderManager',
+  '../RenderManager'
 ], function (doh, TestCase, EventManager, Feature, RenderManager) {
 
   /* Test globals go here */
-  
+  var atlasManagers, renderManager;
 
   /* Begin test case definitions */
   new TestCase({

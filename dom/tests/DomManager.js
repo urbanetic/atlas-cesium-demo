@@ -2,13 +2,12 @@ define([
   'doh/runner',
   'dam/TestCase',
   /* Code under test */
-  '../DomManager',
+  '../DomManager'
 ], function (doh, TestCase, DomManager) {
 
   /* Test globals go here */
-  //var atlasManagers;
-  //var domManager;
-
+  var atlasManagers;
+  var domManager;
 
   /* Begin test case definitions */
   new TestCase({
@@ -33,7 +32,7 @@ define([
     testCreate: function () {
       doh.assertTrue(domManager instanceof DomManager, 'DomManager not created properly');
       doh.assertTrue(atlasManagers.dom instanceof DomManager, 'atlasManagers reference not created properly');
-    },
+    }
   }).register(doh);
 });
 
