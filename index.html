@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>atlas-cesium demo</title>
+  <link rel="stylesheet" href="./atlas-cesium/cesium/Source/Widgets/Viewer/Viewer.css">
+  <script src="./atlas-cesium/lib/require.js"></script>
+  <script>
+    "use strict";
+    var cesiumAtlas;
+    
+    console.debug('Requiring CesiumAtlas');
+    require(['./atlas-cesium/core/CesiumAtlas',
+             './atlas/model/testWKT'
+    ], function (CesiumAtlas, testWKT) {
+      console.debug('Creating atlas-cesium');
+      cesiumAtlas = new CesiumAtlas();
+
+      console.debug('Attaching atlas-cesium');
+      cesiumAtlas.attachTo('cesium');
+
+      var i = 0;
+      var args = {};
+      args.elevation = 0;
+      args.height = 50;
+      args.show = true;
+      args.displayMode = 'extrusion';
+      testWKT.forEach(function (wkt) {
+        args.id = i++;
+        args.footprint = wkt;
+        cesiumAtlas.publish('entity/show', args);
+      })
+    });
+  </script>
+</head>
+<body>
+  <div id="cesium"></div>
+</body>
+</html>

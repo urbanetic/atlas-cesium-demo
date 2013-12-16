@@ -1,0 +1,6 @@
+[submodule "atlas"]
+	path = atlas
+	url = /home/brendan/Documents/mutopia/mutopia-git/atlas/atlas
+[submodule "atlas-cesium"]
+	path = atlas-cesium
+	url = /home/brendan/Documents/mutopia/mutopia-git/atlas/atlas-cesium
