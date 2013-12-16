@@ -99,7 +99,7 @@ define([
   CesiumAtlas.prototype.attachTo = function (elem) {
     this._managers.dom.setDom(elem, true);
     // Hook up the input manager with the DOM element.
-    this._managers.input.initialise(elem);
+    //this._managers.input.initialise(elem);
   };
 
   Atlas.prototype.addFeature = function (id, args) {
