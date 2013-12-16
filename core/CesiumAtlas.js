@@ -28,9 +28,9 @@ define([
   };
   extend(Atlas, CesiumAtlas);
 
-  // CesiumAtlas.prototype.attachTo = function (elem) {
-  //   this.managers.dom.setDom(elem, true);
-  // };
+  CesiumAtlas.prototype.attachTo = function (elem) {
+     this._managers.dom.setDom(elem, true);
+  };
 
   Atlas.prototype.addFeature = function (id, args) {
     //return this._managers.render.addFeature(id, args);
