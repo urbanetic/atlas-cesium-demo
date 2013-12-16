@@ -23,7 +23,7 @@ define([
    * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
    * 
-   * @extends {GeoEntity}
+   * @extends {atlas/model/Feature}
    * @alias atlas-cesium/model/Feature
    * @constructor
    */
