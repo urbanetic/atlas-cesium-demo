@@ -9,7 +9,7 @@ define([
   'atlas-cesium/model/Feature',
   'atlas-cesium/model/Polygon',
   // Extends
-  'atlas/Atlas'
+  'atlas/core/Atlas'
 ], function (extend, EventManager, DomManager, RenderManager, Feature, Polygon, Atlas) {
 
   var CesiumAtlas = function () {
