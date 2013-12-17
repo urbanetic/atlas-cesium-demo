@@ -56,41 +56,41 @@ define([
     this._managers.event.addEventHandler('intern', 'input/leftclick', function (name, args) {
       // Is there an entity here
       var picked = this._managers.render._widget.scene.pick(args);
-      if (picked) {
-        console.debug('clicked on', picked);
-        // Select it
-        this._managers.selection.selectEntity(picked.id);
-        // Hide it
-        // this._managers.render.hide(picked.id);
-      }
+      if (!picked) return;
+
+      console.debug('clicked on', picked);
+      // Select it
+      this._managers.selection.selectEntity(picked.id);
+      // Hide it
+      // this._managers.render.hide(picked.id);
     }.bind(this));
 
     // TODO(bpstudds): Remove this event handler and do it proper.
     this._managers.event.addEventHandler('intern', 'input/rightdown', function (name, args) {
       // Is there an entity here
       var picked = this._widget.scene.pick(args);
-      if (picked) {
-        console.debug('rightdown on', picked);
-        this.dragEntity = picked.id;
-        console.log(this.getEntity(picked.id));
-        var centroid = this.getEntity(picked.id).getCentroid();
-        this.dragStart = { longitude: centroid.y, latitude: centroid.x };
-      }
+      if (!picked) return;
+
+      console.debug('rightdown on', picked);
+      this.dragEntity = picked.id;
+      console.debug(this.getEntity(picked.id));
+      var centroid = this.getEntity(picked.id).getCentroid();
+      this.dragStart = { longitude: centroid.y, latitude: centroid.x };
     }.bind(this._managers.render));
 
     // TODO(bpstudds): Remove this event handler and do it proper.
     this._managers.event.addEventHandler('intern', 'input/rightup', function (name, args) {
       // Was a drag taking place?
-      if (this.dragEntity) {
-        this.dragStop = this._widget.centralBody.getEllipsoid().cartesianToCartographic(this._widget.scene.getCamera().controller.pickEllipsoid(args));
-        this.dragStop = { longitude: this.dragStop.longitude, latitude: this.dragStop.latitude };
-        this.dragStop.longitude *= 180 / Math.PI;
-        this.dragStop.latitude *= 180 / Math.PI;
-        var diff = { x: this.dragStop.latitude - this.dragStart.latitude, y: this.dragStop.longitude - this.dragStart.longitude };
-        //console.log('dragged', this.dragEntity, 'frobm', this.dragStart, 'to', dragStop);
-        console.log('dragged', this.dragEntity, diff);
-        this.dragEntity = null;
-      }
+      if (!this.dragEntity) return;
+
+      this.dragStop = this._widget.centralBody.getEllipsoid().cartesianToCartographic(this._widget.scene.getCamera().controller.pickEllipsoid(args));
+      this.dragStop = { longitude: this.dragStop.longitude, latitude: this.dragStop.latitude };
+      this.dragStop.longitude *= 180 / Math.PI;
+      this.dragStop.latitude *= 180 / Math.PI;
+      var diff = { x: this.dragStop.latitude - this.dragStart.latitude, y: this.dragStop.longitude - this.dragStart.longitude };
+      //console.debug('dragged', this.dragEntity, 'frobm', this.dragStart, 'to', dragStop);
+      console.log('dragged', this.dragEntity, diff);
+      this.dragEntity = null;
     }.bind(this._managers.render));
     */
   };

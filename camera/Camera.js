@@ -33,7 +33,6 @@ define([
   Camera.prototype._animateCamera = function (newCamera) {
     // TODO(bpstudds): Allow for a non-default orientation.
     console.debug('animating camera change');
-    
     latitude = newCamera.position.x * Math.PI / 180;
     longitude = newCamera.position.y * Math.PI / 180;
     altitude = newCamera.position.z;
@@ -44,9 +43,6 @@ define([
         duration: newCamera.duration
       }
     );
-    console.debug('flight created', flight);
-    console.log('the scene', this._renderManager._widget.scene);
-    console.log('the animations', this._renderManager._widget.scene.getAnimations());
     this._renderManager._widget.scene.getAnimations().add(flight);
   }
 
