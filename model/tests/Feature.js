@@ -3,7 +3,7 @@ define([
   'dam/TestCase',
   '../Polygon',
   /* Code under test */
-  '../Feature',
+  '../Feature'
 ], function (doh, TestCase, Polygon, Feature) {
   "use strict";
 

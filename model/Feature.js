@@ -23,11 +23,11 @@ define([
    * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
    * 
-   * @extends {GeoEntity}
+   * @extends {atlas/model/Feature}
    * @alias atlas-cesium/model/Feature
    * @constructor
    */
-  var Feature = function (/*Number*/ id, /*Object*/ args) {
+  var Feature = function (id, args) {
     if (typeof id === 'object') {
       args = id;
       id = args.id;

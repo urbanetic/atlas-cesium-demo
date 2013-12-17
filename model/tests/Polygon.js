@@ -8,7 +8,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   /* Code under test */
-  '../Polygon',
+  '../Polygon'
 ], function (doh, TestCase, GeometryInstance, PolygonGeometry, Primitive, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, Polygon) {
 
   /* Test globals go here */
