@@ -51,7 +51,7 @@ define([
   /**
    * Returns whether this Polygon is visible. Overrides the default Atlas implementation
    * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
-   * @return {Boolean} - Whether the Polygon is visible.
+   * @returns {Boolean} - Whether the Polygon is visible.
    */
   Polygon.prototype.isVisible = function () {
     return this._primitive && this._primitive.show;
@@ -157,7 +157,7 @@ define([
    * @private
    * @param  {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
    * @param  {atlas/model/Vertex} coords - The latlong coordinates to convert.
-   * @return {Cartesian3} Array of Cartesian3 coordinates.
+   * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
     var cartographics = [];
