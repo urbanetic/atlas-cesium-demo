@@ -30,29 +30,10 @@ define([
     this._managers.camera = new CameraManager(this._managers);
 
     // Initialise managers as required.
+    this.bindEvents();
     this._managers.render.bindEvents();
     this._managers.camera.initialise();
     this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}})
-
-    // Test zoomTo
-    setTimeout( (function () {
-      console.debug('fired camera/zoomTo event');
-      this._managers.render._widget.resize();
-      this._managers.render._widget.render();
-      this._managers.event.handleExternalEvent('camera/zoomTo', {
-        position: {
-          x: -37.8,
-          y: 144.96,
-          z: 2000
-        },
-        orientation: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-        duration: 3000
-      })
-    }).bind(this), 1000);
 
     /* CODE TO TEST SELECTION, IGNORE FOR THE MINUTE *
     // TODO(bpstudds): Remove this event handler and do it proper.
@@ -104,20 +85,48 @@ define([
     // Hook up the input manager with the DOM element.
     //this._managers.input.initialise(elem);
   };
+  
+  /**
+   * Registers event handlers with the EventManager.
+   */
+  CesiumAtlas.prototype.bindEvents = function () {
+    var handlers = [
+      { // Define an event handler for showing an entity.
+        source: 'extern',
+        name: 'entity/show',
+        callback: function (event, args) {
+          // TODO(bpstudds): Move the adding of entities somewhere intelligent.
+          this.addFeature(args.id, args);
+        }.bind(this)
+      },
+      { // Define an event handler for hiding an entity.
+        source: 'extern',
+        name: 'entity/hide',
+        callback: function (event, args) {
+          // TODO(bpstudds): Move the adding of entities somewhere intelligent.
+          this.addFeature(args.id, args);
+        }.bind(this)
+      }
+    ];
+    // Add the event handlers to the EventManager.
+    this._managers.event.addEventHandlers(handlers);
+  };  
 
   Atlas.prototype.addFeature = function (id, args) {
     //return this._managers.render.addFeature(id, args);
-     if (id === undefined) {
-       throw new DeveloperError('Can add Feature without specifying id');
-     } else {
-       // Add EventManger to the args for the feature.
-       args.eventManager = this._managers.event;
-       // Add the RenderManager to the args for the feature.
-       args.renderManager = this._managers.render;
-       var feature = new Feature(id, args);
-       this._managers.render.addEntity(feature);
-       //return feature;
-     }
+    if (id === undefined) {
+      throw new DeveloperError('Can add Feature without specifying id');
+    } else {
+      console.debug('adding feature', id);
+      // Add EventManger to the args for the feature.
+      args.eventManager = this._managers.event;
+      // Add the RenderManager to the args for the feature.
+      args.renderManager = this._managers.render;
+      var feature = this._managers.entity.createFeature(id, args);
+      this._managers.entity.add(id, feature);
+      if (args.show) feature.show();
+      //return feature;
+    }
   };
 
   return CesiumAtlas;
