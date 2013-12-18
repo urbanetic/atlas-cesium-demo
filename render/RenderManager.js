@@ -145,6 +145,10 @@ define([
       this._entities[id].hide();
     }
   };
+  
+  RenderManager.prototype.convertScreenCoordsToLatLng = function (screenCoords) {
+    return this._widget.centralBody.getEllipsoid().cartesianToCartographic(this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords))
+  };
 
   return RenderManager;
 });

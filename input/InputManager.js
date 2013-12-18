@@ -26,6 +26,7 @@ define([
    */
   InputManager.prototype.initialise = function (domId) {
     this._element = document.getElementById(domId);
+    // TODO(bpstudds): Should the InputManager be bound to the Atlas dom element?
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
 
     this.createDefaultBinds();
@@ -38,8 +39,8 @@ define([
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
       args = {
-        x: movement.position.x,
-        y: movement.position.y
+        x: movement.endPosition.x,
+        y: movement.endPosition.y,
       };
       this.handleInternalEvent('input/mousemove', args);
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.MOUSE_MOVE);

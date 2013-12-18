@@ -5,17 +5,17 @@ define([
   'atlas/util/Extends',
   'atlas/entity/EntityManager',
   'atlas/events/EventManager',
-  //'atlas/selection/SelectionManager',
+  'atlas/selection/SelectionManager',
   'atlas-cesium/camera/CameraManager',
   'atlas-cesium/dom/DomManager',
-  //'atlas-cesium/input/InputManager',
+  'atlas-cesium/input/InputManager',
   'atlas-cesium/render/RenderManager',
   'atlas-cesium/model/Feature',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   // Extends
   'atlas/core/Atlas'
-], function (extend, EntityManager, EventManager, /*SelectionManager,*/ CameraManager, DomManager, /*InputManager,*/ RenderManager, Feature, Polygon, Cartographic, Atlas) {
+], function (extend, EntityManager, EventManager, SelectionManager, CameraManager, DomManager, InputManager, RenderManager, Feature, Polygon, Cartographic, Atlas) {
 
   var CesiumAtlas = function () {
     CesiumAtlas.base.constructor.call(this);
@@ -25,8 +25,8 @@ define([
     this._managers.event = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
     this._managers.dom = new DomManager(this._managers);
-    //this._managers.selection = new SelectionManager(this._managers);
-    //this._managers.input = new InputManager(this._managers);
+    this._managers.selection = new SelectionManager(this._managers);
+    this._managers.input = new InputManager(this._managers);
     this._managers.camera = new CameraManager(this._managers);
 
     // Initialise managers as required.
@@ -34,6 +34,8 @@ define([
     this._managers.render.bindEvents();
     this._managers.camera.initialise();
     this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}})
+    //this._managers.input.initialise();
+    this._managers.selection.initialise();
 
     /* CODE TO TEST SELECTION, IGNORE FOR THE MINUTE *
     // TODO(bpstudds): Remove this event handler and do it proper.
@@ -83,7 +85,7 @@ define([
   CesiumAtlas.prototype.attachTo = function (elem) {
     this._managers.dom.setDom(elem, true);
     // Hook up the input manager with the DOM element.
-    //this._managers.input.initialise(elem);
+    this._managers.input.initialise(elem);
   };
   
   /**
