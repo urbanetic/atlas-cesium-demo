@@ -43,13 +43,15 @@ define([
      */
     this._positions = [];
     if (positions.length) {
-      this._positions = new Uint16Array(positions.length * 3);
+      console.debug('the input positions', positions);
+      this._positions = new Float64Array(positions.length * 3);
       var j = 0;
-      for (var i in positions) {
+      for (var i = 0; i < positions.length; i++) {
         this._positions[j++] = (positions[i].x);
         this._positions[j++] = (positions[i].y);
         this._positions[j++] = (positions[i].z);
       }
+      console.debug('the positions', this._positions);
     }
     
     /**
@@ -60,13 +62,15 @@ define([
      */
     this._indices = [];
     if (triangles.length) {
+      console.debug('the input triangles', triangles);
       this._indices = new Uint16Array(triangles.length * 3);
       var j = 0;
-      for (var i in triangles) {
+      for (var i = 0; i < triangles.length; i++) {
         this._indices[j++] = (triangles[i][0]);
         this._indices[j++] = (triangles[i][1]);
         this._indices[j++] = (triangles[i][2]);
       }
+      console.debug('the indices', this._indices);
     }
     
     /**
@@ -111,7 +115,7 @@ define([
         flat : true,
         translucent : false
       }),
-      debugShowBoundingVolume: true
+      debugShowBoundingVolume: false
     });
       
     console.debug('the primitive', primitive);
@@ -120,6 +124,7 @@ define([
   };
   
   Mesh.prototype.createGeometry = function () {
+    
     var attributes = new GeometryAttributes({
       position : new GeometryAttribute({
         componentDatatype : ComponentDatatype.DOUBLE,
