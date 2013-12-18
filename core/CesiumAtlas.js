@@ -3,6 +3,7 @@
  */
 define([
   'atlas/util/Extends',
+  'atlas/entity/EntityManager',
   'atlas/events/EventManager',
   //'atlas/selection/SelectionManager',
   'atlas-cesium/camera/CameraManager',
@@ -14,12 +15,13 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartographic',
   // Extends
   'atlas/core/Atlas'
-], function (extend, EventManager, /*SelectionManager,*/ CameraManager, DomManager, /*InputManager,*/ RenderManager, Feature, Polygon, Cartographic, Atlas) {
+], function (extend, EntityManager, EventManager, /*SelectionManager,*/ CameraManager, DomManager, /*InputManager,*/ RenderManager, Feature, Polygon, Cartographic, Atlas) {
 
   var CesiumAtlas = function () {
     CesiumAtlas.base.constructor.call(this);
 
     // Create Managers.
+    this._managers.entity = new EntityManager(this._managers);
     this._managers.event = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
     this._managers.dom = new DomManager(this._managers);
@@ -30,6 +32,7 @@ define([
     // Initialise managers as required.
     this._managers.render.bindEvents();
     this._managers.camera.initialise();
+    this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}})
 
     // Test zoomTo
     setTimeout( (function () {

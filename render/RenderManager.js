@@ -64,7 +64,7 @@ define([
         name: 'entity/show',
         callback: function (event, args) {
           // TODO(bpstudds): Move the adding of entities somewhere intelligent.
-          var feature = this._atlasManagers.entity.addFeature(args.id, args);
+          var feature = this._atlasManagers.entity.createFeature(args.id, args);
           if (feature) feature.show();
         }.bind(this)
       },
@@ -73,7 +73,7 @@ define([
         name: 'entity/hide',
         callback: function (event, args) {
           // TODO(bpstudds): Move the adding of entities somewhere intelligent.
-          var feature = this._atlasManagers.entity.getEntity(args.id)
+          var feature = this._atlasManagers.entity.createEntity(args.id)
           if (feature) feature.hide();
         }.bind(this)
       }
