@@ -24,7 +24,6 @@ define([
   var RenderManager = function (atlasManagers) {
     /*=====
     Inherited from RenderManagerCore
-    this._entities;
     this._atlasManagers;
     =====*/
     RenderManager.base.constructor.call(this, atlasManagers);
@@ -64,19 +63,18 @@ define([
         source: 'extern',
         name: 'entity/show',
         callback: function (event, args) {
-          if (!(args.id in this._entities)) {
-            this.addFeature(args.id, args);
-          }
-          this._entities[args.id].show();
+          // TODO(bpstudds): Move the adding of entities somewhere intelligent.
+          var feature = this._atlasManagers.entity.addFeature(args.id, args);
+          if (feature) feature.show();
         }.bind(this)
       },
       { // Define an event handler for hiding an entity.
         source: 'extern',
         name: 'entity/hide',
         callback: function (event, args) {
-          if (!(args.id in this._entities)) {
-            this._entities[args.id].hide();
-          }
+          // TODO(bpstudds): Move the adding of entities somewhere intelligent.
+          var feature = this._atlasManagers.entity.getEntity(args.id)
+          if (feature) feature.hide();
         }.bind(this)
       }
     ];
@@ -96,6 +94,8 @@ define([
   };
 
   /**
+   * @deprecated
+   * @see {@link atlas/entity/EntityManager}
    * Convenience function that creates a new Feature and adds it to the RenderManager.
    *   
    * @param {Number} id - The ID of this Feature.
@@ -110,6 +110,7 @@ define([
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
    */ 
   RenderManager.prototype.addFeature = function (id, args) {
+    throw new DeveloperError('RenderManager.addFeature is deprecated, use EntityManager.');
     if (id === undefined) {
       throw new DeveloperError('Can not add Feature without specifying id');
     } else {
