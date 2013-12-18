@@ -79,7 +79,7 @@ define([
       }
     ];
     // Add the event handlers to the EventManager.
-    this._atlasManagers.event.addEventHandlers(handlers);
+    //this._atlasManagers.event.addEventHandlers(handlers);
   };
 
   /**
