@@ -111,6 +111,7 @@ define([
   };
   
   Polygon.prototype.onSelect = function () {
+    this.setStyle(Polygon.SELECTED_STYLE);
     if (this._primitive) {
       this._primitive.appearance.material.uniforms.color =
           new CesiumColour(Polygon.SELECTED_STYLE.fillColour.red,
@@ -121,6 +122,7 @@ define([
   };
 
   Polygon.prototype.onDeselect = function () {
+    this.setStyle(Polygon.DEFAULT_STYLE);
     if (this._primitive) {
       this._primitive.appearance.material.uniforms.color =
           new CesiumColour(this._style.fillColour.red,
