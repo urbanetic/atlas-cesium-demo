@@ -34,7 +34,7 @@ define([
     this._managers.render.bindEvents();
     this._managers.camera.initialise();
     this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}})
-    //this._managers.input.initialise();
+    //this._managers.input.initialise(); // Have to initialise input after the DOM is set.
     this._managers.selection.initialise();
 
     /* CODE TO TEST SELECTION, IGNORE FOR THE MINUTE *
@@ -84,7 +84,7 @@ define([
 
   CesiumAtlas.prototype.attachTo = function (elem) {
     this._managers.dom.setDom(elem, true);
-    // Hook up the input manager with the DOM element.
+    // Hook up the input manager to the selected DOM element.
     this._managers.input.initialise(elem);
   };
   
