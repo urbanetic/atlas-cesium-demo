@@ -2,8 +2,10 @@
  * The facade of the atlas-cesium implementation.
  */
 define([
+  'atlas/util/DeveloperError',
   'atlas/util/Extends',
-  'atlas/entity/EntityManager',
+  'atlas/edit/EditManager',
+  'atlas-cesium/entity/EntityManager',
   'atlas/events/EventManager',
   'atlas/selection/SelectionManager',
   'atlas-cesium/camera/CameraManager',
@@ -15,12 +17,13 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartographic',
   // Extends
   'atlas/core/Atlas'
-], function (extend, EntityManager, EventManager, SelectionManager, CameraManager, DomManager, InputManager, RenderManager, Feature, Polygon, Cartographic, Atlas) {
+], function (DeveloperError, extend, EditManager, EntityManager, EventManager, SelectionManager, CameraManager, DomManager, InputManager, RenderManager, Feature, Polygon, Cartographic, Atlas) {
 
   var CesiumAtlas = function () {
     CesiumAtlas.base.constructor.call(this);
 
     // Create Managers.
+    this._managers.edit = new EditManager(this._managers);
     this._managers.entity = new EntityManager(this._managers);
     this._managers.event = new EventManager(this._managers);
     this._managers.render = new RenderManager(this._managers);
@@ -31,8 +34,8 @@ define([
 
     // Initialise managers as required.
     this.bindEvents();
-    this._managers.render.bindEvents();
     this._managers.camera.initialise();
+    this._managers.edit.initialise();
     this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}})
     //this._managers.input.initialise(); // Have to initialise input after the DOM is set.
     this._managers.selection.initialise();
@@ -84,7 +87,7 @@ define([
 
   CesiumAtlas.prototype.attachTo = function (elem) {
     this._managers.dom.setDom(elem, true);
-    // Hook up the input manager to the selected DOM element.
+    // Hook up the InputManager to the selected DOM element.
     this._managers.input.initialise(elem);
   };
   
