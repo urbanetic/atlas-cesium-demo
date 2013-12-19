@@ -132,7 +132,7 @@ define([
   
   Polygon.prototype.translate = function (diff) {
     for (var i in this._vertices) {
-      this._vertices[i].add(diff);
+      this._vertices[i] = this._vertices[i].add(diff);
     }
     this.setRenderable(false);
     this.show();
