@@ -24,7 +24,6 @@ define([
   var RenderManager = function (atlasManagers) {
     /*=====
     Inherited from RenderManagerCore
-    this._entities;
     this._atlasManagers;
     =====*/
     RenderManager.base.constructor.call(this, atlasManagers);
