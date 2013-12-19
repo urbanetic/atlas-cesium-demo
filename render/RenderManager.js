@@ -3,12 +3,13 @@
  */
 define([
   'atlas/util/Extends',
+  'atlas/model/Vertex',
   'atlas-cesium/model/Feature',
   // Cesium imports.
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
   'atlas/render/RenderManager'
-], function (extend, Feature, CesiumViewer, RenderManagerCore) {
+], function (extend, Vertex, Feature, CesiumViewer, RenderManagerCore) {
   "use strict";
 
   /**
@@ -16,7 +17,7 @@ define([
    *
    * @params {Object} atlasManagers - A map of manager types to Atlas manager objects.
    * @returns {atlas-cesium/render/RenderManager}
-   * 
+   *
    * @extends {atlas/render/RenderManager}
    * @alias atlas-cesium/render/RenderManager
    * @constructor
@@ -33,7 +34,7 @@ define([
   extend(RenderManagerCore, RenderManager);
 
   /**
-   * Creates and initialises the Cesium viewer widget. Sets which 
+   * Creates and initialises the Cesium viewer widget. Sets which
    * control components are included in the widget.
    * @see {@link http://cesiumjs.org/Cesium/Build/Documentation/Viewer.html}
    * @param {String} elem - The ID of the DOM element to place the widget in.
@@ -97,7 +98,7 @@ define([
    * @deprecated
    * @see {@link atlas/entity/EntityManager}
    * Convenience function that creates a new Feature and adds it to the RenderManager.
-   *   
+   *
    * @param {Number} id - The ID of this Feature.
    * @param {Object} args - Parameters describing the feature.
    * @param {atlas/render/RenderManager} args.renderManager - The RenderManager object responsible for rendering the Feature.
@@ -108,7 +109,7 @@ define([
    * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of the Mesh or Polygon.
    * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
-   */ 
+   */
   RenderManager.prototype.addFeature = function (id, args) {
     throw new DeveloperError('RenderManager.addFeature is deprecated, use EntityManager.');
     if (id === undefined) {
@@ -145,10 +146,23 @@ define([
       this._entities[id].hide();
     }
   };
-  
+
   RenderManager.prototype.convertScreenCoordsToLatLng = function (screenCoords) {
-    return this._widget.centralBody.getEllipsoid().cartesianToCartographic(this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords))
+    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords)
+    var cartographic = this._widget.centralBody.getEllipsoid().cartesianToCartographic(cartesian)
+    var f = 180 / Math.PI;
+    return new Vertex(cartographic.latitude*f, cartographic.longitude*f, cartographic.height);
   };
+
+  RenderManager.prototype.getAt = function (screenCoords) {
+    var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
+    var pickedIds = [];
+    pickedPrimitives.forEach(function (p) {
+      pickedIds.push(p.id);
+    });
+    return pickedIds;
+  }
 
   return RenderManager;
 });
+
