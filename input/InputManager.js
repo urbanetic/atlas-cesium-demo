@@ -41,6 +41,8 @@ define([
       args = {
         x: movement.endPosition.x,
         y: movement.endPosition.y,
+        startX: movement.startPosition.x,
+        startY: movement.startPosition.y,
       };
       this.handleInternalEvent('input/mousemove', args);
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.MOUSE_MOVE);

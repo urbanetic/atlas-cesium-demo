@@ -1,6 +1,7 @@
 define([
   'atlas/util/Extends',
   'atlas/model/Colour',
+  'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
@@ -21,6 +22,7 @@ define([
   'atlas/model/GeoEntity'
 ], function (extend,
               Color,
+              Vertex,
               BoundingSphere,
               Cartographic,
               Cartesian3,
@@ -38,7 +40,17 @@ define([
               Primitive,
               MeshCore) {
 
-  var Mesh = function (positions, triangles) {
+  var Mesh = function (id, args) {
+    // Extend from Mesh -> GeoEntity
+    if (typeof id === 'object') {
+      args = id;
+      id = args.id;
+    }
+    if (id === undefined) {
+      throw 'Can not create Mesh without an ID';
+    }
+    this._id = id;
+
     /**
      * The array of vertex positions for this Mesh, in model space coordinates.
      * This is a 1D array to conform with Cesium requirements. Every three elements of this
@@ -46,14 +58,11 @@ define([
      * @type {Array.{Number}}
      */
     this._positions = [];
-    if (positions.length) {
-      console.debug('the input positions', positions);
-      this._positions = new Float64Array(positions.length * 3);
-      var j = 0;
-      for (var i = 0; i < positions.length; i++) {
-        this._positions[j++] = (positions[i].x);
-        this._positions[j++] = (positions[i].y);
-        this._positions[j++] = (positions[i].z);
+    if (args.positions.length) {
+      console.debug('the input positions', args.positions);
+      this._positions = new Float64Array(args.positions.length);
+      for (var i = 0; i < args.positions.length; i++) {
+        this._positions[i] = args.positions[i];
       }
       console.debug('the positions', this._positions);
     }
@@ -65,23 +74,32 @@ define([
      * an (x,y,z) tuple) that corresponds to that vertex of the triangle.
      */
     this._indices = [];
-    if (triangles.length) {
-      console.debug('the input triangles', triangles);
-      this._indices = new Uint16Array(triangles.length * 3);
-      var j = 0;
-      for (var i = 0; i < triangles.length; i++) {
-        this._indices[j++] = (triangles[i][0]);
-        this._indices[j++] = (triangles[i][1]);
-        this._indices[j++] = (triangles[i][2]);
+    console.log(args);
+    if (args.triangles.length) {
+      console.debug('the input triangles', args.triangles);
+      this._indices = new Uint16Array(args.triangles.length);
+      for (var i = 0; i < args.triangles.length; i++) {
+        this._indices[i] = args.triangles[i];
       }
       console.debug('the indices', this._indices);
+    }
+
+    this._normals = [];
+    if (args.normals.length) {
+      this._normals = new Float64Array(args.normals.length);
+      for (var i = 0; i < args.normals.length; i++) {
+        this._normals[i] = args.normals[i];
+      }
     }
 
     /**
      * The location of the mesh object in latitude and longitude.
      * @type {atlas/model/Vertex}
      */
-    this._location = {};
+    this._geoLocation = {};
+    if (args.geoLocation){
+      this._geoLocation = new Vertex(args.geoLocation[0], args.geoLocation[1], args.geoLocation[2]);
+    }
 
     /**
      * Defines a transformation from model coordinates to world coordinates.
@@ -98,12 +116,11 @@ define([
     this.createGeometry();
     var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
-    var modelMatrix = Matrix4.multiplyByUniformScale(
+    var modelMatrix =
       Matrix4.multiplyByTranslation(
         Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-          Cartographic.fromDegrees(-100.0, 40.0))),
-        new Cartesian3(0.0, 0.0, 200000.0)),
-      500000.0);
+          Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+        new Cartesian3(0.0, 0.0, 350.0));
 
     var instance = new GeometryInstance({
       geometry : this._geometry,
