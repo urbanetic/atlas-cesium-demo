@@ -22,10 +22,10 @@ define([
 
   /**
    * Completes all initialisation that requires other atlas managers.
-   * @param {String} domId - The DOM ID of the HTML element to receive events from.
+   * @param {String|HTMLElement} elem - The DOM ID or DOM element of the HTML element to receive events from.
    */
-  InputManager.prototype.initialise = function (domId) {
-    this._element = document.getElementById(domId);
+  InputManager.prototype.initialise = function (elem) {
+    this._element = typeof elem === 'string' ? document.getElementById(elem) : elem;
     // TODO(bpstudds): Should the InputManager be bound to the Atlas dom element?
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
 
