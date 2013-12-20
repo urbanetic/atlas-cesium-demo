@@ -32,24 +32,26 @@ define([
     this._managers.camera.initialise();
 
     // Test zoomTo
-    setTimeout( (function () {
-      console.debug('fired camera/zoomTo event');
-      this._managers.render._widget.resize();
-      this._managers.render._widget.render();
-      this._managers.event.handleExternalEvent('camera/zoomTo', {
-        position: {
-          x: -37.8,
-          y: 144.96,
-          z: 2000
-        },
-        orientation: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-        duration: 3000
-      })
-    }).bind(this), 1000);
+    if (this._managers.render._widget) {
+      setTimeout( (function () {
+        console.debug('fired camera/zoomTo event');
+        this._managers.render._widget.resize();
+        this._managers.render._widget.render();
+        this._managers.event.handleExternalEvent('camera/zoomTo', {
+          position: {
+            x: -37.8,
+            y: 144.96,
+            z: 2000
+          },
+          orientation: {
+            x: 0,
+            y: 0,
+            z: 0
+          },
+          duration: 3000
+        })
+      }).bind(this), 1000);
+    }
 
     /* CODE TO TEST SELECTION, IGNORE FOR THE MINUTE *
     // TODO(bpstudds): Remove this event handler and do it proper.
