@@ -21,25 +21,36 @@ define([
   //Base class.
   'atlas/model/GeoEntity'
 ], function (extend,
-              Color,
-              Vertex,
-              BoundingSphere,
-              Cartographic,
-              Cartesian3,
-              ColorGeometryInstanceAttribute,
-              ComponentDatatype,
-              Geometry,
-              GeometryAttribute,
-              GeometryAttributes,
-              GeometryInstance,
-              GeometryPipeline,
-              Matrix4,
-              PrimitiveType,
-              Transforms,
-              PerInstanceColorAppearance,
-              Primitive,
-              MeshCore) {
+             Color,
+             Vertex,
+             BoundingSphere,
+             Cartographic,
+             Cartesian3,
+             ColorGeometryInstanceAttribute,
+             ComponentDatatype,
+             Geometry,
+             GeometryAttribute,
+             GeometryAttributes,
+             GeometryInstance,
+             GeometryPipeline,
+             Matrix4,
+             PrimitiveType,
+             Transforms,
+             PerInstanceColorAppearance,
+             Primitive,
+             MeshCore) {
 
+  /**
+   * Constructs a new Mesh object.
+   * @class A Mesh represents a 3D renderable object in atlas.
+   * @param {String} id - The ID of the Mesh.
+   * @param {Object} args - Arguments that describe the Mesh.
+   * @returns {atlas-cesium/model/Mesh} - The new Mesh object.
+   *
+   * @alias atlas-cesium/model/Mesh
+   * @extends {atlas/model/Mesh}
+   * @constructor
+   */
   var Mesh = function (id, args) {
     // Extend from Mesh -> GeoEntity
     if (typeof id === 'object') {
@@ -49,21 +60,28 @@ define([
     if (id === undefined) {
       throw 'Can not create Mesh without an ID';
     }
+
+    /**
+     * The ID of the GeoEntity.
+     * @type {String}
+     * @private
+     */
     this._id = id;
 
     /**
      * The array of vertex positions for this Mesh, in model space coordinates.
      * This is a 1D array to conform with Cesium requirements. Every three elements of this
      * array describes a new vertex, with each element being the x, y, z component respectively.
-     * @type {Array.{Number}}
+     * @type {Array.<Number>}
+     * @private
      */
     this._positions = [];
     if (args.positions.length) {
       console.debug('the input positions', args.positions);
       this._positions = new Float64Array(args.positions.length);
-      for (var i = 0; i < args.positions.length; i++) {
-        this._positions[i] = args.positions[i];
-      }
+      args.positions.forEach(function (position, i) { //for (var i = 0; i < args.positions.length; i++) {
+        this._positions[i] = position;
+      }.bind(this));
       console.debug('the positions', this._positions);
     }
 
@@ -72,41 +90,55 @@ define([
      * together and describe a triangle forming the mesh. The value of the element is the index
      * of virtual positions array (the array if each element in <code>Mesh._positions</code> was
      * an (x,y,z) tuple) that corresponds to that vertex of the triangle.
+     * @type {Array.<Number>}
+     * @private
      */
     this._indices = [];
     console.log(args);
     if (args.triangles.length) {
       console.debug('the input triangles', args.triangles);
       this._indices = new Uint16Array(args.triangles.length);
-      for (var i = 0; i < args.triangles.length; i++) {
-        this._indices[i] = args.triangles[i];
-      }
+      args.triangles.forEach(function (triangle, i) { //for (var i = 0; i < args.triangles.length; i++) {
+        this._indices[i] = triangle;
+      }.bind(this));
       console.debug('the indices', this._indices);
     }
 
+    /**
+     * An array of normal vectors for each vertex defined in <code>Mesh._positions</code>.
+     * @type {Array.<Number>}
+     * @private
+     */
     this._normals = [];
     if (args.normals.length) {
       this._normals = new Float64Array(args.normals.length);
-      for (var i = 0; i < args.normals.length; i++) {
-        this._normals[i] = args.normals[i];
-      }
+      args.normals.forEach(function (normal, i) { //for (var i = 0; i < args.normals.length; i++) {
+        this._normals[i] = normal;
+      }.bind(this));
     }
 
     /**
-     * The location of the mesh object in latitude and longitude.
+     * The location of the mesh object, specified by latitude, longitude, and elevation.
      * @type {atlas/model/Vertex}
+     * @private
      */
     this._geoLocation = {};
-    if (args.geoLocation){
+    if (args.geoLocation) {
       this._geoLocation = new Vertex(args.geoLocation[0], args.geoLocation[1], args.geoLocation[2]);
     }
 
     /**
      * Defines a transformation from model coordinates to world coordinates.
-     * @type {cesium/Core/Matri4}
+     * @type {cesium/Core/Matrix4}
+     * @private
      */
     this._modelMatrix = {};
 
+    /**
+     * The Cesium Geometry object for the Mesh.
+     * @type {cesium/Core/Geometry}
+     * @private
+     */
     this._geometry = {};
   };
   extend(MeshCore, Mesh);
@@ -116,11 +148,12 @@ define([
     this.createGeometry();
     var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
-    var modelMatrix =
+    var modelMatrix = Matrix4.multiplyByUniformScale(
       Matrix4.multiplyByTranslation(
         Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
           Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-        new Cartesian3(0.0, 0.0, 350.0));
+        new Cartesian3(0.0, 0.0, 35)),
+      0.1);
 
     var instance = new GeometryInstance({
       geometry : this._geometry,
@@ -167,7 +200,7 @@ define([
     this._geometry.boundingSphere = geometry.boundingSphere;
 
     return this._geometry;
-  }
+  };
 
   return Mesh;
 });

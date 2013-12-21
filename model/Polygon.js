@@ -133,7 +133,7 @@ define([
   };
   
   Polygon.prototype.translate = function (diff) {
-    for (var i in this._vertices) {
+    for (var i = 0; i < this._vertices.length; i++) {
       this._vertices[i] = this._vertices[i].add(diff);
     }
     this.setRenderable(false);
@@ -153,7 +153,7 @@ define([
       this._build(this._renderManager._widget.centralBody.getEllipsoid(),
           this._renderManager.getMinimumTerrainHeight(this._vertices));
       this._primitive =
-          new Primitive({geometryInstances: this.getGeometry(), 
+          new Primitive({geometryInstances: this.getGeometry(),
               appearance: this.getAppearance()});
     }
     // Check that the primitive has been correctly created.
@@ -163,7 +163,8 @@ define([
   /**
    * Builds the geometry and appearance data required to render the Polygon in
    * Cesium.
-   * @param {number} minTerrainElevation - The minimum height of the terrain 
+   * @param {cesium/core/Ellipsoid} ellipsoid - The ellipsoid being rendered onto.
+   * @param {Number} minTerrainElevation - The minimum height of the terrain
    *        in the area covered by this polygon.
    */
   Polygon.prototype._build = function (ellipsoid, minTerrainElevation) {
@@ -174,7 +175,7 @@ define([
     // For 3D extruded polygons, ensure polygon is not closed as it causes
     // rendering to hang.
     if (this._height > 0) {
-      if (this._cartesians[0] == this._cartesians[this._cartesians.length - 1]) {
+      if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
         this._cartesians.pop();
       }
     }
@@ -194,16 +195,16 @@ define([
       // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
       //                 This may require sorting of vertices before rendering.
       this._appearance = new MaterialAppearance({
-        closed: false, 
+        closed: false,
         translucent: false,
         faceForward: true
       });
     }
-    var cesiumColour = new CesiumColour(this._style.fillColour.red,
+    this._appearance.material.uniforms.color = new CesiumColour(
+        this._style.fillColour.red,
         this._style.fillColour.green,
         this._style.fillColour.blue,
         1 /*force opaque because of bug this._style.fillColour.alpha*/);
-    this._appearance.material.uniforms.color = cesiumColour;
   };
 
   /**
