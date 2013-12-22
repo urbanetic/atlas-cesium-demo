@@ -1,4 +1,5 @@
 define([
+  'atlas/util/DeveloperError',
   'atlas/util/Extends',
   'atlas/model/Colour',
   'atlas/model/Vertex',
@@ -20,7 +21,8 @@ define([
   'atlas-cesium/cesium/Source/Scene/Primitive',
   //Base class.
   'atlas/model/GeoEntity'
-], function (extend,
+], function (DeveloperError,
+             extend,
              Color,
              Vertex,
              BoundingSphere,
@@ -58,7 +60,7 @@ define([
       id = args.id;
     }
     if (id === undefined) {
-      throw 'Can not create Mesh without an ID';
+      throw new DeveloperError('Can not create Mesh without an ID');
     }
 
     /**
@@ -77,12 +79,10 @@ define([
      */
     this._positions = [];
     if (args.positions.length) {
-      console.debug('the input positions', args.positions);
       this._positions = new Float64Array(args.positions.length);
-      args.positions.forEach(function (position, i) { //for (var i = 0; i < args.positions.length; i++) {
+      args.positions.forEach(function (position, i) {
         this._positions[i] = position;
-      }.bind(this));
-      console.debug('the positions', this._positions);
+      }, this);
     }
 
     /**
@@ -94,14 +94,11 @@ define([
      * @private
      */
     this._indices = [];
-    console.log(args);
     if (args.triangles.length) {
-      console.debug('the input triangles', args.triangles);
       this._indices = new Uint16Array(args.triangles.length);
       args.triangles.forEach(function (triangle, i) { //for (var i = 0; i < args.triangles.length; i++) {
         this._indices[i] = triangle;
-      }.bind(this));
-      console.debug('the indices', this._indices);
+      }, this);
     }
 
     /**
@@ -114,7 +111,7 @@ define([
       this._normals = new Float64Array(args.normals.length);
       args.normals.forEach(function (normal, i) { //for (var i = 0; i < args.normals.length; i++) {
         this._normals[i] = normal;
-      }.bind(this));
+      }, this);
     }
 
     /**
@@ -132,6 +129,7 @@ define([
      * @type {cesium/Core/Matrix4}
      * @private
      */
+    // TODO(bpstudds): Generate modelMatrix on the fly and cache it.
     this._modelMatrix = {};
 
     /**
