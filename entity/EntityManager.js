@@ -15,7 +15,7 @@ define([
 
     /**
      * Contains a mapping of ID to GeoEntity of all GeoEntities in atlas.
-     * @type {Object.<String,atlas/model/GeoEntity>}
+     * @type {Object.<String, atlas/model/GeoEntity>}
      */
     this._entities = {};
 
@@ -23,7 +23,7 @@ define([
      * Contains a mapping of GeoEntity subclass names to the constructor object
      * used to create that GeoEntity. Allows overriding of the default atlas GeoEntities
      * without having to subclass the EntityManager.
-     * @type {Object.<String,Function>}
+     * @type {Object.<String, Function>}
      */
     this._entityTypes = {
       'Feature': Feature,
@@ -66,11 +66,11 @@ define([
   /**
    * Returns the GeoEntities located within the given Polygon.
    * @param {atlas/model/Polygon} boundingPoly - The polygon defining the geographic area to
-   * retrieve GeoEntities.
+   *      retrieve GeoEntities.
    * @param {Boolean} [intersects] - If true, GeoEntities which intersect the boundingBox are
-   * returned as well. Otherwise, only wholly contains GeoEntities are returned.
+   *      returned as well. Otherwise, only wholly contains GeoEntities are returned.
    * @returns {atlas/model/GeoEntity|undefined} The GeoEntities located in the bounding box,
-   * or <code>undefined</code> if there are no such GeoEntities.
+   *      or <code>undefined</code> if there are no such GeoEntities.
    */
   EntityManager.prototype.getInPoly = function (boundingPoly, intersects) {
     // TODO
