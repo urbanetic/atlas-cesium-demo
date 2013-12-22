@@ -26,5 +26,22 @@ define([
    *    gotoBookmark()
    */
   
+  CameraManager.prototype.lockCamera = function () {
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableRotate = false;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTranslate = false;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableZoom = false;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTilt = false;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableLook = false;
+  };
+  
+  CameraManager.prototype.unlockCamera = function () {
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableRotate = true;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTranslate = true;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableZoom = true;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTilt = true;
+    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableLook = true;
+  };
+
   return CameraManager;
 });
+
