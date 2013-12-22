@@ -9,11 +9,18 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
-  'atlas-cesium/cesium/Source/Core/Color',
-  'atlas-cesium/cesium/Source/Core/Matrix4',
-  'atlas-cesium/cesium/Source/Core/Transforms',
-  'atlas-cesium/cesium/Source/Core/Cartesian3'
-], function (extend, PolygonCore, Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, Matrix4, Transforms, Cartesian3) {
+  'atlas-cesium/cesium/Source/Core/Color'
+], function (extend,
+             PolygonCore,
+             Style,
+             Colour,
+             GeometryInstance,
+             PolygonGeometry,
+             Primitive,
+             Cartographic,
+             EllipsoidSurfaceAppearance,
+             MaterialAppearance,
+             CesiumColour) {
   "use strict";
 
   var Polygon = function (id, vertices, args) {
@@ -34,6 +41,27 @@ define([
      *    this._centroid
      *    this._area
      */
+
+    /**
+     * The Cesium GeometryInstance of the Polygon.
+     * @type {GeometryInstance}
+     * @private
+     */
+    this._geometry = null;
+
+    /**
+     * The Cesium appearance data of the Polygon.
+     * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
+     * @private
+     */
+    this._appearance = null;
+
+    /**
+     * The Cesium Primitive instance of the Polygon, used to render the Polygon in Cesium.
+     * @type {Primitive}
+     * @private
+     */
+    this._primitive = null;
 
     /**
      * An array of Cesium cartesian coordinates describing the position of the Polygon
@@ -113,25 +141,24 @@ define([
   Polygon.prototype.onSelect = function () {
     this.setStyle(Polygon.SELECTED_STYLE);
     if (this._primitive) {
-      this._primitive.appearance.material.uniforms.color =
-          new CesiumColour(Polygon.SELECTED_STYLE.fillColour.red,
-          Polygon.SELECTED_STYLE.fillColour.green,
-          Polygon.SELECTED_STYLE.fillColour.blue,
-          1 /*force opaque because of bug this._style.fillColour.alpha*/);
+      this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
   };
 
   Polygon.prototype.onDeselect = function () {
     this.setStyle(Polygon.DEFAULT_STYLE);
     if (this._primitive) {
-      this._primitive.appearance.material.uniforms.color =
-          new CesiumColour(this._style.fillColour.red,
-          this._style.fillColour.green,
-          this._style.fillColour.blue,
-          1 /*force opaque because of bug this._style.fillColour.alpha*/);
+      this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
   };
-  
+
+  /**
+   * Translate the Polygon.
+   * @param {atlas/model/Vertex} diff - The vector from the Polygon's current location to the desired location.
+   * @param {Number} diff.x - The change in latitude, given in decimal degrees.
+   * @param {Number} diff.y - The change in longitude, given in decimal degrees.
+   * @param {Number} diff.z - The change in altitude, given in metres.
+   */
   Polygon.prototype.translate = function (diff) {
     for (var i = 0; i < this._vertices.length; i++) {
       this._vertices[i] = this._vertices[i].add(diff);
@@ -158,12 +185,13 @@ define([
     }
     // Check that the primitive has been correctly created.
     this._renderable = (this._primitive instanceof Primitive);
+    if (!this._renderable) console.error('Cesium Primitive not correctly created', this._primitive);
   };
 
   /**
    * Builds the geometry and appearance data required to render the Polygon in
    * Cesium.
-   * @param {cesium/core/Ellipsoid} ellipsoid - The ellipsoid being rendered onto.
+   * @param {Ellipsoid} ellipsoid - The ellipsoid being rendered onto.
    * @param {Number} minTerrainElevation - The minimum height of the terrain
    *        in the area covered by this polygon.
    */
@@ -200,11 +228,7 @@ define([
         faceForward: true
       });
     }
-    this._appearance.material.uniforms.color = new CesiumColour(
-        this._style.fillColour.red,
-        this._style.fillColour.green,
-        this._style.fillColour.blue,
-        1 /*force opaque because of bug this._style.fillColour.alpha*/);
+    this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
   };
 
   /**
@@ -212,8 +236,8 @@ define([
    *     the Cartesian (x,y,z with respect to globe 3d ellipsoid) format
    *     required for Cesium.[_coordArrayToCartesianArray description]
    * @private
-   * @param  {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param  {atlas/model/Vertex} coords - The latlong coordinates to convert.
+   * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
+   * @param {atlas/model/Vertex} coords - The latlong coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
@@ -225,6 +249,29 @@ define([
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
+  };
+
+  /**
+   * Takes an atlas Style object and converts it to Cesium Color objects.
+   * @param style
+   * @private
+   */
+  Polygon._convertStyleToCesiumColors = function(style) {
+    return {
+      fill: Polygon._convertAtlasToCesiumColor(style.fillColour),
+      border: Polygon._convertAtlasToCesiumColor(style.borderColour)
+    }
+  };
+
+  /**
+   * Converts an Atlas Colour object to a Cesium Color object.
+   * @param {atlas/model/Colour} color - The Colour to convert.
+   * @returns {cesium/Core/Color} The converted Cesium Color object.
+   * @private
+   */
+  Polygon._convertAtlasToCesiumColor = function (color) {
+    // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
+    return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Polygon;
