@@ -9,7 +9,7 @@ define([
 
   var EntityManager = function (atlasManagers) {
     EntityManager.base.constructor.call(this, atlasManagers);
-    
+
     this._atlasManagers = atlasManagers;
     this._atlasManagers.entity = this;
 
@@ -32,7 +32,7 @@ define([
     };
   };
   extend(EntityManagerCore, EntityManager);
-  
+
   /*
    * Inherited from atlas/entity/EntityManager
    *    setGeoEntityTypes(constructors)
@@ -56,7 +56,7 @@ define([
    */
   EntityManager.prototype.getAt = function (point) {
     var ids = this._atlasManagers.render.getAt(point);
-    var entities = [];
+    var entities = undefined;
     ids.forEach(function (id) {
       entities.push(this.getById(id));
     }.bind(this));

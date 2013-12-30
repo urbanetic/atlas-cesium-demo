@@ -77,7 +77,7 @@ define([
      */
     this._minTerrainElevation = 0.0;
 
-    this._primitive = null;
+    this._primitive = {};
   };
   extend(PolygonCore, Polygon);
 
@@ -137,7 +137,7 @@ define([
     }
     return this._primitive.show;
   };
-  
+
   Polygon.prototype.onSelect = function () {
     this.setStyle(Polygon.SELECTED_STYLE);
     if (this._primitive) {
@@ -166,7 +166,7 @@ define([
     this.setRenderable(false);
     this.show();
   };
-  
+
   /**
    * Generates the data structures required to render a Polygon
    * in Cesium.
