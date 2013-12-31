@@ -164,7 +164,7 @@ define([
       this._vertices[i] = this._vertices[i].add(diff);
     }
     this.setRenderable(false);
-    this.show();
+    this.isVisisble() && this.show();
   };
 
   /**
