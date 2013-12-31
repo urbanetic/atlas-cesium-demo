@@ -2,11 +2,13 @@ define([
   'atlas/util/DeveloperError',
   'atlas/util/Extends',
   'atlas/model/Colour',
+  'atlas/model/Style',
   'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
+  'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/ComponentDatatype',
   'atlas-cesium/cesium/Source/Core/Geometry',
@@ -17,6 +19,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Matrix4',
   'atlas-cesium/cesium/Source/Core/PrimitiveType',
   'atlas-cesium/cesium/Source/Core/Transforms',
+  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   //Base class.
@@ -24,10 +27,12 @@ define([
 ], function (DeveloperError,
              extend,
              Color,
+             Style,
              Vertex,
              BoundingSphere,
              Cartographic,
              Cartesian3,
+             CesiumColor,
              ColorGeometryInstanceAttribute,
              ComponentDatatype,
              Geometry,
@@ -38,6 +43,7 @@ define([
              Matrix4,
              PrimitiveType,
              Transforms,
+             MaterialAppearance,
              PerInstanceColorAppearance,
              Primitive,
              MeshCore) {
@@ -78,16 +84,17 @@ define([
     /*
      * Inherited from Mesh
      *    _id
+     *    _renderManager
      *    _geoLocation
      *    _scale
      *    _rotation
      *    _area
      *    _centroid
      *    _geometry
-     *    _visible
-     *    _renderManager
-     *    _renderable
      *    _appearance
+     *    _texture
+     *    _visible
+     *    _renderable
      */
 
     /**
@@ -162,9 +169,40 @@ define([
      * @private
      */
     this._primitive = {};
+
+    /**
+     * The uniform colour to apply to the Mesh if a texture is not defined.
+     * TODO(bpstudds): Work out the textures.
+     * @type {atlas/model/Colour}
+     * @private
+     */
+    this._uniformColor = Color.GREEN;
+    if (args.color) {
+      // TODO(bpstudds): I don't think this is working.
+      this._uniformColor = Color.fromRGBA(args.color);
+    }
   };
   extend(MeshCore, Mesh);
 
+  /* Inherited from Mesh base class.
+   *    onSelect()
+   *    onDeselect()
+   *    show()
+   *    hide()
+   *    toggleVisibility()
+   *    translate(translation)
+   *    isVisible()
+   *    scale(scale)
+   *    rotate(rotation)
+   *    setRenderable(isRenderable)
+   *    isRenderable()
+   *    _build()
+   *    remove()
+   *    getGeometry()
+   *    getAppearance()
+   *    getCentroid()
+   *    getArea()
+   */
 
   /**
    * Shows the Mesh. The rendering data is recreated if it has been invalidated.
@@ -193,6 +231,24 @@ define([
     return this._primitive && this._primitive.show;
   };
 
+  // TODO(bpstudds): Remove this to some central location.
+  Mesh.prototype.onSelect = function () {
+    if (this._primitive) {
+      //this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
+      var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(Color.RED));
+    }
+  };
+
+  // TODO(bpstudds): Remove this to some central location.
+  Mesh.prototype.onDeselect = function () {
+    if (this._primitive) {
+      //this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(Color.RED);
+      var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColor));
+    }
+  };
+
   /**
    * Creates the Cesium primitive object required to render the Mesh.
    * The Primitive object contains data to transform the Mesh from model space to
@@ -211,17 +267,27 @@ define([
       0.1);
 
     var instance = new GeometryInstance({
-      geometry : this._geometry,
-      modelMatrix : this._modelMatrix,
+      id: this._id.replace('mesh', ''),
+      geometry: this._geometry,
+      modelMatrix: this._modelMatrix,
       attributes : {
-        color : ColorGeometryInstanceAttribute.fromColor(Color.GREEN)
+        color : ColorGeometryInstanceAttribute.fromColor(this._uniformColor)
       }
     });
 
+    /*
+    // TODO(bpstudds): Work out how to get MaterialApperance working.
+    this._appearance = new MaterialAppearance({
+        closed: true,
+        translucent: false,
+        faceForward: true
+    });
+    this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
+    */
+
     this._primitive = new Primitive({
-      id: this._id,
-      geometryInstances : instance,
-      appearance : new PerInstanceColorAppearance({
+      geometryInstances: instance,
+      appearance: new PerInstanceColorAppearance({
         flat : false,
         translucent : false
       }),
@@ -261,6 +327,21 @@ define([
     this._geometry.boundingSphere = geometry.boundingSphere;
 
     return this._geometry;
+  };
+
+  // TODO(bpstudds): Move this to some central location.
+  Mesh._convertStyleToCesiumColors = function(style) {
+    return {
+      fill: Mesh._convertAtlasToCesiumColor(style.fillColour),
+      border: Mesh._convertAtlasToCesiumColor(style.borderColour)
+    }
+  };
+
+
+  // TODO(bpstudds): Move this to some central location.
+  Mesh._convertAtlasToCesiumColor = function (color) {
+    // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
+    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Mesh;
