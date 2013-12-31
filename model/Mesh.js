@@ -208,10 +208,19 @@ define([
    * Shows the Mesh. The rendering data is recreated if it has been invalidated.
    */
   Mesh.prototype.show = function () {
-    if (this.isVisible()) { return; }
-
     if (!this.isRenderable()) {
-      this._createPrimitive();
+      // TODO(bpstudds): Work out how to correctly move the silly primitives.
+      // Remove existing primitive
+      if (this._primitive) {
+        console.debug('removing primitive');
+        this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+      }
+      console.debug('building primitive');
+      this._modelMatrix = this._createModelMatrix();
+      this._geometry = this._createGeometry();
+      this._primitive = this._createPrimitive();
+      this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+      this.setRenderable(true);
     }
     console.debug('Showing entity', this._id);
     this._primitive.show = true;
@@ -250,16 +259,32 @@ define([
   };
 
   /**
+   * Translates the Polygon.
+   * @param {atlas/model/Vertex} translation - The vector from the Polygon's current location to the desired location.
+   * @param {Number} translation.x - The change in latitude, given in decimal degrees.
+   * @param {Number} translation.y - The change in longitude, given in decimal degrees.
+   * @param {Number} translation.z - The change in altitude, given in metres.
+   */
+  Mesh.prototype.translate = function (translation) {
+    console.debug('mesh', 'trying to translate');
+    // Update the 'translation', ie change _geoLocation.
+    this._geoLocation = this._geoLocation.add(translation);
+    // And redraw the Mesh.
+    this.setRenderable(false);
+    this.show();
+  };
+
+  /**
    * Creates the Cesium primitive object required to render the Mesh.
    * The Primitive object contains data to transform the Mesh from model space to
    * world space, as well as controlling the appearance of the Mesh.
+   * @returns {cesium/Core/Primitive}
    * @private
    */
   Mesh.prototype._createPrimitive = function () {
-    if (!this._geometry) { this._createGeometry(); }
-    var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+    if (this.isRenderable()) { return; }
 
-    this._modelMatrix = this._createModelMatrix();
+    var thePrimitive = {};
     var instance = new GeometryInstance({
       id: this._id.replace('mesh', ''),
       geometry: this._geometry,
@@ -279,7 +304,7 @@ define([
     this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
     */
 
-    this._primitive = new Primitive({
+    thePrimitive = new Primitive({
       geometryInstances: instance,
       appearance: new PerInstanceColorAppearance({
         flat : false,
@@ -287,19 +312,18 @@ define([
       }),
       debugShowBoundingVolume: false
     });
-    this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-    this._primitive.show = false;
-    this.setRenderable(true);
+    thePrimitive.show = false;
+    return thePrimitive;
   };
 
   /**
    * Creates Cesium Geometry object required to render the Mesh.
    * The Geometry represents the Mesh in 'model space'.
-   * @returns {cesium|Core|Geometry}
+   * @returns {cesium/Core/Geometry}
    * @private
    */
   Mesh.prototype._createGeometry = function () {
-    this._geometry = {};
+    var theGeometry = {};
     var attributes = new GeometryAttributes({
       position : new GeometryAttribute({
         componentDatatype : ComponentDatatype.DOUBLE,
@@ -315,12 +339,12 @@ define([
       boundingSphere: BoundingSphere.fromVertices(this._positions)
     }));
 
-    this._geometry.attributes = geometry.attributes;
-    this._geometry.indices = geometry.indices;
-    this._geometry.primitiveType = geometry.primitiveType;
-    this._geometry.boundingSphere = geometry.boundingSphere;
+    theGeometry.attributes = geometry.attributes;
+    theGeometry.indices = geometry.indices;
+    theGeometry.primitiveType = geometry.primitiveType;
+    theGeometry.boundingSphere = geometry.boundingSphere;
 
-    return this._geometry;
+    return theGeometry;
   };
 
   Mesh.prototype._createModelMatrix = function () {
