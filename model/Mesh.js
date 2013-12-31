@@ -214,7 +214,7 @@ define([
       this._createPrimitive();
     }
     console.debug('Showing entity', this._id);
-    this._renderable = this._primitive.show = true;
+    this._primitive.show = true;
   };
 
   /**
@@ -259,13 +259,7 @@ define([
     if (!this._geometry) { this._createGeometry(); }
     var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
-    this._modelMatrix = Matrix4.multiplyByUniformScale(
-      Matrix4.multiplyByTranslation(
-        Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-          Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-        new Cartesian3(0.0, 0.0, 35)),
-      0.1);
-
+    this._modelMatrix = this._createModelMatrix();
     var instance = new GeometryInstance({
       id: this._id.replace('mesh', ''),
       geometry: this._geometry,
@@ -276,7 +270,7 @@ define([
     });
 
     /*
-    // TODO(bpstudds): Work out how to get MaterialApperance working.
+    // TODO(bpstudds): Work out how to get MaterialAppearance working.
     this._appearance = new MaterialAppearance({
         closed: true,
         translucent: false,
@@ -327,6 +321,16 @@ define([
     this._geometry.boundingSphere = geometry.boundingSphere;
 
     return this._geometry;
+  };
+
+  Mesh.prototype._createModelMatrix = function () {
+    var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+    return Matrix4.multiplyByScale(
+      Matrix4.multiplyByTranslation(
+        Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
+          Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+        new Cartesian3(0.0, 0.0, 35)),
+      this._scale);
   };
 
   // TODO(bpstudds): Move this to some central location.
