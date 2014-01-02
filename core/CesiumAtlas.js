@@ -64,7 +64,7 @@ define([
     // Hook up the InputManager to the selected DOM element.
     this._managers.input.initialise(elem);
   };
-  
+
   /**
    * Registers event handlers with the EventManager for global events.
    */

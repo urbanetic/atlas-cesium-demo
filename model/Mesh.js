@@ -2,11 +2,13 @@ define([
   'atlas/util/DeveloperError',
   'atlas/util/Extends',
   'atlas/model/Colour',
+  'atlas/model/Style',
   'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
+  'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/ComponentDatatype',
   'atlas-cesium/cesium/Source/Core/Geometry',
@@ -17,17 +19,20 @@ define([
   'atlas-cesium/cesium/Source/Core/Matrix4',
   'atlas-cesium/cesium/Source/Core/PrimitiveType',
   'atlas-cesium/cesium/Source/Core/Transforms',
+  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   //Base class.
-  'atlas/model/GeoEntity'
+  'atlas/model/Mesh'
 ], function (DeveloperError,
              extend,
-             Color,
+             Colour,
+             Style,
              Vertex,
              BoundingSphere,
              Cartographic,
              Cartesian3,
+             CesiumColor,
              ColorGeometryInstanceAttribute,
              ComponentDatatype,
              Geometry,
@@ -38,6 +43,7 @@ define([
              Matrix4,
              PrimitiveType,
              Transforms,
+             MaterialAppearance,
              PerInstanceColorAppearance,
              Primitive,
              MeshCore) {
@@ -46,29 +52,50 @@ define([
    * Constructs a new Mesh object.
    * @class A Mesh represents a 3D renderable object in atlas.
    * @param {String} id - The ID of the Mesh.
-   * @param {Object} args - Arguments that describe the Mesh.
-   * @returns {atlas-cesium/model/Mesh} - The new Mesh object.
+   * @param {String} meshData - The data required to render the Mesh.
+   * @params {Array.<Number>} meshData.geoLocation - The location of the Mesh in an [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every triangle vertex to ensure shading works correctly.
+   * @params {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements forming a vertex, ie a (x, y, z) coordinate tuple in model space.
+   * @params {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh. Every 3 elements forming a new triangle with counter-clockwise winding order.
+   * @params {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
+   * @params {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a [red, green, blue, alpha] formatted array.
+   * @params {Array.<Number>} [meshData.scale] - The scale of the Mesh.
+   * @params {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
+   * @param {Object} args - Required and optional arguments to construct the Mesh object.
+   * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and <code>args</code> are provided as arguments)
+   * @param {atlas/render/RenderManager} args.renderManager - The RenderManager object responsible for the GeoEntity.
+   * @param {atlas/events/EventManager} args.eventManager - The EventManager object responsible for the Event system.
+   * @param {atlas/events/EventTarget} [args.parent] - The parent EventTarget object of the GeoEntity.g
+   *
+   * @see {@link atlas/model/Mesh}
+   * @see {@link atlas/model/GeoEntity}
    *
    * @alias atlas-cesium/model/Mesh
    * @extends {atlas/model/Mesh}
    * @constructor
    */
-  var Mesh = function (id, args) {
-    // Extend from Mesh -> GeoEntity
+  var Mesh = function (id, meshData, args) {
     if (typeof id === 'object') {
       args = id;
       id = args.id;
     }
-    if (id === undefined) {
-      throw new DeveloperError('Can not create Mesh without an ID');
-    }
+    // Call base class MeshCore constructor.
+    Mesh.base.constructor.call(this, id, meshData, args);
 
-    /**
-     * The ID of the GeoEntity.
-     * @type {String}
-     * @private
+    /*
+     * Inherited from atlas/model/Mesh
+     *    _id
+     *    _renderManager
+     *    _geoLocation
+     *    _scale
+     *    _rotation
+     *    _area
+     *    _centroid
+     *    _geometry
+     *    _appearance
+     *    _texture
+     *    _visible
+     *    _renderable
      */
-    this._id = id;
 
     /**
      * The array of vertex positions for this Mesh, in model space coordinates.
@@ -78,9 +105,9 @@ define([
      * @private
      */
     this._positions = [];
-    if (args.positions.length) {
-      this._positions = new Float64Array(args.positions.length);
-      args.positions.forEach(function (position, i) {
+    if (meshData.positions && meshData.positions.length) {
+      this._positions = new Float64Array(meshData.positions.length);
+      meshData.positions.forEach(function (position, i) {
         this._positions[i] = position;
       }, this);
     }
@@ -94,9 +121,9 @@ define([
      * @private
      */
     this._indices = [];
-    if (args.triangles.length) {
-      this._indices = new Uint16Array(args.triangles.length);
-      args.triangles.forEach(function (triangle, i) { //for (var i = 0; i < args.triangles.length; i++) {
+    if (meshData.triangles && meshData.triangles.length) {
+      this._indices = new Uint16Array(meshData.triangles.length);
+      meshData.triangles.forEach(function (triangle, i) {
         this._indices[i] = triangle;
       }, this);
     }
@@ -107,76 +134,199 @@ define([
      * @private
      */
     this._normals = [];
-    if (args.normals.length) {
-      this._normals = new Float64Array(args.normals.length);
-      args.normals.forEach(function (normal, i) { //for (var i = 0; i < args.normals.length; i++) {
+    if (meshData.normals && meshData.normals.length) {
+      this._normals = new Float64Array(meshData.normals.length);
+      meshData.normals.forEach(function (normal, i) {
         this._normals[i] = normal;
       }, this);
     }
 
     /**
      * The location of the mesh object, specified by latitude, longitude, and elevation.
+     * @see {@link atlas/model/Mesh#_geoLocation}
      * @type {atlas/model/Vertex}
      * @private
      */
     this._geoLocation = {};
-    if (args.geoLocation) {
-      this._geoLocation = new Vertex(args.geoLocation[0], args.geoLocation[1], args.geoLocation[2]);
+    if (meshData.geoLocation) {
+      this._geoLocation = new Vertex(meshData.geoLocation);
     }
 
     /**
-     * Defines a transformation from model coordinates to world coordinates.
-     * @type {cesium/Core/Matrix4}
+     * The scale of the Mesh object.
+     * @see {@link atlas/model/Mesh#_scale}
+     * @type {atlas/model/Vertex}
      * @private
      */
-    // TODO(bpstudds): Generate modelMatrix on the fly and cache it.
-    this._modelMatrix = {};
+    this._scale = {};
+    if (meshData.scale && meshData.scale.length) {
+      this._scale = new Vertex(meshData.scale);
+    }
 
     /**
-     * The Cesium Geometry object for the Mesh.
-     * @type {cesium/Core/Geometry}
+     * The Cesium Primitive object.
+     * @type {cesium/Core/Primitive}
      * @private
      */
-    this._geometry = {};
+    this._primitive = {};
+
+    /**
+     * The uniform colour to apply to the Mesh if a texture is not defined.
+     * TODO(bpstudds): Work out the textures.
+     * @type {atlas/model/Colour}
+     * @private
+     */
+    this._uniformColor = Colour.GREEN;
+    if (args.color) {
+      // TODO(bpstudds): I don't think this is working.
+      this._uniformColor = Colour.fromRGBA(args.color);
+    }
   };
+  // Extends from atlas/model/Mesh
   extend(MeshCore, Mesh);
 
+  /**
+   * Uniform colour of the Mesh when it is selected.
+   * @type {atlas/model/Colour}
+   */
+  Mesh.SELECTED_COLOUR = Colour.RED;
 
-  Mesh.prototype.createPrimitive = function () {
-    this.createGeometry();
-    var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+  /* Inherited from atlas/model/Mesh base class.
+   *    onSelect()
+   *    onDeselect()
+   *    show()
+   *    hide()
+   *    toggleVisibility()
+   *    translate(translation)
+   *    isVisible()
+   *    scale(scale)
+   *    rotate(rotation)
+   *    setRenderable(isRenderable)
+   *    isRenderable()
+   *    _build()
+   *    remove()
+   *    getGeometry()
+   *    getAppearance()
+   *    getCentroid()
+   *    getArea()
+   */
 
-    var modelMatrix = Matrix4.multiplyByUniformScale(
-      Matrix4.multiplyByTranslation(
-        Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-          Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-        new Cartesian3(0.0, 0.0, 35)),
-      0.1);
+  /**
+   * Shows the Mesh. The rendering data is recreated if it has been invalidated.
+   */
+  Mesh.prototype.show = function () {
+    if (!this.isRenderable()) {
+      // TODO(bpstudds): Work out how to correctly move the silly primitives.
+      // Remove existing primitive
+      if (this._primitive) {
+        console.debug('removing primitive');
+        this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+      }
+      console.debug('building primitive');
+      this._modelMatrix = this._createModelMatrix();
+      this._geometry = this._createGeometry();
+      this._primitive = this._createPrimitive();
+      this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+      this.setRenderable(true);
+    }
+    console.debug('Showing entity', this._id);
+    this._primitive.show = true;
+  };
 
+  /**
+   * Hides the Mesh.
+   */
+  Mesh.prototype.hide = function () {
+    this._primitive && (this._primitive.show = false);
+  };
+
+  /**
+   * @returns {Boolean} Whether the Mesh is visible.
+   */
+  Mesh.prototype.isVisible = function () {
+    return this._primitive && this._primitive.show;
+  };
+
+  Mesh.prototype.onSelect = function () {
+    if (this._primitive) {
+      var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(Mesh.SELECTED_COLOUR));
+    }
+  };
+
+  Mesh.prototype.onDeselect = function () {
+    if (this._primitive) {
+      var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColor));
+    }
+  };
+
+  /**
+   * Translates the Polygon.
+   * @param {atlas/model/Vertex} translation - The vector from the Polygon's current location to the desired location.
+   * @param {Number} translation.x - The change in latitude, given in decimal degrees.
+   * @param {Number} translation.y - The change in longitude, given in decimal degrees.
+   * @param {Number} translation.z - The change in altitude, given in metres.
+   */
+  Mesh.prototype.translate = function (translation) {
+    console.debug('mesh', 'trying to translate');
+    // Update the 'translation', ie change _geoLocation.
+    this._geoLocation = this._geoLocation.add(translation);
+    // And redraw the Mesh.
+    this.setRenderable(false);
+    this.show();
+  };
+
+  /**
+   * Creates the Cesium primitive object required to render the Mesh.
+   * The Primitive object contains data to transform the Mesh from model space to
+   * world space, as well as controlling the appearance of the Mesh.
+   * @returns {cesium/Core/Primitive}
+   * @private
+   */
+  Mesh.prototype._createPrimitive = function () {
+    if (this.isRenderable()) { return; }
+
+    var thePrimitive = {};
     var instance = new GeometryInstance({
-      geometry : this._geometry,
-      modelMatrix : modelMatrix,
+      id: this._id.replace('mesh', ''),
+      geometry: this._geometry,
+      modelMatrix: this._modelMatrix,
       attributes : {
-        color : ColorGeometryInstanceAttribute.fromColor(Color.GREEN)
+        color : ColorGeometryInstanceAttribute.fromColor(this._uniformColor)
       }
     });
 
-    var primitive = new Primitive({
-      geometryInstances : instance,
-      appearance : new PerInstanceColorAppearance({
+    /*
+    // TODO(bpstudds): Work out how to get MaterialAppearance working.
+    this._appearance = new MaterialAppearance({
+        closed: true,
+        translucent: false,
+        faceForward: true
+    });
+    this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
+    */
+
+    thePrimitive = new Primitive({
+      geometryInstances: instance,
+      appearance: new PerInstanceColorAppearance({
         flat : false,
         translucent : false
       }),
       debugShowBoundingVolume: false
     });
-
-    console.debug('the primitive', primitive);
-    this._renderManager._widget.scene.getPrimitives().add(primitive);
-    primitive.show = true;
+    thePrimitive.show = false;
+    return thePrimitive;
   };
 
-  Mesh.prototype.createGeometry = function () {
-
+  /**
+   * Creates Cesium Geometry object required to render the Mesh.
+   * The Geometry represents the Mesh in 'model space'.
+   * @returns {cesium/Core/Geometry}
+   * @private
+   */
+  Mesh.prototype._createGeometry = function () {
+    var theGeometry = {};
     var attributes = new GeometryAttributes({
       position : new GeometryAttribute({
         componentDatatype : ComponentDatatype.DOUBLE,
@@ -192,12 +342,37 @@ define([
       boundingSphere: BoundingSphere.fromVertices(this._positions)
     }));
 
-    this._geometry.attributes = geometry.attributes;
-    this._geometry.indices = geometry.indices;
-    this._geometry.primitiveType = geometry.primitiveType;
-    this._geometry.boundingSphere = geometry.boundingSphere;
+    theGeometry.attributes = geometry.attributes;
+    theGeometry.indices = geometry.indices;
+    theGeometry.primitiveType = geometry.primitiveType;
+    theGeometry.boundingSphere = geometry.boundingSphere;
 
-    return this._geometry;
+    return theGeometry;
+  };
+
+  Mesh.prototype._createModelMatrix = function () {
+    var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+    return Matrix4.multiplyByScale(
+      Matrix4.multiplyByTranslation(
+        Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
+          Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+        new Cartesian3(0.0, 0.0, 35)),
+      this._scale);
+  };
+
+  // TODO(bpstudds): Move this to some central location.
+  Mesh._convertStyleToCesiumColors = function(style) {
+    return {
+      fill: Mesh._convertAtlasToCesiumColor(style.fillColour),
+      border: Mesh._convertAtlasToCesiumColor(style.borderColour)
+    }
+  };
+
+
+  // TODO(bpstudds): Move this to some central location.
+  Mesh._convertAtlasToCesiumColor = function (color) {
+    // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
+    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Mesh;

@@ -77,7 +77,7 @@ define([
      */
     this._minTerrainElevation = 0.0;
 
-    this._primitive = null;
+    this._primitive = {};
   };
   extend(PolygonCore, Polygon);
 
