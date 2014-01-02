@@ -140,20 +140,16 @@ define([
 
   Polygon.prototype.onSelect = function () {
     this.setStyle(Polygon.SELECTED_STYLE);
-    if (this._primitive) {
+    if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
-    // TODO(bpstudds): Delete code to test the scale() function.
-    //this.scale({x: 2, y: 2});
   };
 
   Polygon.prototype.onDeselect = function () {
     this.setStyle(Polygon.DEFAULT_STYLE);
-    if (this._primitive) {
+    if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
-    // TODO(bpstudds): Delete code to test the scale() function.
-    //this.scale({x: 0.5, y: 0.5});
   };
 
   /**
