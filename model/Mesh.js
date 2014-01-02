@@ -274,7 +274,7 @@ define([
     this._geoLocation = this._geoLocation.add(translation);
     // And redraw the Mesh.
     this.setRenderable(false);
-    this.show();
+    this.isVisible() && this.show();
   };
 
   /**
@@ -367,7 +367,6 @@ define([
       border: Mesh._convertAtlasToCesiumColor(style.borderColour)
     }
   };
-
 
   // TODO(bpstudds): Move this to some central location.
   Mesh._convertAtlasToCesiumColor = function (color) {
