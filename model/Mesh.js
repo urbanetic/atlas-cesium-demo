@@ -170,26 +170,16 @@ define([
      */
     this._primitive = {};
 
-    /**
-     * The uniform colour to apply to the Mesh if a texture is not defined.
-     * TODO(bpstudds): Work out the textures.
-     * @type {atlas/model/Colour}
-     * @private
+    /*
+     * Set the Mesh's uniform colour.
      */
-    this._uniformColor = Colour.GREEN;
-    if (args.color) {
-      // TODO(bpstudds): I don't think this is working.
-      this._uniformColor = Colour.fromRGBA(args.color);
+    // TODO(bpstudds): Work out the textures.
+    if (meshData.color) {
+      this._uniformColour = Colour.fromRGBA(meshData.color);
     }
   };
   // Extends from atlas/model/Mesh
   extend(MeshCore, Mesh);
-
-  /**
-   * Uniform colour of the Mesh when it is selected.
-   * @type {atlas/model/Colour}
-   */
-  Mesh.SELECTED_COLOUR = Colour.RED;
 
   /* Inherited from atlas/model/Mesh base class.
    *    onSelect()
@@ -222,6 +212,7 @@ define([
         console.debug('removing primitive');
         this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
       }
+      // TODO(bpstudds): Move this into a _build() function.
       console.debug('building primitive');
       this._modelMatrix = this._createModelMatrix();
       this._geometry = this._createGeometry();
@@ -248,52 +239,38 @@ define([
   };
 
   Mesh.prototype.onSelect = function () {
+    this.setUniformColour(Mesh.SELECTED_COLOUR);
     if (this._primitive) {
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
-      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(Mesh.SELECTED_COLOUR));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
   };
 
   Mesh.prototype.onDeselect = function () {
+    this.setUniformColour(this._previousColour);
     if (this._primitive) {
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
-      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColor));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
-  };
-
-  /**
-   * Translates the Polygon.
-   * @param {atlas/model/Vertex} translation - The vector from the Polygon's current location to the desired location.
-   * @param {Number} translation.x - The change in latitude, given in decimal degrees.
-   * @param {Number} translation.y - The change in longitude, given in decimal degrees.
-   * @param {Number} translation.z - The change in altitude, given in metres.
-   */
-  Mesh.prototype.translate = function (translation) {
-    console.debug('mesh', 'trying to translate');
-    // Update the 'translation', ie change _geoLocation.
-    this._geoLocation = this._geoLocation.add(translation);
-    // And redraw the Mesh.
-    this.setRenderable(false);
-    this.isVisible() && this.show();
   };
 
   /**
    * Creates the Cesium primitive object required to render the Mesh.
    * The Primitive object contains data to transform the Mesh from model space to
    * world space, as well as controlling the appearance of the Mesh.
-   * @returns {cesium/Core/Primitive}
+   * @returns {cesium/Core/Primitive|undefined}
    * @private
    */
   Mesh.prototype._createPrimitive = function () {
-    if (this.isRenderable()) { return; }
+    if (this.isRenderable()) { return undefined; }
 
-    var thePrimitive = {};
+    var thePrimitive;
     var instance = new GeometryInstance({
       id: this._id.replace('mesh', ''),
       geometry: this._geometry,
       modelMatrix: this._modelMatrix,
       attributes : {
-        color : ColorGeometryInstanceAttribute.fromColor(this._uniformColor)
+        color : ColorGeometryInstanceAttribute.fromColor(this._uniformColour)
       }
     });
 
