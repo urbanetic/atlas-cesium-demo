@@ -82,7 +82,7 @@ define([
     Mesh.base.constructor.call(this, id, meshData, args);
 
     /*
-     * Inherited from Mesh
+     * Inherited from atlas/model/Mesh
      *    _id
      *    _renderManager
      *    _geoLocation
@@ -191,7 +191,7 @@ define([
    */
   Mesh.SELECTED_COLOUR = Colour.RED;
 
-  /* Inherited from Mesh base class.
+  /* Inherited from atlas/model/Mesh base class.
    *    onSelect()
    *    onDeselect()
    *    show()
