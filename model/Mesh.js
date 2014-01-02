@@ -26,7 +26,7 @@ define([
   'atlas/model/Mesh'
 ], function (DeveloperError,
              extend,
-             Color,
+             Colour,
              Style,
              Vertex,
              BoundingSphere,
@@ -176,13 +176,20 @@ define([
      * @type {atlas/model/Colour}
      * @private
      */
-    this._uniformColor = Color.GREEN;
+    this._uniformColor = Colour.GREEN;
     if (args.color) {
       // TODO(bpstudds): I don't think this is working.
-      this._uniformColor = Color.fromRGBA(args.color);
+      this._uniformColor = Colour.fromRGBA(args.color);
     }
   };
+  // Extends from atlas/model/Mesh
   extend(MeshCore, Mesh);
+
+  /**
+   * Uniform colour of the Mesh when it is selected.
+   * @type {atlas/model/Colour}
+   */
+  Mesh.SELECTED_COLOUR = Colour.RED;
 
   /* Inherited from Mesh base class.
    *    onSelect()
@@ -221,7 +228,7 @@ define([
    * Hides the Mesh.
    */
   Mesh.prototype.hide = function () {
-    (this.isVisible()) && this._primitive && (this._primitive.show = false);
+    this._primitive && (this._primitive.show = false);
   };
 
   /**
@@ -231,19 +238,15 @@ define([
     return this._primitive && this._primitive.show;
   };
 
-  // TODO(bpstudds): Remove this to some central location.
   Mesh.prototype.onSelect = function () {
     if (this._primitive) {
-      //this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
-      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(Color.RED));
+      attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(Mesh.SELECTED_COLOUR));
     }
   };
 
-  // TODO(bpstudds): Remove this to some central location.
   Mesh.prototype.onDeselect = function () {
     if (this._primitive) {
-      //this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(Color.RED);
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
       attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColor));
     }
@@ -295,7 +298,7 @@ define([
   /**
    * Creates Cesium Geometry object required to render the Mesh.
    * The Geometry represents the Mesh in 'model space'.
-   * @returns {cesium|Core|Geometry}
+   * @returns {cesium/Core/Geometry}
    * @private
    */
   Mesh.prototype._createGeometry = function () {
