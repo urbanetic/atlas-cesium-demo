@@ -137,12 +137,14 @@ define([
     }
     return this._primitive.show;
   };
-  
+
   Polygon.prototype.onSelect = function () {
     this.setStyle(Polygon.SELECTED_STYLE);
     if (this._primitive) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
+    // TODO(bpstudds): Delete code to test the scale() function.
+    //this.scale({x: 2, y: 2});
   };
 
   Polygon.prototype.onDeselect = function () {
@@ -150,23 +152,10 @@ define([
     if (this._primitive) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
+    // TODO(bpstudds): Delete code to test the scale() function.
+    //this.scale({x: 0.5, y: 0.5});
   };
 
-  /**
-   * Translate the Polygon.
-   * @param {atlas/model/Vertex} diff - The vector from the Polygon's current location to the desired location.
-   * @param {Number} diff.x - The change in latitude, given in decimal degrees.
-   * @param {Number} diff.y - The change in longitude, given in decimal degrees.
-   * @param {Number} diff.z - The change in altitude, given in metres.
-   */
-  Polygon.prototype.translate = function (diff) {
-    for (var i = 0; i < this._vertices.length; i++) {
-      this._vertices[i] = this._vertices[i].add(diff);
-    }
-    this.setRenderable(false);
-    this.show();
-  };
-  
   /**
    * Generates the data structures required to render a Polygon
    * in Cesium.
