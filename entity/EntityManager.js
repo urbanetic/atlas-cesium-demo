@@ -9,7 +9,7 @@ define([
 
   var EntityManager = function (atlasManagers) {
     EntityManager.base.constructor.call(this, atlasManagers);
-    
+
     this._atlasManagers = atlasManagers;
     this._atlasManagers.entity = this;
 
@@ -32,7 +32,7 @@ define([
     };
   };
   extend(EntityManagerCore, EntityManager);
-  
+
   /*
    * Inherited from atlas/entity/EntityManager
    *    setGeoEntityTypes(constructors)
@@ -51,8 +51,7 @@ define([
   /**
    * Returns the GeoEntity that intersects the given Vertex or undefined.
    * @param {atlas/model/Vertex} point - The point of interest.
-   * @returns {atlas/model/GeoEntity|undefined} The GeoEntity located at the given screen coordinates,
-   * or <code>undefined</code> if there is no such GeoEntity.
+   * @returns {Array.<atlas/model/GeoEntity>} The GeoEntities located at the given screen coordinates.
    */
   EntityManager.prototype.getAt = function (point) {
     var ids = this._atlasManagers.render.getAt(point);

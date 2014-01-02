@@ -1,12 +1,12 @@
 define([
   'atlas/util/Extends',
   'atlas-cesium/model/Polygon',
-  'atlas/model/Mesh',
+  'atlas-cesium/model/Mesh',
   // Base class
   'atlas/model/Feature'
 ], function (extend, Polygon, Mesh, FeatureCore) {
 
-  
+
   /**
    * Constructs a new Feature object.
    * @class A Feature represents an entity that can be visualised either
@@ -22,7 +22,7 @@ define([
    * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of the Mesh or Polygon.
    * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
-   * 
+   *
    * @extends {atlas/model/Feature}
    * @alias atlas-cesium/model/Feature
    * @constructor
