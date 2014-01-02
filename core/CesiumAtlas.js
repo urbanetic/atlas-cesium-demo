@@ -73,7 +73,7 @@ define([
       { // Define an event handler for showing an entity.
         source: 'extern',
         name: 'entity/show',
-        callback: function (event, args) {
+        callback: function (args) {
           var entity = this._managers.entity.getById(args.id);
           (!entity) && (entity = this.addFeature(args.id, args));
           entity.show();
@@ -82,7 +82,7 @@ define([
       { // Define an event handler for hiding an entity.
         source: 'extern',
         name: 'entity/hide',
-        callback: function (event, args) {
+        callback: function (args) {
           var entity = this._managers.entity.getById(args.id);
           entity && entity.hide();
         }.bind(this)
