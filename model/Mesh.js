@@ -244,6 +244,7 @@ define([
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
       attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
+    this.enableEditing();
   };
 
   Mesh.prototype.onDeselect = function () {
@@ -252,6 +253,7 @@ define([
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
       attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
+    this.disableEditing();
   };
 
   /**

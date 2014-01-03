@@ -143,6 +143,7 @@ define([
     if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
+    this.enableEditing();
   };
 
   Polygon.prototype.onDeselect = function () {
@@ -150,6 +151,7 @@ define([
     if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
+    this.disableEditing();
   };
 
   /**
