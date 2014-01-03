@@ -38,6 +38,7 @@ define([
     this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(element);
     this.createDefaultBindings();
+    this.createDefaultKeyboardBindings();
   };
 
   /**
@@ -103,6 +104,28 @@ define([
       this.handleInternalEvent('input/rightclick', args);
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
 
+  };
+
+  InputManager.prototype.createDefaultKeyboardBindings = function () {
+    var theDom = document.getElementById(this._atlasManagers.dom._currentDomId); //getDomElement();
+    var domEventNames = ['keydown', 'keypress', 'keyup'];
+    domEventNames.forEach(function (name) {
+      console.log('adding event listener to', name);
+      var thisEvent = 'input/' + name;
+      document.addEventListener(name, function (e) {
+        var args = {
+          'name': thisEvent,
+          'key': e.keyCode,
+          'modifiers': {
+            'shift': e.shiftKey,
+            'meta': e.metaKey,
+            'alt': e.altKey,
+            'ctrl': e.ctrlKey
+          }
+        };
+        this.handleInternalEvent(args.name, args);
+      }.bind(this._atlasManagers.event), false);
+    }, this);
   };
 
   return InputManager;
