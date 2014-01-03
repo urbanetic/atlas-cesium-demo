@@ -30,6 +30,19 @@
         args.footprint = wkt;
         cesiumAtlas.publish('entity/show', args);
       });
+      cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
+        position: {
+          x: -37.8,
+          y: 144.96,
+          z: 2000
+        },
+        orientation: {
+          x: 0,
+          y: 0,
+          z: 0
+        },
+        duration: 3000
+      });
     });
   </script>
 </head>
