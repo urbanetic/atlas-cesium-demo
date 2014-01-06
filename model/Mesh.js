@@ -334,6 +334,13 @@ define([
       this._scale);
   };
 
+  /**
+   * Function to permanently remove the Mesh from the scene (vs. hiding it).
+   */
+  Mesh.prototype.remove = function () {
+    this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+  };
+
   // TODO(bpstudds): Move this to some central location.
   Mesh._convertStyleToCesiumColors = function(style) {
     return {
