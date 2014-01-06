@@ -116,13 +116,12 @@ define([
         var args = {
           'name': thisEvent,
           'key': e.keyCode,
-          'modifiers': {
-            'shift': e.shiftKey,
-            'meta': e.metaKey,
-            'alt': e.altKey,
-            'ctrl': e.ctrlKey
-          }
+          'modifiers': []
         };
+        e.shiftKey && args.modifiers.push('shift');
+        e.metaKey && args.modifiers.push('meta');
+        e.altKey && args.modifiers.push('alt');
+        e.ctrlKey && args.modifiers.push('ctrl');
         this.handleInternalEvent(args.name, args);
       }.bind(this._atlasManagers.event), false);
     }, this);
