@@ -170,11 +170,8 @@ define([
      */
     this._primitive = {};
 
-    /*
-     * Set the Mesh's uniform colour.
-     */
-    // TODO(bpstudds): Work out the textures.
     if (meshData.color) {
+      // TODO(bpstudds): Work out the textures.
       this._uniformColour = Colour.fromRGBA(meshData.color);
     }
   };
@@ -262,7 +259,7 @@ define([
    * @private
    */
   Mesh.prototype._createPrimitive = function () {
-    if (this.isRenderable()) { return undefined; }
+    if (this.isRenderable()) { return; }
 
     var thePrimitive;
     var instance = new GeometryInstance({
