@@ -219,6 +219,13 @@ define([
   };
 
   /**
+   * Function to permanently remove the Polygon from the scene (vs. hiding it).
+   */
+  Polygon.prototype.remove = function () {
+    this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+  };
+
+  /**
    * Function to covert an array of lat/long coordinates to
    *     the Cartesian (x,y,z with respect to globe 3d ellipsoid) format
    *     required for Cesium.[_coordArrayToCartesianArray description]
