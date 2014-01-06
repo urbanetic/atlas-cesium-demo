@@ -140,31 +140,16 @@ define([
 
   Polygon.prototype.onSelect = function () {
     this.setStyle(Polygon.SELECTED_STYLE);
-    if (this._primitive) {
+    if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
   };
 
   Polygon.prototype.onDeselect = function () {
     this.setStyle(Polygon.DEFAULT_STYLE);
-    if (this._primitive) {
+    if (this.isVisible()) {
       this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
     }
-  };
-
-  /**
-   * Translate the Polygon.
-   * @param {atlas/model/Vertex} diff - The vector from the Polygon's current location to the desired location.
-   * @param {Number} diff.x - The change in latitude, given in decimal degrees.
-   * @param {Number} diff.y - The change in longitude, given in decimal degrees.
-   * @param {Number} diff.z - The change in altitude, given in metres.
-   */
-  Polygon.prototype.translate = function (diff) {
-    for (var i = 0; i < this._vertices.length; i++) {
-      this._vertices[i] = this._vertices[i].add(diff);
-    }
-    this.setRenderable(false);
-    this.isVisisble() && this.show();
   };
 
   /**
