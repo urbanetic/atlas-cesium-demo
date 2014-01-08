@@ -220,6 +220,8 @@ define([
    * Function to permanently remove the Polygon from the scene (vs. hiding it).
    */
   Polygon.prototype.remove = function () {
+    // TODO(aramk) switch to Resig's Extend.js
+    Polygon.base.remove.apply(this, arguments);
     this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
   };
 
