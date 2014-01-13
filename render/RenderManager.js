@@ -16,10 +16,10 @@ define([
    * Responsible for global rendering control specific to Cesium.
    *
    * @params {Object} atlasManagers - A map of manager types to Atlas manager objects.
-   * @returns {atlas-cesium/render/RenderManager}
+   * @returns {atlas-cesium.render.RenderManager}
    *
-   * @extends {atlas/render/RenderManager}
-   * @alias atlas-cesium/render/RenderManager
+   * @extends {atlas.render.RenderManager}
+   * @alias atlas-cesium.render.RenderManager
    * @constructor
    */
   var RenderManager = function (atlasManagers) {
@@ -64,7 +64,7 @@ define([
   /**
    * Returns the minimum terrain height, given currently configured terrain options, for
    * an array of Vertices.
-   * @param {Array.<atlas/model/Vertex>} vertices - The Vertices to determine minimum terrain height of.
+   * @param {Array.<atlas.model.Vertex>} vertices - The Vertices to determine minimum terrain height of.
    * @returns {Number} The minimum terrain height.
    */
   RenderManager.prototype.getMinimumTerrainHeight = function (vertices) {

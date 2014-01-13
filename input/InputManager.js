@@ -12,7 +12,7 @@ define([
    * the format expected by atlas.
    * @param {Object} atlasManagers - The map of all atlas manager objects.
    *
-   * @alias atlas-cesium/input/InputManager
+   * @alias atlas-cesium.input.InputManager
    * @constructor
    */
   var InputManager = function (atlasManagers) {

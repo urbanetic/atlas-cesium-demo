@@ -64,15 +64,15 @@ define([
    * @params {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
    * @param {Object} args - Required and optional arguments to construct the Mesh object.
    * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and <code>args</code> are provided as arguments)
-   * @param {atlas/render/RenderManager} args.renderManager - The RenderManager object responsible for the GeoEntity.
-   * @param {atlas/events/EventManager} args.eventManager - The EventManager object responsible for the Event system.
-   * @param {atlas/events/EventTarget} [args.parent] - The parent EventTarget object of the GeoEntity.g
+   * @param {atlas.render.RenderManager} args.renderManager - The RenderManager object responsible for the GeoEntity.
+   * @param {atlas.events.EventManager} args.eventManager - The EventManager object responsible for the Event system.
+   * @param {atlas.events.EventTarget} [args.parent] - The parent EventTarget object of the GeoEntity.g
    *
-   * @see {@link atlas/model/Mesh}
-   * @see {@link atlas/model/GeoEntity}
+   * @see {@link atlas.model.Mesh}
+   * @see {@link atlas.model.GeoEntity}
    *
-   * @alias atlas-cesium/model/Mesh
-   * @extends {atlas/model/Mesh}
+   * @alias atlas-cesium.model.Mesh
+   * @extends {atlas.model.Mesh}
    * @constructor
    */
   var Mesh = function (id, meshData, args) {
@@ -84,7 +84,7 @@ define([
     Mesh.base.constructor.call(this, id, meshData, args);
 
     /*
-     * Inherited from atlas/model/Mesh
+     * Inherited from atlas.model.Mesh
      *    _id
      *    _renderManager
      *    _geoLocation
@@ -145,8 +145,8 @@ define([
 
     /**
      * The location of the mesh object, specified by latitude, longitude, and elevation.
-     * @see {@link atlas/model/Mesh#_geoLocation}
-     * @type {atlas/model/Vertex}
+     * @see {@link atlas.model.Mesh#_geoLocation}
+     * @type {atlas.model.Vertex}
      * @private
      */
     this._geoLocation = {};
@@ -156,8 +156,8 @@ define([
 
     /**
      * The scale of the Mesh object.
-     * @see {@link atlas/model/Mesh#_scale}
-     * @type {atlas/model/Vertex}
+     * @see {@link atlas.model.Mesh#_scale}
+     * @type {atlas.model.Vertex}
      * @private
      */
     this._scale = {};
@@ -169,8 +169,8 @@ define([
 
     /**
      * The rotation of the Mesh object.
-     * @see {@link atlas/model/Mesh#_rotation}
-     * @type {atlas/model/Vertex}
+     * @see {@link atlas.model.Mesh#_rotation}
+     * @type {atlas.model.Vertex}
      * @private
      */
     this._rotation = {};
@@ -192,10 +192,10 @@ define([
       this._uniformColour = Colour.fromRGBA(meshData.color);
     }
   };
-  // Extends from atlas/model/Mesh
+  // Extends from atlas.model.Mesh
   extend(MeshCore, Mesh);
 
-  /* Inherited from atlas/model/Mesh base class.
+  /* Inherited from atlas.model.Mesh base class.
    *    onSelect()
    *    onDeselect()
    *    show()
