@@ -343,7 +343,9 @@ define([
 
   Mesh.prototype._createModelMatrix = function () {
     var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
-    if (!(this._rotation instanceof Vertex)) { this._rotation = new Vertex(0,0,0); }
+    if (!(this._rotation instanceof Vertex)) {
+      this._rotation = new Vertex(0,0,0);
+    }
     // Construct rotation and translation transformation matrix.
     // TODO(bpstudds): Only rotation about the vertical axis is implemented.
     var rotationTranslation = Matrix4.fromRotationTranslation(
