@@ -161,7 +161,7 @@ define([
      * @private
      */
     this._scale = {};
-    if (meshData.scale && meshData.scale.length) {
+    if (meshData.scale && meshData.scale.length > 0) {
       this._scale = new Vertex(meshData.scale);
     } else {
       this._scale = new Vertex(1,1,1);
@@ -174,7 +174,7 @@ define([
      * @private
      */
     this._rotation = {};
-    if (meshData.scale && meshData.scale.length) {
+    if (meshData.rotation && meshData.rotation.length > 0) {
       this._rotation = new Vertex(meshData.rotation);
     } else {
       this._rotation = new Vertex(0,0,0);
@@ -258,6 +258,7 @@ define([
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
       attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
+    this.enableEditing();
   };
 
   Mesh.prototype.onDeselect = function () {
@@ -266,6 +267,7 @@ define([
       var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
       attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
     }
+    this.disableEditing();
   };
 
   /**

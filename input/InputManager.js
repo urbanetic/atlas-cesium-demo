@@ -37,13 +37,14 @@ define([
     //      imperative.
     this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(element);
-    this.createDefaultBindings();
+    this.createDefaultMouseBindings();
+    this.createDefaultKeyboardBindings();
   };
 
   /**
    * Creates the default bindings between Cesium screen space events and Atlas events.
    */
-  InputManager.prototype.createDefaultBindings = function () {
+  InputManager.prototype.createDefaultMouseBindings = function () {
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
       args = {
@@ -103,6 +104,29 @@ define([
       this.handleInternalEvent('input/rightclick', args);
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
 
+  };
+
+  InputManager.prototype.createDefaultKeyboardBindings = function () {
+    // TODO(bpstudds): Provide cleaner API for accessing the DOM element.
+    // TODO(bpstudds): Create Event for (eg) dom/attached and have this bind to that.
+    var theDom = document.getElementById(this._atlasManagers.dom._currentDomId);
+    var domEventNames = ['keydown', 'keypress', 'keyup'];
+    domEventNames.forEach(function (name) {
+      console.log('adding event listener to', name);
+      var thisEvent = 'input/' + name;
+      document.addEventListener(name, function (e) {
+        var args = {
+          'name': thisEvent,
+          'key': e.keyCode,
+          'modifiers': []
+        };
+        e.shiftKey && args.modifiers.push('shift');
+        e.metaKey && args.modifiers.push('meta');
+        e.altKey && args.modifiers.push('alt');
+        e.ctrlKey && args.modifiers.push('ctrl');
+        this.handleInternalEvent(args.name, args);
+      }.bind(this._atlasManagers.event), false);
+    }, this);
   };
 
   return InputManager;
