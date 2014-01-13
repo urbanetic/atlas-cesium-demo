@@ -16,6 +16,7 @@ define([
   'atlas-cesium/cesium/Source/Core/GeometryAttributes',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/GeometryPipeline',
+  'atlas-cesium/cesium/Source/Core/Matrix3',
   'atlas-cesium/cesium/Source/Core/Matrix4',
   'atlas-cesium/cesium/Source/Core/PrimitiveType',
   'atlas-cesium/cesium/Source/Core/Transforms',
@@ -40,6 +41,7 @@ define([
              GeometryAttributes,
              GeometryInstance,
              GeometryPipeline,
+             Matrix3,
              Matrix4,
              PrimitiveType,
              Transforms,
@@ -161,6 +163,21 @@ define([
     this._scale = {};
     if (meshData.scale && meshData.scale.length) {
       this._scale = new Vertex(meshData.scale);
+    } else {
+      this._scale = new Vertex(1,1,1);
+    }
+
+    /**
+     * The rotation of the Mesh object.
+     * @see {@link atlas/model/Mesh#_rotation}
+     * @type {atlas/model/Vertex}
+     * @private
+     */
+    this._rotation = {};
+    if (meshData.scale && meshData.scale.length) {
+      this._rotation = new Vertex(meshData.rotation);
+    } else {
+      this._rotation = new Vertex(0,0,0);
     }
 
     /**
@@ -326,11 +343,21 @@ define([
 
   Mesh.prototype._createModelMatrix = function () {
     var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+    if (!(this._rotation instanceof Vertex)) {
+      this._rotation = new Vertex(0,0,0);
+    }
+    // Construct rotation and translation transformation matrix.
+    // TODO(bpstudds): Only rotation about the vertical axis is implemented.
+    var rotationTranslation = Matrix4.fromRotationTranslation(
+      // Input angle must be in radians.
+      Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
+      new Cartesian3(0.0, 0.0, 35));
+    // Apply rotation, translation and scale transformations.
     return Matrix4.multiplyByScale(
-      Matrix4.multiplyByTranslation(
+      Matrix4.multiply(
         Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
           Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-        new Cartesian3(0.0, 0.0, 35)),
+        rotationTranslation),
       this._scale);
   };
 
