@@ -20,7 +20,7 @@ define([
 ], function (DeveloperError, extend, EditManager, EntityManager, EventManager, SelectionManager, CameraManager, DomManager, InputManager, RenderManager, Feature, Polygon, Cartographic, Atlas) {
 
   var CesiumAtlas = function () {
-    // Call the atlas/core/Atlas constructor.
+    // Call the atlas.core.Atlas constructor.
     CesiumAtlas.base.constructor.call(this);
 
     // Create all the atlas manager objects before initialising any. Any initialisation work
@@ -52,7 +52,7 @@ define([
     // And finally hook CesiumAtlas into any global events.
     this.bindEvents();
   };
-  // Extend from atlas/core/Atlas.
+  // Extend from atlas.core.Atlas.
   extend(Atlas, CesiumAtlas);
 
   /**
@@ -96,7 +96,7 @@ define([
    * Creates and adds a new Feature object to atlas-cesium.
    * @param {String} id - The ID of the Feature to add.
    * @param {Object} args - Arguments describing the Feature to add.
-   * @param {String|Array.atlas/model/Vertex} [args.footprint=null] - Either a WKT string or array of Vertices describing the Features' footprint.
+   * @param {String|Array.atlas.model.Vertex} [args.footprint=null] - Either a WKT string or array of Vertices describing the Features' footprint.
    * @param {Object} [args.mesh=null] - A object in the C3ML format describing the Features' Mesh.
    * @param {Number} [args.height=0] - The extruded height when displaying as a extruded polygon.
    * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of the Mesh or Polygon.

@@ -15,7 +15,7 @@ define([
 
     /**
      * Contains a mapping of ID to GeoEntity of all GeoEntities in atlas.
-     * @type {Object.<String, atlas/model/GeoEntity>}
+     * @type {Object.<String, atlas.model.GeoEntity>}
      */
     this._entities = {};
 
@@ -34,7 +34,7 @@ define([
   extend(EntityManagerCore, EntityManager);
 
   /*
-   * Inherited from atlas/entity/EntityManager
+   * Inherited from atlas.entity.EntityManager
    *    setGeoEntityTypes(constructors)
    *    createFeature(id, args)
    *    add(id, entity)
@@ -50,8 +50,8 @@ define([
 
   /**
    * Returns the GeoEntity that intersects the given Vertex or undefined.
-   * @param {atlas/model/Vertex} point - The point of interest.
-   * @returns {Array.<atlas/model/GeoEntity>} The GeoEntities located at the given screen coordinates.
+   * @param {atlas.model.Vertex} point - The point of interest.
+   * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen coordinates.
    */
   EntityManager.prototype.getAt = function (point) {
     var ids = this._atlasManagers.render.getAt(point);
@@ -64,11 +64,11 @@ define([
 
   /**
    * Returns the GeoEntities located within the given Polygon.
-   * @param {atlas/model/Polygon} boundingPoly - The polygon defining the geographic area to
+   * @param {atlas.model.Polygon} boundingPoly - The polygon defining the geographic area to
    *      retrieve GeoEntities.
    * @param {Boolean} [intersects] - If true, GeoEntities which intersect the boundingBox are
    *      returned as well. Otherwise, only wholly contains GeoEntities are returned.
-   * @returns {atlas/model/GeoEntity|undefined} The GeoEntities located in the bounding box,
+   * @returns {atlas.model.GeoEntity|undefined} The GeoEntities located in the bounding box,
    *      or <code>undefined</code> if there are no such GeoEntities.
    */
   EntityManager.prototype.getInPoly = function (boundingPoly, intersects) {

@@ -27,7 +27,7 @@ define([
     // Call base constructor
     Polygon.base.constructor.call(this, id, vertices, args);
     /*
-     * Inherited from atlas/model/Polygon
+     * Inherited from atlas.model.Polygon
      *    this._renderManager
      *    this._vertices
      *    this._height
@@ -83,13 +83,13 @@ define([
 
   /**
    * Defines the default style to use when rendering a polygon.
-   * @type {atlas/model/Colour}
+   * @type {atlas.model.Colour}
    */
   Polygon.DEFAULT_STYLE = new Style(Colour.GREEN, Colour.GREEN, 1);
 
   /**
    * Defines the default style to use when rendering a selected polygon.
-   * @type {atlas/model/Colour}
+   * @type {atlas.model.Colour}
    */
   Polygon.SELECTED_STYLE = new Style(Colour.RED, Colour.RED, 1);
 
@@ -233,7 +233,7 @@ define([
    *     required for Cesium.[_coordArrayToCartesianArray description]
    * @private
    * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas/model/Vertex} coords - The latlong coordinates to convert.
+   * @param {atlas.model.Vertex} coords - The latlong coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
@@ -261,7 +261,7 @@ define([
 
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas/model/Colour} color - The Colour to convert.
+   * @param {atlas.model.Colour} color - The Colour to convert.
    * @returns {cesium/Core/Color} The converted Cesium Color object.
    * @private
    */
