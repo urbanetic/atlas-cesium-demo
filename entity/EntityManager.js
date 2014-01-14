@@ -73,14 +73,14 @@ define([
    */
   EntityManager.prototype.getInPoly = function (boundingPoly, intersects) {
     // TODO
-    // See mutopia-gui cesium extensions. Aram converted the target point and visible polygons
+    // See catalyst-gui cesium extensions. Aram converted the target point and visible polygons
     // to WKT and then used OpenLayers to find the intersecting entities.
     throw 'EntityManager.getInPoly not yet implemented.'
   };
 
   EntityManager.prototype.getInRect = function (start, end) {
     // TODO
-    // See mutopia-gui cesium extensions. Aram converted the target point and visible polygons
+    // See catalyst-gui cesium extensions. Aram converted the target point and visible polygons
     // to WKT and then used OpenLayers to find the intersecting entities.
     throw 'EntityManager.getInRect not yet implemented.'
   };
