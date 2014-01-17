@@ -36,7 +36,6 @@ define([
 
     /**
      * The 2D {@link Polygon} footprint of this Feature.
-     * @override
      * @type {Polygon}
      */
     this._footprint = null;
@@ -46,7 +45,6 @@ define([
 
     /**
      * 3D {@link Mesh} of this Feature.
-     * @override
      * @type {Mesh}
      */
     this._mesh = null;

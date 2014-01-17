@@ -15,7 +15,7 @@ define([
   /**
    * Responsible for global rendering control specific to Cesium.
    *
-   * @params {Object} atlasManagers - A map of manager types to Atlas manager objects.
+   * @param {Object} atlasManagers - A map of manager types to Atlas manager objects.
    * @returns {atlas-cesium.render.RenderManager}
    *
    * @extends {atlas.render.RenderManager}
