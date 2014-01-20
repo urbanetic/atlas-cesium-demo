@@ -373,8 +373,8 @@ define([
   // TODO(bpstudds): Move this to some central location.
   Mesh._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Mesh._convertAtlasToCesiumColor(style.fillColour),
-      border: Mesh._convertAtlasToCesiumColor(style.borderColour)
+      fill: Mesh._convertAtlasToCesiumColor(style.getFill()),
+      border: Mesh._convertAtlasToCesiumColor(style.getBorderColour())
     }
   };
 

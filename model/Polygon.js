@@ -254,15 +254,15 @@ define([
    */
   Polygon._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Polygon._convertAtlasToCesiumColor(style.fillColour),
-      border: Polygon._convertAtlasToCesiumColor(style.borderColour)
+      fill: Polygon._convertAtlasToCesiumColor(style.getFill()),
+      border: Polygon._convertAtlasToCesiumColor(style.getBorderColour())
     }
   };
 
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
    * @param {atlas.model.Colour} color - The Colour to convert.
-   * @returns {cesium/Core/Color} The converted Cesium Color object.
+   * @returns {cesium.Core.Color} The converted Cesium Color object.
    * @private
    */
   Polygon._convertAtlasToCesiumColor = function (color) {
