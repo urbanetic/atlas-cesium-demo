@@ -1,0 +1,23 @@
+{
+  "name": "atlas-cesium",
+  "version": "0.0.0",
+  "description": "An AGI Cesium <cesiumjs.org> implementation of the Atlas rendering API.",
+  "author": "Brendan Studds <brendan.studds@gmail.com>",
+  "private": "true",
+  "license": "MIT",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@bitbucket.org/mutopia/atlas-cesium"
+  },
+  "devDependencies": {
+    "grunt-shell": "~0.6.3",
+    "grunt": "~0.4.2",
+    "grunt-jsdoc": "~0.5.1",
+    "load-grunt-tasks": "~0.2.1"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "atlas-cesium",
+  "version": "0.0.0",
+  "authors": [
+    "Brendan Studds <brendan.studds@gmail.com>"
+  ],
+  "description": "A AGI Cesium (cesiumjs.org) implementation of the Atlas 3D rendering API.",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "lib",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "cesium": "https://github.com/AnalyticalGraphicsInc/cesium.git#b23"
+  }
+}
