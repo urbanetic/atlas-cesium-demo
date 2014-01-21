@@ -55,13 +55,13 @@ define([
    * @class A Mesh represents a 3D renderable object in atlas.
    * @param {String} id - The ID of the Mesh.
    * @param {String} meshData - The data required to render the Mesh.
-   * @params {Array.<Number>} meshData.geoLocation - The location of the Mesh in an [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every triangle vertex to ensure shading works correctly.
-   * @params {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements forming a vertex, ie a (x, y, z) coordinate tuple in model space.
-   * @params {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh. Every 3 elements forming a new triangle with counter-clockwise winding order.
-   * @params {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
-   * @params {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a [red, green, blue, alpha] formatted array.
-   * @params {Array.<Number>} [meshData.scale] - The scale of the Mesh.
-   * @params {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
+   * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every triangle vertex to ensure shading works correctly.
+   * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements forming a vertex, ie a (x, y, z) coordinate tuple in model space.
+   * @param {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh. Every 3 elements forming a new triangle with counter-clockwise winding order.
+   * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
+   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a [red, green, blue, alpha] formatted array.
+   * @param {Array.<Number>} [meshData.scale] - The scale of the Mesh.
+   * @param {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
    * @param {Object} args - Required and optional arguments to construct the Mesh object.
    * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and <code>args</code> are provided as arguments)
    * @param {atlas.render.RenderManager} args.renderManager - The RenderManager object responsible for the GeoEntity.
