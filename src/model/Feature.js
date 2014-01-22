@@ -40,7 +40,8 @@ define([
      */
     this._footprint = null;
     if (args.footprint !== undefined) {
-      this._footprint = new Polygon(id + 'polygon', args.footprint, args);
+      args.vertices = args.footprint;
+      this._footprint = new Polygon(id + 'polygon', args);
     }
 
     /**
