@@ -353,7 +353,7 @@ define([
     var rotationTranslation = Matrix4.fromRotationTranslation(
       // Input angle must be in radians.
       Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-      new Cartesian3(0.0, 0.0, 35));
+      new Cartesian3(0.0, 0.0, 0.0));
     // Apply rotation, translation and scale transformations.
     return Matrix4.multiplyByScale(
       Matrix4.multiply(
