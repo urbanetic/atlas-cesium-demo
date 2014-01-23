@@ -46,6 +46,7 @@ define([
     if (args.constructors) {
       this.setGeoEntityTypes(args.constructors);
     }
+    this.bindEvents();
   };
 
   /**
