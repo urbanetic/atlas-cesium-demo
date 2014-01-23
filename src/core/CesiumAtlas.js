@@ -24,7 +24,7 @@ define([
     CesiumAtlas.base.constructor.call(this);
 
     // Create all the atlas manager objects before initialising any. Any initialisation work
-    // that requires the presence of a particular manager is done in <code>initialise()</code>,
+    // that requires the presence of a particular manager is done in <code>setup()</code>,
     // so the managers may be created in any order.
     this._managers.edit = new EditManager(this._managers);
     this._managers.entity = new EntityManager(this._managers);
@@ -35,12 +35,12 @@ define([
     this._managers.input = new InputManager(this._managers);
     this._managers.camera = new CameraManager(this._managers);
 
-    // Initialise the manager objects. These are independent unless stated otherwise.
-    this._managers.camera.initialise();
-    this._managers.edit.initialise();
-    this._managers.entity.initialise({constructors: {"Feature": Feature, "Polygon": Polygon}});
-    //this._managers.input.initialise(); // Initialise the InputManager after the DOM is set.
-    this._managers.selection.initialise();
+    // Setup the manager objects. These are independent unless stated otherwise.
+    this._managers.camera.setup();
+    this._managers.edit.setup();
+    this._managers.entity.setup({constructors: {"Feature": Feature, "Polygon": Polygon}});
+    //this._managers.input.setup(); // Initialise the InputManager after the DOM is set.
+    this._managers.selection.setup();
 
     /**
      * Contains a map of event name to EventHandler object.
@@ -62,7 +62,7 @@ define([
   CesiumAtlas.prototype.attachTo = function (elem) {
     this._managers.dom.setDom(elem, true);
     // Hook up the InputManager to the selected DOM element.
-    this._managers.input.initialise(elem);
+    this._managers.input.setup(elem);
   };
 
   /**
