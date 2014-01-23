@@ -77,7 +77,7 @@ define([
 
     /**
      * The Cesium Primitive object.
-     * @type {cesium/Core/Primitive}
+     * @type {Primitive}
      * @private
      */
     _primitive: null,
@@ -142,11 +142,11 @@ define([
      * Creates the Cesium primitive object required to render the Mesh.
      * The Primitive object contains data to transform the Mesh from model space to
      * world space, as well as controlling the appearance of the Mesh.
-     * @returns {cesium/Core/Primitive|undefined}
+     * @returns {Primitive}
      * @private
      */
     _createPrimitive: function () {
-      if (this.isRenderable()) { return; }
+      if (this.isRenderable()) { return null; }
 
       var thePrimitive;
       var instance = new GeometryInstance({
@@ -183,25 +183,35 @@ define([
     /**
      * Creates Cesium Geometry object required to render the Mesh.
      * The Geometry represents the Mesh in 'model space'.
-     * @returns {cesium/Core/Geometry}
+     * @returns {Geometry}
      * @private
      */
     _createGeometry: function () {
       var theGeometry = {};
       var attributes = new GeometryAttributes({
-        position : new GeometryAttribute({
-          componentDatatype : ComponentDatatype.DOUBLE,
-          componentsPerAttribute : 3,
-          values : this._positions
+        position: new GeometryAttribute({
+          componentDatatype: ComponentDatatype.DOUBLE,
+          componentsPerAttribute: 3,
+          values: this._positions
         })
       });
 
-      var geometry = GeometryPipeline.computeNormal(new Geometry({
+      var geometry = new Geometry({
         attributes: attributes,
         indices: this._indices,
         primitiveType: PrimitiveType.TRIANGLES,
         boundingSphere: BoundingSphere.fromVertices(this._positions)
-      }));
+      });
+      // Compute normals if they are not passed int.
+      if (!this._normals) {
+        geometry = GeometryPipeline.computeNormal(geometry);
+      } else {
+        geometry.attributes.normal = new GeometryAttribute({
+          componentDatatype: ComponentDatatype.FLOAT,
+          componentsPerAttribute: 3,
+          values: this._normals
+        });
+      }
 
       theGeometry.attributes = geometry.attributes;
       theGeometry.indices = geometry.indices;
