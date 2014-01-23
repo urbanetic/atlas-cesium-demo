@@ -31,7 +31,7 @@ define([
    * Completes all initialisation that requires other atlas managers.
    * @param {String|HTMLElement} elem - The DOM ID or DOM element of the HTML element to receive events from.
    */
-  InputManager.prototype.initialise = function (elem) {
+  InputManager.prototype.setup = function (elem) {
     var element = typeof elem === 'string' ? document.getElementById(elem) : elem;
     // TODO(bpstudds): Pretty sure InputManager should respond to an 'dom/set' event, rather than be
     //      imperative.

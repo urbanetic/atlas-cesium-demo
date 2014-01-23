@@ -42,7 +42,7 @@ define([
    *    getById(id)
    */
 
-  EntityManager.prototype.initialise = function (args) {
+  EntityManager.prototype.setup = function (args) {
     if (args.constructors) {
       this.setGeoEntityTypes(args.constructors);
     }
