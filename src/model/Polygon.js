@@ -200,8 +200,7 @@ define([
         this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       this.onDisableEditing();
-    },
-
+    }
   });
 
 //////
@@ -237,7 +236,7 @@ define([
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
-  },
+  };
 
   /**
    * Takes an atlas Style object and converts it to Cesium Color objects.
@@ -249,18 +248,18 @@ define([
       fill: Polygon._convertAtlasToCesiumColor(style.getFill()),
       border: Polygon._convertAtlasToCesiumColor(style.getBorderColour())
     }
-  },
+  };
 
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
    * @param {atlas.model.Colour} color - The Colour to convert.
-   * @returns {cesium.Core.Color} The converted Cesium Color object.
+   * @returns {Color} The converted Cesium Color object.
    * @private
    */
   Polygon._convertAtlasToCesiumColor = function (color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
-  }
+  };
 
   return Polygon;
 });
