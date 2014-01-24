@@ -18,6 +18,8 @@
     "grunt-shell": "~0.6.3",
     "grunt": "~0.4.2",
     "grunt-jsdoc": "~0.5.1",
-    "load-grunt-tasks": "~0.2.1"
+    "load-grunt-tasks": "~0.2.1",
+    "grunt-cli": "~0.1.12",
+    "bower": "~1.2.8"
   }
 }
