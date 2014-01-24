@@ -2,7 +2,7 @@ define([
   'doh/runner',
   'dam/TestCase',
   /* Code under test */
-  '../core/CesiumAtlas'
+  //'../core/CesiumAtlas'
 ], function (doh, TestCase, CesiumAtlas) {
 
   /* Test globals go here */

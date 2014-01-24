@@ -33,11 +33,11 @@ module.exports = function(grunt) {
           stdout: true
         },
         command: [
-            'echo "----- Building Cesium              -----"',
+            'echo "----- Building Cesium               -----"',
             'cd lib/cesium',
             './Tools/apache-ant-1.8.2/bin/ant build',
             'cd ../..',
-            'echo "----- Cesium built                 -----"'
+            'echo "----- Cesium built                  -----"'
         ].join('&&')
       }
     },
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
 //    }
   });
 
-  grunt.registerTask('build', ['shell:installBowerDep', 'shell:buildCesium', 'jsdoc']);
+  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesium', 'jsdoc']);
   grunt.registerTask('docs', ['jsdoc']);
   grunt.registerTask('default', 'build');
 };
