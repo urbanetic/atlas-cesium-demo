@@ -1,51 +1,46 @@
 define([
-  'atlas/util/Extends',
+  'atlas/util/DeveloperError',
+  'atlas/model/Vertex',
   // Cesium imports
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Scene/CameraFlightPath',
   // Base class.
   'atlas/camera/Camera'
-], function (extend, Cartographic, CameraFlightPath, CameraCore) {
+], function (
+  DeveloperError,
+  Vertex,
+  Cartographic,
+  CameraFlightPath,
+  CameraCore) {
 
-  var Camera = function (renderManager, position, orientation) {
-    if (renderManager === undefined) {
-      throw new DeveloperError('Can not create atlas-cesium Camera without specify render manager');
-    }
-    Camera.base.constructor.call(this, position, orientation);
-    
-    /* Inherited members
-     *    _orientation
-     *    _position
-     */
-    
-    this._renderManager = renderManager;
-  };
-  extend(CameraCore, Camera);
-
-  /*
-   * Inherited functions:
-   *    zoomTo(position, orientation, duration)
-   *    pointAt(geoEntity)
-   *    goTo()
-   *    pointDown()
+  //var Camera = function (renderManager, position, orientation) {
+  /**
+   *
+   * @class atlas-cesium.camera.Camera
    */
-  
-  Camera.prototype._animateCamera = function (newCamera) {
-    // TODO(bpstudds): Allow for a non-default orientation.
-    console.debug('animating camera change');
-    latitude = newCamera.position.x * Math.PI / 180;
-    longitude = newCamera.position.y * Math.PI / 180;
-    altitude = newCamera.position.z;
-    var target = new Cartographic(longitude, latitude, altitude);
-    var flight = CameraFlightPath.createAnimationCartographic(
-      this._renderManager._widget.scene, {
-        destination: target,
-        duration: newCamera.duration
-      }
-    );
-    this._renderManager._widget.scene.getAnimations().add(flight);
-  }
+  return CameraCore.extend( /** @lends atlas-cesium.camera.Camera# */ {
 
+    _init: function (renderManager, position, orientation) {
+      this._super(position, orientation);
+      this._renderManager = renderManager;
+    },
 
-  return Camera;
+    _animateCamera: function (newCamera) {
+      // TODO(bpstudds): Allow for a non-default orientation.
+      console.debug('animating camera change');
+      var latitude = newCamera.position.x * Math.PI / 180,
+          longitude = newCamera.position.y * Math.PI / 180,
+          altitude = newCamera.position.z,
+          target = new Cartographic(longitude, latitude, altitude),
+          flight = {};
+      flight = CameraFlightPath.createAnimationCartographic(
+        this._renderManager._widget.scene, {
+          destination: target,
+          duration: newCamera.duration
+        }
+      );
+      this._position = new Vertex(latitude, longitude, altitude);
+      this._renderManager._widget.scene.getAnimations().add(flight);
+    }
+  });
 });
