@@ -47,7 +47,7 @@ define([
   InputManager.prototype.createDefaultMouseBindings = function () {
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.endPosition.x,
         y: movement.endPosition.y,
         startX: movement.startPosition.x,
@@ -57,7 +57,7 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.MOUSE_MOVE);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
@@ -65,7 +65,7 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_DOWN);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
@@ -73,7 +73,7 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_UP);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
@@ -81,7 +81,7 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_CLICK);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
@@ -89,7 +89,7 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_DOWN);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
@@ -97,13 +97,76 @@ define([
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_UP);
 
     this._screenSpaceEventHandler.setInputAction(function(movement) {
-      args = {
+      var args = {
         x: movement.position.x,
         y: movement.position.y
       };
       this.handleInternalEvent('input/rightclick', args);
     }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
+  };
 
+  InputManager.prototype.createHtmlMouseBindings = function () {
+    var element = this._atlasManagers.dom.getDom();
+    var buttonIds = ['left', 'middle', 'right'];
+
+    this._mouseHandlers = [];
+    this._mouseHandlers.push({
+      name: 'mousedown',
+      cback: function (e) {
+        var args = {
+          name: 'input/' + buttonIds[e.button] + 'down',
+          button: buttonIds[e.button],
+          modifiers: [],
+          pos: { x: e.screenX, y: e.screenY },
+          diff: { cx: e.movementX, cy: e.movementY }
+        };
+        e.shiftKey && args.modifiers.push('shift');
+        e.metaKey && args.modifiers.push('meta');
+        e.altKey && args.modifiers.push('alt');
+        e.ctrlKey && args.modifiers.push('ctrl');
+        this.handleInternalEvent(args.name, args);
+      }.bind(this._atlasManagers.event)
+    });
+
+    this._mouseHandlers.push({
+      name: 'mouseup',
+      cback: function (e) {
+        var args = {
+          name: 'input/' + buttonIds[e.button] + 'up',
+          button: buttonIds[e.button],
+          modifiers: [],
+          pos: { x: e.screenX, y: e.screenY },
+          diff: { cx: e.movementX, cy: e.movementY }
+        };
+        e.shiftKey && args.modifiers.push('shift');
+        e.metaKey && args.modifiers.push('meta');
+        e.altKey && args.modifiers.push('alt');
+        e.ctrlKey && args.modifiers.push('ctrl');
+        this.handleInternalEvent(args.name, args);
+      }.bind(this._atlasManagers.event)
+    });
+
+    this._mouseHandlers.push({
+      name: 'mousemove',
+      cback: function (e) {
+        var args = {
+          name: 'input/mousemove',
+          button: buttonIds[e.button],
+          modifiers: [],
+          pos: { x: e.screenX, y: e.screenY },
+          diff: { cx: e.movementX, cy: e.movementY }
+        };
+        e.shiftKey && args.modifiers.push('shift');
+        e.metaKey && args.modifiers.push('meta');
+        e.altKey && args.modifiers.push('alt');
+        e.ctrlKey && args.modifiers.push('ctrl');
+        this.handleInternalEvent(args.name, args);
+      }.bind(this._atlasManagers.event)
+    });
+
+    this._mouseHandlers.forEach(function(handler) {
+      element.addEventListener(handler.name, handler.cback);
+    });
   };
 
   InputManager.prototype.createDefaultKeyboardBindings = function () {
@@ -112,7 +175,6 @@ define([
     var theDom = document.getElementById(this._atlasManagers.dom._currentDomId);
     var domEventNames = ['keydown', 'keypress', 'keyup'];
     domEventNames.forEach(function (name) {
-      console.log('adding event listener to', name);
       var thisEvent = 'input/' + name;
       document.addEventListener(name, function (e) {
         var args = {
