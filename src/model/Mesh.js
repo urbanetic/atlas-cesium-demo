@@ -51,7 +51,7 @@ define([
   /**
    * Constructs a new Mesh object.
    * @classdesc A Mesh represents a 3D renderable object in atlas.
-   * @param {String} id - The ID of the Mesh.
+   * @param {String} id - The ID of th/pull-request/20/converting-geoentity-and-its-subtypes-to/diff#chg-src/model/Polygon.jse Mesh.
    * @param {String} meshData - The data required to render the Mesh.
    * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every triangle vertex to ensure shading works correctly.
    * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements forming a vertex, ie a (x, y, z) coordinate tuple in model space.
@@ -245,6 +245,7 @@ define([
      * Function to permanently remove the Mesh from the scene (vs. hiding it).
      */
     remove: function () {
+      this._super();
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     }
   });

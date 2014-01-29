@@ -4,7 +4,7 @@
   "authors": [
     "Brendan Studds <brendan.studds@gmail.com>"
   ],
-  "description": "A AGI Cesium (cesiumjs.org) implementation of the Atlas 3D rendering API.",
+  "description": "An AGI Cesium (cesiumjs.org) implementation of the Atlas 3D rendering API.",
   "license": "MIT",
   "private": true,
   "ignore": [
