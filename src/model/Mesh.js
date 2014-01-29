@@ -49,7 +49,6 @@ define([
              MeshCore) {
 
   /**
-   * Constructs a new Mesh object.
    * @classdesc A Mesh represents a 3D renderable object in atlas.
    * @param {String} id - The ID of th/pull-request/20/converting-geoentity-and-its-subtypes-to/diff#chg-src/model/Polygon.jse Mesh.
    * @param {String} meshData - The data required to render the Mesh.
@@ -72,7 +71,6 @@ define([
    * @class atlas-cesium.model.Mesh
    * @extends atlas.model.Mesh
    */
-  //var Mesh = function (id, meshData, args) {
   var Mesh = MeshCore.extend( /** @lends atlas-cesium.model.Mesh# */ {
 
     /**

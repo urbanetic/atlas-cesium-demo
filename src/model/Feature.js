@@ -7,7 +7,7 @@ define([
 
 
   /**
-   * @classdes A Feature represents an entity that can be visualised either
+   * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
    *
    * @param {Number} id - The ID of this Feature.
