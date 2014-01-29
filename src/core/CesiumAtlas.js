@@ -4,20 +4,34 @@
 define([
   'atlas/util/DeveloperError',
   'atlas/util/Extends',
+  'atlas-cesium/camera/CameraManager',
+  'atlas-cesium/dom/DomManager',
   'atlas/edit/EditManager',
   'atlas-cesium/entity/EntityManager',
   'atlas/events/EventManager',
-  'atlas/selection/SelectionManager',
-  'atlas-cesium/camera/CameraManager',
-  'atlas-cesium/dom/DomManager',
   'atlas-cesium/input/InputManager',
   'atlas-cesium/render/RenderManager',
+  'atlas/selection/SelectionManager',
+  'atlas/visualisation/VisualisationManager',
   'atlas-cesium/model/Feature',
   'atlas-cesium/model/Polygon',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   // Extends
   'atlas/core/Atlas'
-], function (DeveloperError, extend, EditManager, EntityManager, EventManager, SelectionManager, CameraManager, DomManager, InputManager, RenderManager, Feature, Polygon, Cartographic, Atlas) {
+], function (
+  DeveloperError,
+  extend,
+  CameraManager,
+  DomManager,
+  EditManager,
+  EntityManager,
+  EventManager,
+  InputManager,
+  RenderManager,
+  SelectionManager,
+  VisualisationManager,
+  Feature,
+  Polygon,
+  Atlas) {
 
   var CesiumAtlas = function () {
     // Call the atlas.core.Atlas constructor.
@@ -34,6 +48,7 @@ define([
     this._managers.selection = new SelectionManager(this._managers);
     this._managers.input = new InputManager(this._managers);
     this._managers.camera = new CameraManager(this._managers);
+    this._managers.visualisation = new VisualisationManager(this._managers);
 
     // Setup the manager objects. These are independent unless stated otherwise.
     this._managers.camera.setup();
