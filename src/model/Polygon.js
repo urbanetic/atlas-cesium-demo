@@ -80,7 +80,7 @@ define([
      * in Cesium.
      */
     _createPrimitive: function () {
-      console.debug('creating primitive for entity', this._id);
+      console.debug('creating primitive for entity', this.getId());
       if (!this.isRenderable()) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
@@ -105,7 +105,7 @@ define([
      */
     _build: function (ellipsoid, minTerrainElevation) {
       // TODO(bpstudds): Need to cache computed geometry and appearance data somehow.
-      console.debug('building entity', this._id);
+      console.debug('building entity', this.getId());
       this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
       this._minTerrainElevation = minTerrainElevation || 0;
       // For 3D extruded polygons, ensure polygon is not closed as it causes
@@ -117,7 +117,7 @@ define([
       }
       // Generate geometry data.
       this._geometry = new GeometryInstance({
-        id: this._id.replace('polygon', ''),
+        id: this.getId().replace('polygon', ''),
         geometry: PolygonGeometry.fromPositions({
           positions: this._cartesians,
           height: this._minTerrainElevation + this._elevation,
@@ -145,7 +145,7 @@ define([
      */
     show: function () {
       if (this.isVisible() && this.isRenderable()) {
-        console.debug('entity ' + this._id + 'already visible and correctly rendered');
+        console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
         if (!this.isRenderable()) {
           if (!this._primitive) {
@@ -159,7 +159,7 @@ define([
             this._renderManager._widget.scene.getPrimitives().add(this._primitive);
           }
         }
-        console.log('showing entity '+this._id);
+        console.log('showing entity ' + this.getId());
         this._primitive.show = true;
       }
       return this.isRenderable() && this._primitive.show;

@@ -100,7 +100,7 @@ define([
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
         this.setRenderable(true);
       }
-      console.debug('Showing entity', this._id);
+      console.debug('Showing entity', this.getId());
       this._primitive.show = true;
     },
 
@@ -121,7 +121,7 @@ define([
     onSelect: function () {
       this.setUniformColour(MeshCore.SELECTED_COLOUR);
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
       }
       this.onEnableEditing();
@@ -130,7 +130,7 @@ define([
     onDeselect: function () {
       this.setUniformColour(this._previousColour);
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this._id.replace('mesh', ''));
+        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
       }
       this.onDisableEditing();
@@ -148,7 +148,7 @@ define([
 
       var thePrimitive;
       var instance = new GeometryInstance({
-        id: this._id.replace('mesh', ''),
+        id: this.getId().replace('mesh', ''),
         geometry: this._geometry,
         modelMatrix: this._modelMatrix,
         attributes : {

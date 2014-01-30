@@ -114,7 +114,7 @@ define([
       // Add the RenderManager to the args for the feature.
       args.renderManager = this._managers.render;
       var feature = this._managers.entity.createFeature(id, args);
-      this._managers.entity.add(id, feature);
+      //this._managers.entity.add(id, feature);
       return feature;
     }
   };
