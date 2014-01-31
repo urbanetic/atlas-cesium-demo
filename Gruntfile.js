@@ -37,6 +37,13 @@ module.exports = function(grunt) {
             'cd ../..',
             'echo "----- Cesium built                  -----"',
         ].join('&&')
+      },
+      jsdoc: {
+        command: [
+            'echo "----- Building JSDoc                -----"',
+            'jsdoc -c jsdoc.conf.json',
+            'echo "----- JSDoc built                   -----"'
+        ].join('&&')
       }
     },
 
@@ -56,6 +63,6 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesium']);
-  grunt.registerTask('docs', ['jsdoc']);
+  grunt.registerTask('doc', ['shell:jsdoc']);
   grunt.registerTask('default', 'install');
 };
