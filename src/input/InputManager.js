@@ -1,18 +1,26 @@
 define([
+  'atlas/util/Class',
   'atlas/util/DeveloperError',
   'atlas/util/default',
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/ScreenSpaceEventHandler',
-  'atlas-cesium/cesium/Source/Core/ScreenSpaceEventType'
-], function (DeveloperError, defaults, ScreenSpaceEventHandler, ScreenSpaceEventType) {
+  'atlas-cesium/cesium/Source/Core/ScreenSpaceEventType',
+  // Base class
+  'atlas/input/InputManager'
+], function (
+  Class,
+  DeveloperError,
+  defaultValue,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
+  InputManagerCore) {
 
   /**
-   * Constructs a new InputManager
-   * @class The InputManager links render and implementation specific user input handling to
+   * @classdesc The InputManager links render and implementation specific user input handling to
    * the format expected by atlas.
    * @param {Object} atlasManagers - The map of all atlas manager objects.
    *
-   * @alias atlas-cesium.input.InputManager
+   * @class atlas-cesium.input.InputManager
    * @constructor
    */
   var InputManager = function (atlasManagers) {
@@ -35,14 +43,15 @@ define([
     var element = typeof elem === 'string' ? document.getElementById(elem) : elem;
     // TODO(bpstudds): Pretty sure InputManager should respond to an 'dom/set' event, rather than be
     //      imperative.
-    this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
-    this._screenSpaceEventHandler = new ScreenSpaceEventHandler(element);
-    this.createDefaultMouseBindings();
-    this.createDefaultKeyboardBindings();
+    //this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
+    //this._screenSpaceEventHandler = new ScreenSpaceEventHandler(element);
+    // Don't use Cesium mouse events at the minute.
+    this.createHtmlMouseBindings();
+    this.createHtmlKeyboardBindings();
   };
 
   /**
-   * Creates the default bindings between Cesium screen space events and Atlas events.
+   * Creates the bindings between Cesium screen space events and Atlas events.
    */
   InputManager.prototype.createDefaultMouseBindings = function () {
 
