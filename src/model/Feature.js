@@ -1,15 +1,13 @@
 define([
-  'atlas/util/Extends',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/model/Feature'
-], function (extend, Polygon, Mesh, FeatureCore) {
+], function (Polygon, Mesh, FeatureCore) {
 
 
   /**
-   * Constructs a new Feature object.
-   * @class A Feature represents an entity that can be visualised either
+   * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
    *
    * @param {Number} id - The ID of this Feature.
@@ -23,38 +21,20 @@ define([
    * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of 'footprint', 'extrusion' or 'mesh'.
    *
-   * @extends {atlas.model.Feature}
-   * @alias atlas-cesium.model.Feature
-   * @constructor
+   * @class atlas-cesium.model.Feature
+   * @extends atlas.model.Feature
    */
-  var Feature = function (id, args) {
-    if (typeof id === 'object') {
-      args = id;
-      id = args.id;
+  return FeatureCore.extend( /** @lends atlas-cesium.model.Feature# */ {
+    _init: function (id, args) {
+      this._super(id, args);
+      if (args.mesh !== undefined) {
+        this._mesh = new Mesh(id + 'mesh', args.mesh, args);
+      }
+      if (args.footprint !== undefined) {
+        args.vertices = args.footprint;
+        this._footprint = new Polygon(id + 'polygon', args);
+      }
     }
-    Feature.base.constructor.call(this, id, args);
-
-    /**
-     * The 2D {@link Polygon} footprint of this Feature.
-     * @type {Polygon}
-     */
-    this._footprint = null;
-    if (args.footprint !== undefined) {
-      this._footprint = new Polygon(id + 'polygon', args.footprint, args);
-    }
-
-    /**
-     * 3D {@link Mesh} of this Feature.
-     * @type {Mesh}
-     */
-    this._mesh = null;
-    if (args.mesh !== undefined) {
-      this._mesh = new Mesh(id + 'mesh', args.mesh, args);
-    }
-
-  };
-  extend(FeatureCore, Feature);
-
-  return Feature;
+  });
 });
 

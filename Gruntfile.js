@@ -1,5 +1,3 @@
-// vim: tabstop:2,shiftwidth:2
-
 module.exports = function(grunt) {
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
@@ -30,38 +28,41 @@ module.exports = function(grunt) {
       },
       buildCesium: {
         options: {
-          stdout: true
+          stdout: true, stdin: true
         },
         command: [
             'echo "----- Building Cesium               -----"',
             'cd lib/cesium',
             './Tools/apache-ant-1.8.2/bin/ant build',
             'cd ../..',
-            'echo "----- Cesium built                  -----"'
+            'echo "----- Cesium built                  -----"',
+        ].join('&&')
+      },
+      jsdoc: {
+        command: [
+            'echo "----- Building JSDoc                -----"',
+            'jsdoc -c jsdoc.conf.json',
+            'echo "----- JSDoc built                   -----"'
         ].join('&&')
       }
     },
 
-    jsdoc : {
-      dist : {
-        src: ['src/**/*.js'],
-        options: {
-          configure: './jsdoc.conf.json'
-        }
-      }
+    copy: {
+     overrideCesium: {
+       files: [
+         {
+           expand: true,
+           cwd: 'src/cesium-overrides/',
+           src: '**/*.js',
+           dest: './lib/cesium/',
+           ext: '.js'
+         }
+       ]
+     }
     }
-
-//    // Watches
-//    watch: {
-//    },
-//
-//    // Grunt server settings
-//    connect: {
-//
-//    }
   });
 
-  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesium', 'jsdoc']);
-  grunt.registerTask('docs', ['jsdoc']);
-  grunt.registerTask('default', 'build');
+  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesium']);
+  grunt.registerTask('doc', ['shell:jsdoc']);
+  grunt.registerTask('default', 'install');
 };

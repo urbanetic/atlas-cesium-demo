@@ -37,7 +37,7 @@ define([
     testCreate: function () {
       doh.assertTrue(feature instanceof Feature, 'feature not valid Feature');
       doh.assertTrue(feature._footprint instanceof Polygon, 'footprint not valid Polygon');
-      doh.assertEqual(id, feature._id);
+      doh.assertEqual(id, feature.getId());
     }
 
   }).register(doh);

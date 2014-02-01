@@ -1,5 +1,6 @@
 define([
   'atlas/util/Class',
+  'atlas/lib/keycode',
   'atlas/util/DeveloperError',
   'atlas/util/default',
   // Cesium imports.
@@ -9,6 +10,7 @@ define([
   'atlas/input/InputManager'
 ], function (
   Class,
+  Keycode,
   DeveloperError,
   defaultValue,
   ScreenSpaceEventHandler,
@@ -186,9 +188,10 @@ define([
     domEventNames.forEach(function (name) {
       var thisEvent = 'input/' + name;
       document.addEventListener(name, function (e) {
+        var translatedKey = keycode.translate_event(e);
         var args = {
           'name': thisEvent,
-          'key': e.keyCode,
+          'key': translatedKey.code,
           'modifiers': []
         };
         e.shiftKey && args.modifiers.push('shift');
