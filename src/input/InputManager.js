@@ -103,12 +103,6 @@ define([
     }
   }),
 
-    //InputManager.prototype.createHtmlMouseBindings = function () {}
-    // Moved to atlas.input.InputManager
-
-    //InputManager.prototype.createDefaultKeyboardBindings = function () {}
-    // Moved to atlas.input.InputManager
-
 //////
 // STATICS
 
