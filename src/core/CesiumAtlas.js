@@ -101,7 +101,24 @@ define([
           var entity = this._managers.entity.getById(args.id);
           entity && entity.hide();
         }.bind(this)
-      }
+      }/*,
+      // TODO(bpstudds): Move Overlay testing code somewhere intelligent.
+      {
+        source: 'intern',
+        name: 'input/leftup',
+        callback: function (args) {
+          console.debug('trying to show overlay');
+          if (this.overlay !== undefined) this.overlay.hide();
+          this.overlay = new Overlay(this._currentDomId,
+            {
+              top: args.y,
+              left: args.x
+            },
+            '<p>x:' + args.x + ' y:' + args.y + '</p>'
+          );
+          this.overlay.show();
+        }.bind(this._managers.dom)
+      }*/
     ];
     // Add the event handlers to the EventManager.
     this._eventHandlers = this._managers.event.addEventHandlers(handlerParams);
@@ -128,9 +145,7 @@ define([
       args.eventManager = this._managers.event;
       // Add the RenderManager to the args for the feature.
       args.renderManager = this._managers.render;
-      var feature = this._managers.entity.createFeature(id, args);
-      //this._managers.entity.add(id, feature);
-      return feature;
+      return this._managers.entity.createFeature(id, args);
     }
   };
 

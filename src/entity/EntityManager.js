@@ -59,7 +59,7 @@ define([
     var entities = [];
     ids.forEach(function (id) {
       entities.push(this.getById(id));
-    }.bind(this));
+    }, this);
     return entities;
   };
 
