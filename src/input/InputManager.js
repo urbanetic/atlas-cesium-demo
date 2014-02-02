@@ -46,72 +46,64 @@ define([
       this._super(elem);
       // TODO(bpstudds): Pretty sure InputManager should respond to an 'dom/set' event, rather than be imperative.
       // Don't use Cesium mouse events at the minute...
-      //this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
-      //this._screenSpaceEventHandler = new ScreenSpaceEventHandler(element);
+      this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
+      this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
+      this.createCesiumMouseBindings();
       // ... instead use generic HTML events.
-      this.createHtmlMouseBindings();
+      //this.createHtmlMouseBindings();
       this.createHtmlKeyboardBindings();
     },
 
     /**
      * Creates bindings for Cesium screen space events, which handle mouse input poorly.
      */
-    createDefaultMouseBindings: function () {
-
+    createCesiumMouseBindings: function () {
+      // TODO(bpstudds): Add 'movement' property to args.
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.endPosition.x,
-          y: movement.endPosition.y,
-          startX: movement.startPosition.x,
-          startY: movement.startPosition.y
+          position: { x: movement.endPosition.x, y: movement.endPosition.y }
         };
         this.handleInternalEvent('input/mousemove', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.MOUSE_MOVE);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/leftdown', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_DOWN);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/leftup', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_UP);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/leftclick', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_CLICK);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/rightdown', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_DOWN);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/rightup', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_UP);
 
       this._screenSpaceEventHandler.setInputAction(function(movement) {
         var args = {
-          x: movement.position.x,
-          y: movement.position.y
+          position: { x: movement.position.x, y: movement.position.y }
         };
         this.handleInternalEvent('input/rightclick', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
