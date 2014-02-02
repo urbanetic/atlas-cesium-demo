@@ -46,11 +46,11 @@ define([
       this._super(elem);
       // TODO(bpstudds): Pretty sure InputManager should respond to an 'dom/set' event, rather than be imperative.
       // Don't use Cesium mouse events at the minute...
-      this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
-      this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
-      this.createCesiumMouseBindings();
+//      this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
+//      this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
+//      this.createCesiumMouseBindings();
       // ... instead use generic HTML events.
-      //this.createHtmlMouseBindings();
+      this.createHtmlMouseBindings();
       this.createHtmlKeyboardBindings();
     },
 
