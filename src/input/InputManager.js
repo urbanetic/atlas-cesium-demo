@@ -10,14 +10,8 @@ define([
   // Base class
   'atlas/input/InputManager'
 ], function (
-  Class,
-  DeveloperError,
-  defaultValue,
-  mixin,
-  Keycode,
-  ScreenSpaceEventHandler,
-  ScreenSpaceEventType,
-  InputManagerCore) {
+  Class, DeveloperError, defaultValue, mixin, Keycode, ScreenSpaceEventHandler,
+  ScreenSpaceEventType, InputManagerCore) {
 
   /**
    * @classdesc The InputManager links render and implementation specific user input handling to
@@ -27,7 +21,6 @@ define([
    * @class atlas-cesium.input.InputManager
    * @extends atlas.input.InputManager
    */
-  //var InputManager = function (atlasManagers) {
   var InputManager = mixin(InputManagerCore.extend(/** @lends atlas-cesium.input.InputManager# */ {
 
     /**
@@ -108,7 +101,7 @@ define([
         this.handleInternalEvent('input/rightclick', args);
       }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
     }
-  }), // End class instance definitions.
+  }),
 
     //InputManager.prototype.createHtmlMouseBindings = function () {}
     // Moved to atlas.input.InputManager
@@ -120,9 +113,8 @@ define([
 // STATICS
 
     {
-      // Nope
     }
-  ); // End class static definitions.
+  );
 
   return InputManager;
 });
