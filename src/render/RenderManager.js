@@ -45,7 +45,7 @@ define([
     }
     this._widget = new CesiumViewer(elem, {
       animation: false,
-      baseLayerPicker: false,
+      baseLayerPicker: true,
       fullscreenButton: false,
       geocoder: false,
       homeButton: false,
