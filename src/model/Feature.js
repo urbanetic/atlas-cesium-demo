@@ -27,6 +27,7 @@ define([
   return FeatureCore.extend( /** @lends atlas-cesium.model.Feature# */ {
     _init: function (id, args) {
       this._super(id, args);
+      if (args.style === undefined) { args.style = this._style; }
       if (args.mesh !== undefined) {
         this._mesh = new Mesh(id + 'mesh', args.mesh, args);
       }
