@@ -61,6 +61,26 @@ define([
     // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
   };
 
+//////
+// GETTERS AND SETTERS
+
+  RenderManager.prototype.getAt = function (screenCoords) {
+    var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
+    var pickedIds = [];
+    pickedPrimitives.forEach(function (p) {
+      pickedIds.push(p.id);
+    });
+    return pickedIds;
+  };
+
+  RenderManager.prototype.getAnimations = function () {
+    return this._widget.scene.getAnimations();
+  };
+
+  RenderManager.prototype.getCesiumCamera = function () {
+    return this._widget.scene.getCamera();
+  };
+
   /**
    * Returns the minimum terrain height, given currently configured terrain options, for
    * an array of Vertices.
@@ -80,15 +100,6 @@ define([
     var cartographic = this._widget.centralBody.getEllipsoid().cartesianToCartographic(cartesian);
     var f = 180 / Math.PI;
     return new Vertex(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
-  };
-
-  RenderManager.prototype.getAt = function (screenCoords) {
-    var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
-    var pickedIds = [];
-    pickedPrimitives.forEach(function (p) {
-      pickedIds.push(p.id);
-    });
-    return pickedIds;
   };
 
   return RenderManager;
