@@ -210,13 +210,13 @@ define([
    * Defines the default style to use when rendering a polygon.
    * @type {atlas.model.Colour}
    */
-  Polygon.DEFAULT_STYLE = new Style(Colour.GREEN, Colour.GREEN, 1);
+  Polygon.DEFAULT_STYLE = new Style({fillColour: Colour.GREEN});
 
   /**
    * Defines the default style to use when rendering a selected polygon.
    * @type {atlas.model.Colour}
    */
-  Polygon.SELECTED_STYLE = new Style(Colour.RED, Colour.RED, 1);
+  Polygon.SELECTED_STYLE = new Style({fillColour: Colour.RED});
 
   /**
    * Function to covert an array of lat/long coordinates to
@@ -224,7 +224,7 @@ define([
    *     required for Cesium.[_coordArrayToCartesianArray description]
    * @private
    * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas.model.Vertex} coords - The latlong coordinates to convert.
+   * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
