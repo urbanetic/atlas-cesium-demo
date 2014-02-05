@@ -84,8 +84,12 @@ define([
     _createPrimitive: function () {
       console.debug('creating primitive for entity', this.getId());
       if (!this.isRenderable()) {
-        if (this._primitive) {
-          this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+        if (this._dirty['entity'] ||
+            this._dirty['model'] ||
+            this._dirty['vertices']) {
+          if (this._primitive) {
+            this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+          }
         }
         this._build(this._renderManager._widget.centralBody.getEllipsoid(),
             this._renderManager.getMinimumTerrainHeight(this._vertices));
@@ -94,8 +98,9 @@ define([
                 appearance: this.getAppearance()});
       }
       // Check that the primitive has been correctly created.
-      this._renderable = (this._primitive instanceof Primitive);
-      if (!this._renderable) console.error('Cesium Primitive not correctly created', this._primitive);
+      //this._renderable = (this._primitive instanceof Primitive);
+      //if (!this._renderable) console.error('Cesium Primitive not correctly created', this._primitive);
+      this.clean();
     },
 
     /**
@@ -108,37 +113,44 @@ define([
     _build: function (ellipsoid, minTerrainElevation) {
       // TODO(bpstudds): Need to cache computed geometry and appearance data somehow.
       console.debug('building entity', this.getId());
-      this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
-      this._minTerrainElevation = minTerrainElevation || 0;
-      // For 3D extruded polygons, ensure polygon is not closed as it causes
-      // rendering to hang.
-      if (this._height > 0) {
-        if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
-          this._cartesians.pop();
+      if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+        this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
+        this._minTerrainElevation = minTerrainElevation || 0;
+        // For 3D extruded polygons, ensure polygon is not closed as it causes
+        // rendering to hang.
+        if (this._height > 0) {
+          if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
+            this._cartesians.pop();
+          }
         }
-      }
-      // Generate geometry data.
-      this._geometry = new GeometryInstance({
-        id: this.getId().replace('polygon', ''),
-        geometry: PolygonGeometry.fromPositions({
-          positions: this._cartesians,
-          height: this._minTerrainElevation + this._elevation,
-          extrudedHeight: this._minTerrainElevation + this._elevation + this._height
-        })
-      });
-      // Generate appearance data
-      if (this._height === undefined || this._height === 0) {
-        this._appearance = new EllipsoidSurfaceAppearance();
-      } else {
-        // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
-        //                 This may require sorting of vertices before rendering.
-        this._appearance = new MaterialAppearance({
-          closed: false,
-          translucent: false,
-          faceForward: true
+        // Generate geometry data.
+        this._geometry = new GeometryInstance({
+          id: this.getId().replace('polygon', ''),
+          geometry: PolygonGeometry.fromPositions({
+            positions: this._cartesians,
+            height: this._minTerrainElevation + this._elevation,
+            extrudedHeight: this._minTerrainElevation + this._elevation + this._height
+          })
         });
       }
-      this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+      if (this._dirty['entity'] || this._dirty['style']) {
+        if (!this._appearance) {
+          // Generate appearance data
+          if (this._height === undefined || this._height === 0) {
+            this._appearance = new EllipsoidSurfaceAppearance();
+          } else {
+            // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
+            //                 This may require sorting of vertices before rendering.
+            this._appearance = new MaterialAppearance({
+              closed: false,
+              translucent: false,
+              faceForward: true
+            });
+          }
+        } else {
+          this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        }
+      }
     },
 
     /**
