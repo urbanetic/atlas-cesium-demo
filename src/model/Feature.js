@@ -28,10 +28,10 @@ define([
     _init: function (id, args) {
       this._super(id, args);
       if (args.style === undefined) { args.style = this._style; }
-      if (args.mesh !== undefined) {
+      if (args.mesh) {
         this._mesh = new Mesh(id + 'mesh', args.mesh, args);
       }
-      if (args.footprint !== undefined) {
+      if (args.footprint) {
         args.vertices = args.footprint;
         this._footprint = new Polygon(id + 'polygon', args);
       }
