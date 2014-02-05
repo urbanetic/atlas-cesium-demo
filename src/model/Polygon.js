@@ -83,39 +83,29 @@ define([
      */
     _createPrimitive: function () {
       console.debug('creating primitive for entity', this.getId());
-      if (!this.isRenderable()) {
-        if (this._dirty['entity'] ||
-            this._dirty['model'] ||
-            this._dirty['vertices']) {
-          if (this._primitive) {
-            this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
-          }
-        }
-        this._build(this._renderManager._widget.centralBody.getEllipsoid(),
-            this._renderManager.getMinimumTerrainHeight(this._vertices));
-        this._primitive =
-            new Primitive({geometryInstances: this.getGeometry(),
-                appearance: this.getAppearance()});
-      }
-      // Check that the primitive has been correctly created.
-      //this._renderable = (this._primitive instanceof Primitive);
-      //if (!this._renderable) console.error('Cesium Primitive not correctly created', this._primitive);
-      this.clean();
+      this._geometry = this._updateGeometry();
+      this._appearance = this._updateAppearance();
+      return new Primitive({
+        geometryInstances: this.getGeometry(),
+        appearance: this.getAppearance()
+      });
     },
 
     /**
-     * Builds the geometry and appearance data required to render the Polygon in
-     * Cesium.
-     * @param {Ellipsoid} ellipsoid - The ellipsoid being rendered onto.
-     * @param {Number} minTerrainElevation - The minimum height of the terrain
-     *        in the area covered by this polygon.
+     * Updates the geometry data as required.
+     * @returns {GeometryInstance}
+     * @private
      */
-    _build: function (ellipsoid, minTerrainElevation) {
-      // TODO(bpstudds): Need to cache computed geometry and appearance data somehow.
-      console.debug('building entity', this.getId());
+    _updateGeometry: function () {
+      var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
+
+      // Generate new cartesians if the vertices have changed.
+      console.debug(this._dirty);
       if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+        console.error('entity', this.getId(), 'updating geometry');
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
-        this._minTerrainElevation = minTerrainElevation || 0;
+        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
+
         // For 3D extruded polygons, ensure polygon is not closed as it causes
         // rendering to hang.
         if (this._height > 0) {
@@ -123,20 +113,30 @@ define([
             this._cartesians.pop();
           }
         }
-        // Generate geometry data.
-        this._geometry = new GeometryInstance({
-          id: this.getId().replace('polygon', ''),
-          geometry: PolygonGeometry.fromPositions({
-            positions: this._cartesians,
-            height: this._minTerrainElevation + this._elevation,
-            extrudedHeight: this._minTerrainElevation + this._elevation + this._height
-          })
-        });
       }
+
+      // Generate geometry data.
+      return new GeometryInstance({
+        id: this.getId().replace('polygon', ''),
+        geometry: PolygonGeometry.fromPositions({
+          positions: this._cartesians,
+          height: this._minTerrainElevation + this._elevation,
+          extrudedHeight: this._minTerrainElevation + this._elevation + this._height
+        })
+      });
+    },
+
+    /**
+     * Updates the appearance data.
+     * @private
+     */
+    _updateAppearance: function () {
+
       if (this._dirty['entity'] || this._dirty['style']) {
+        console.debug('entity', this.getId(), 'updating appearance');
         if (!this._appearance) {
           // Generate appearance data
-          if (this._height === undefined || this._height === 0) {
+          if (false && !this._height) {
             this._appearance = new EllipsoidSurfaceAppearance();
           } else {
             // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
@@ -147,10 +147,27 @@ define([
               faceForward: true
             });
           }
-        } else {
-          this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
         }
+        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
       }
+      return this._appearance;
+    },
+
+    /**
+     * Builds the geometry and appearance data required to render the Polygon in
+     * Cesium.
+     */
+    _build: function () {
+      if (!this._primitive || this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+        if (this._primitive) {
+          this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+        }
+        this._primitive = this._createPrimitive();
+        this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+      } else if (this._dirty['style']) {
+        this._updateAppearance();
+      }
+      this.clean();
     },
 
     /**
@@ -162,16 +179,7 @@ define([
         console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
         if (!this.isRenderable()) {
-          if (!this._primitive) {
-            // Create the primitive is it doesn't exist.
-            this._createPrimitive();
-            this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-          } else {
-            // Otherwise rebuild primitive as required.
-            // TODO(bpstudds): Work out how to do the rebuild.
-            this._createPrimitive();
-            this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-          }
+          this._build();
         }
         console.log('showing entity ' + this.getId());
         this._primitive.show = true;
