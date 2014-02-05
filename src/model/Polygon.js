@@ -60,8 +60,9 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-//////
-// GETTERS AND SETTERS
+    // -------------------------------------------
+    // GETTERS AND SETTERS
+    // -------------------------------------------
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
@@ -72,8 +73,9 @@ define([
       return !!(this._primitive && this._primitive.show);
     },
 
-//////
-// MODIFIERS
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     /**
      * Generates the data structures required to render a Polygon
@@ -183,8 +185,9 @@ define([
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
 
-//////
-// BEHAVIOUR
+    // -------------------------------------------
+    // BEHAVIOUR
+    // -------------------------------------------
 
     onSelect: function () {
       this.setStyle(Polygon.SELECTED_STYLE);
@@ -203,20 +206,21 @@ define([
     }
   });
 
-//////
-// STATICS
+  // -------------------------------------------
+  // STATICS
+  // -------------------------------------------
 
   /**
    * Defines the default style to use when rendering a polygon.
    * @type {atlas.model.Colour}
    */
-  Polygon.DEFAULT_STYLE = new Style(Colour.GREEN, Colour.GREEN, 1);
+  Polygon.DEFAULT_STYLE = new Style({fillColour: Colour.GREEN});
 
   /**
    * Defines the default style to use when rendering a selected polygon.
    * @type {atlas.model.Colour}
    */
-  Polygon.SELECTED_STYLE = new Style(Colour.RED, Colour.RED, 1);
+  Polygon.SELECTED_STYLE = new Style({fillColour: Colour.RED});
 
   /**
    * Function to covert an array of lat/long coordinates to
@@ -224,7 +228,7 @@ define([
    *     required for Cesium.[_coordArrayToCartesianArray description]
    * @private
    * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas.model.Vertex} coords - The latlong coordinates to convert.
+   * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
   Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {

@@ -61,8 +61,9 @@ define([
     // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
   };
 
-//////
-// GETTERS AND SETTERS
+  // -------------------------------------------
+  // GETTERS AND SETTERS
+  // -------------------------------------------
 
   RenderManager.prototype.getAt = function (screenCoords) {
     var pickedPrimitives = this._widget.scene.drillPick(screenCoords);

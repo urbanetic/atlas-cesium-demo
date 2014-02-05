@@ -24,29 +24,30 @@ define([
   'atlas-cesium/cesium/Source/Scene/Primitive',
   //Base class.
   'atlas/model/Mesh'
-], function (DeveloperError,
-             Colour,
-             Style,
-             Vertex,
-             BoundingSphere,
-             Cartographic,
-             Cartesian3,
-             CesiumColor,
-             ColorGeometryInstanceAttribute,
-             ComponentDatatype,
-             Geometry,
-             GeometryAttribute,
-             GeometryAttributes,
-             GeometryInstance,
-             GeometryPipeline,
-             Matrix3,
-             Matrix4,
-             PrimitiveType,
-             Transforms,
-             MaterialAppearance,
-             PerInstanceColorAppearance,
-             Primitive,
-             MeshCore) {
+], function (
+  DeveloperError,
+  Colour,
+  Style,
+  Vertex,
+  BoundingSphere,
+  Cartographic,
+  Cartesian3,
+  CesiumColor,
+  ColorGeometryInstanceAttribute,
+  ComponentDatatype,
+  Geometry,
+  GeometryAttribute,
+  GeometryAttributes,
+  GeometryInstance,
+  GeometryPipeline,
+  Matrix3,
+  Matrix4,
+  PrimitiveType,
+  Transforms,
+  MaterialAppearance,
+  PerInstanceColorAppearance,
+  Primitive,
+  MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -119,19 +120,19 @@ define([
     },
 
     onSelect: function () {
-      this.setUniformColour(MeshCore.SELECTED_COLOUR);
+      this.setStyle(MeshCore.SELECTED_STYLE);
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
+        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onEnableEditing();
     },
 
     onDeselect: function () {
-      this.setUniformColour(this._previousColour);
+      this.setStyle(this._previousStyle);
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._uniformColour));
+        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onDisableEditing();
     },
@@ -152,7 +153,7 @@ define([
         geometry: this._geometry,
         modelMatrix: this._modelMatrix,
         attributes : {
-          color : ColorGeometryInstanceAttribute.fromColor(this._uniformColour)
+          color : ColorGeometryInstanceAttribute.fromColor(this._style._fillColour)
         }
       });
 
