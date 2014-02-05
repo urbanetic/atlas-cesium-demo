@@ -60,8 +60,9 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-//////
-// GETTERS AND SETTERS
+    // -------------------------------------------
+    // GETTERS AND SETTERS
+    // -------------------------------------------
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
@@ -72,8 +73,9 @@ define([
       return !!(this._primitive && this._primitive.show);
     },
 
-//////
-// MODIFIERS
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     /**
      * Generates the data structures required to render a Polygon
@@ -183,8 +185,9 @@ define([
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
 
-//////
-// BEHAVIOUR
+    // -------------------------------------------
+    // BEHAVIOUR
+    // -------------------------------------------
 
     onSelect: function () {
       this.setStyle(Polygon.SELECTED_STYLE);
@@ -203,8 +206,9 @@ define([
     }
   });
 
-//////
-// STATICS
+  // -------------------------------------------
+  // STATICS
+  // -------------------------------------------
 
   /**
    * Defines the default style to use when rendering a polygon.
