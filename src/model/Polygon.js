@@ -269,7 +269,7 @@ define([
    */
   Polygon._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Polygon._convertAtlasToCesiumColor(style.getFill()),
+      fill: Polygon._convertAtlasToCesiumColor(style.getFillColour()),
       border: Polygon._convertAtlasToCesiumColor(style.getBorderColour())
     }
   };
