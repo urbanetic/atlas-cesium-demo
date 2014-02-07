@@ -41,17 +41,15 @@ define([
 
     this._widget = null;
     this._performanceDisplay = null;
-    
+
     // TODO(aramk) Allow passing arguments for this.
     this._isSleeping = false;
     this._minFps = 1;
     this._maxFps = 60;
     this._delta = 0;
     this._deltaHistorySize = 30;
-    this._fpsInitialDelay = 50;
     this._deltaBinSize = 5;
     this._maxDelta = 50;
-    this._fpsStatsCountLimit = 1000;
     this._fps = this._maxFps;
     this._fpsStats = {};
     this._fpsDelay = 3000;
@@ -102,7 +100,7 @@ define([
           this._state === ImageryState.TRANSITIONING) {
         that._loadingImageryCount--;
         if (that._loadingImageryCount === 0) {
-          that._delaySleep(this._fpsDelay);
+          that._delaySleep(that._fpsDelay);
         }
       }
       this._state = value;
@@ -174,12 +172,6 @@ define([
       return;
     }
     var stats = this._fpsStats;
-    stats.frameCount = stats.frameCount || 0;
-    // After the limit, prevent this function from being called - we have gathered enough data.
-    if (stats.frameCount > this._fpsStatsCountLimit) {
-      return;
-    }
-    stats.frameCount++;
 
     var existingMin = stats.min,
         existingMax = stats.max;
@@ -236,9 +228,6 @@ define([
    */
   RenderManager.prototype._getSleepFps = function() {
     var stats = this._fpsStats;
-    if (stats.frameCount < this._fpsInitialDelay) {
-      return this._maxFps;
-    }
     var delta = stats.avg;
     var ratio = (delta - stats.outlierMin) / (stats.outlierMax - stats.outlierMin);
     // Quadratic is for mitigating effect of large outliers and reducing lower FPS.
@@ -280,7 +269,7 @@ define([
    * @private
    */
   RenderManager.prototype._setSleeping = function(value) {
-    if (this._fpsDelayHandler) {
+    if (this._fpsDelayHandler !== null) {
       clearTimeout(this._fpsDelayHandler);
       this._fpsDelayHandler = null;
     }
@@ -305,6 +294,8 @@ define([
       }
     }.bind(this));
 
+    // TODO(aramk) Capture when the camera is moving instead of these?
+
     this._atlasManagers.event.addEventHandler('intern', 'input/leftdown', function() {
       this._setSleeping(false);
       // Prevents setting FPS mode on during drag.
@@ -317,9 +308,7 @@ define([
     }.bind(this));
 
     this._atlasManagers.event.addEventHandler('intern', 'input/wheel', function() {
-      // Delay is higher for wheel since event is triggered before inertial movement.
-      // TODO(aramk) Capture when the camera is moving instead.
-      this._delaySleep(this._fpsDelay * 2);
+      this._delaySleep(this._fpsDelay);
     }.bind(this));
   };
 
