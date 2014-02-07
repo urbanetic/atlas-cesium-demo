@@ -90,18 +90,18 @@ define([
         // TODO(bpstudds): Work out how to correctly move the silly primitives.
         // Remove existing primitive
         if (this._primitive) {
-          console.debug('removing primitive');
+          //console.debug('removing primitive');
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
         }
         // TODO(bpstudds): Move this into a _build() function.
-        console.debug('building primitive');
+        //console.debug('building primitive');
         this._modelMatrix = this._createModelMatrix();
         this._geometry = this._createGeometry();
         this._primitive = this._createPrimitive();
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
         this.setRenderable(true);
       }
-      console.debug('Showing entity', this.getId());
+      //console.debug('Showing entity', this.getId());
       this._primitive.show = true;
     },
 

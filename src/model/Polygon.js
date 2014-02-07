@@ -82,7 +82,7 @@ define([
      * in Cesium.
      */
     _createPrimitive: function () {
-      console.debug('creating primitive for entity', this.getId());
+      //console.debug('creating primitive for entity', this.getId());
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
       return new Primitive({
@@ -101,7 +101,7 @@ define([
 
       // Generate new cartesians if the vertices have changed.
       if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
-        console.error('entity', this.getId(), 'updating geometry');
+        //console.error('entity', this.getId(), 'updating geometry');
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
 
@@ -132,7 +132,7 @@ define([
     _updateAppearance: function () {
 
       if (this._dirty['entity'] || this._dirty['style']) {
-        console.debug('entity', this.getId(), 'updating appearance');
+        //console.debug('entity', this.getId(), 'updating appearance');
         if (!this._appearance) {
           // Generate appearance data
           if (false && !this._height) {
@@ -175,12 +175,12 @@ define([
      */
     show: function () {
       if (this.isVisible() && this.isRenderable()) {
-        console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
+        //console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
         if (!this.isRenderable()) {
           this._build();
         }
-        console.log('showing entity ' + this.getId());
+        //console.log('showing entity ' + this.getId());
         this._primitive.show = true;
       }
       return this.isRenderable() && this._primitive.show;
