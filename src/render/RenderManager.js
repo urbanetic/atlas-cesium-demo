@@ -100,25 +100,33 @@ define([
     }
 
     widget._renderLoopRunning = true;
-    try {
-      setTimeout(function() {
-        widget.resize();
-        // Use the time taken for rendering as a measure of the demand and scale the frame rates
-        // accordingly.
-        var start = new Date().getTime();
-        widget.render();
-        var elapsed = new Date().getTime() - start;
-        if (this._fpsMode) {
-          this._updateFpsStats(elapsed);
-          this._fps = this._getTargetFps(elapsed);
-        } else {
-          this._fps = this._maxFPS;
-        }
-        this._delta = elapsed;
+
+    var _render = function() {
+      widget.resize();
+      // Use the time taken for rendering as a measure of the demand and scale the frame rates
+      // accordingly.
+      var start = new Date().getTime();
+      widget.render();
+      var elapsed = new Date().getTime() - start;
+      if (this._fpsMode) {
+        this._updateFpsStats(elapsed);
+        this._fps = this._getTargetFps(elapsed);
+      } else {
+        this._fps = this._maxFPS;
+      }
+      this._delta = elapsed;
 //        console.debug('this._fpsStats', this._fpsStats, 'elapsed', elapsed, 'fps', this._fps, 'avg',
 //            this._fpsStats.avg);
-        requestAnimationFrame(tick);
-      }.bind(this), 1000 / this._fps);
+      requestAnimationFrame(tick);
+    }.bind(this);
+
+    try {
+      if (this._fps === this._maxFPS) {
+        // Execute immediately to avoid timing delays.
+        _render();
+      } else {
+        setTimeout(_render, 1000 / this._fps);
+      }
     } catch (e) {
       widget._useDefaultRenderLoop = false;
       widget._renderLoopRunning = false;
@@ -267,12 +275,12 @@ define([
 
   RenderManager.prototype._delayFpsMode = function(ms) {
     this._setFpsMode(false);
-    this._fpsDelayHandler = setTimeout(function () {
+    this._fpsDelayHandler = setTimeout(function() {
       this._setFpsMode(true);
     }.bind(this), ms);
   };
 
-  RenderManager.prototype._setFpsMode = function (value) {
+  RenderManager.prototype._setFpsMode = function(value) {
     if (this._fpsDelayHandler) {
       clearTimeout(this._fpsDelayHandler);
       this._fpsDelayHandler = null;
