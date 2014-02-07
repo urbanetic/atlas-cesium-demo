@@ -99,85 +99,23 @@ define([
   // TODO(aramk) Move this into a file under "shims" folder. Eventually handle this with custom events?
   RenderManager.prototype._shim = function() {
     var that = this;
-
     var prototype = Imagery.prototype;
-
     prototype.__defineSetter__('state', function(value) {
       if (value === ImageryState.TRANSITIONING && this._state !== ImageryState.TRANSITIONING) {
         that._loadingImageryCount++;
-//        console.error('loading imagery', that._loadingImageryCount);
         that._setFpsMode(false);
       } else if (value !== ImageryState.TRANSITIONING &&
           this._state === ImageryState.TRANSITIONING) {
         that._loadingImageryCount--;
-//        console.error('not loading imagery', that._loadingImageryCount);
         if (that._loadingImageryCount === 0) {
-//          console.error('done loading');
           that._delayFpsMode(3000);
-//          that._setFpsMode(true);
         }
       }
       this._state = value;
-//      if (that._loadingImageryCount > 100) {
-//        debugger;
-//      }
     });
-
     prototype.__defineGetter__('state', function() {
       return this._state;
     });
-
-//    prototype._requestImageryOld = prototype._requestImagery;
-//    prototype._requestImagery = function(imagery) {
-//      var imageryProvider = this._imageryProvider;
-//
-//      var that = this;
-//
-//      function success(image) {
-//        if (!defined(image)) {
-//          return failure();
-//        }
-//        that._onLayerSuccess(imagery);
-//        console.error('success!', imagery);
-//        imagery.image = image;
-//        imagery.state = ImageryState.RECEIVED;
-//
-//        TileProviderError.handleSuccess(that._requestImageError);
-//      }
-//
-//      function failure(e) {
-//        // Initially assume failure.  handleError may retry, in which case the state will
-//        // change to TRANSITIONING.
-//        imagery.state = ImageryState.FAILED;
-//        that._onLayerSuccess(imagery);
-//
-//        var message = 'Failed to obtain image tile X: ' + imagery.x + ' Y: ' + imagery.y +
-//            ' Level: ' + imagery.level + '.';
-//        that._requestImageError = TileProviderError.handleError(
-//            that._requestImageError,
-//            imageryProvider,
-//            imageryProvider.getErrorEvent(),
-//            message,
-//            imagery.x, imagery.y, imagery.level,
-//            doRequest);
-//      }
-//
-//      function doRequest() {
-//        console.error('start!', imagery);
-//        imagery.state = ImageryState.TRANSITIONING;
-//        var imagePromise = imageryProvider.requestImage(imagery.x, imagery.y, imagery.level);
-//
-//        if (!defined(imagePromise)) {
-//          // Too many parallel requests, so postpone loading tile.
-//          imagery.state = ImageryState.UNLOADED;
-//          return;
-//        }
-//
-//        when(imagePromise, success, failure);
-//      }
-//
-//      doRequest();
-//    };
   };
 
   RenderManager.prototype._render = function() {
@@ -328,7 +266,7 @@ define([
 //    console.debug('ratio', ratio, 'yRatio', yRatio);
 
     // TODO(aramk) remove
-    return 1;
+//    return 1;
 
     // TODO(aramk) Don't hard code these.
     var fps = this._minFPS + (this._maxFPS - this._minFPS) * Math.pow(ratio, 2);
