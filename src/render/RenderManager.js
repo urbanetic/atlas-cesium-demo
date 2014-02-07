@@ -35,7 +35,18 @@ define([
     this._widget = null;
     this._performanceDisplay = null;
     // TODO(aramk) Allow passing arguments for this.
-    this._fps = 60;
+    this._fpsMode = true;
+    this._minFPS = 1;
+    this._maxFPS = 60;
+    this._delta = 0;
+    // TODO(aramk) Make this more intelligent.
+    this._fpsInitialDelay = 50;
+    this._deltaBinSize = 5;
+    this._maxDelta = 50;
+    this._fpsStatsCountLimit = 1000;
+    this._fps = this._maxFPS;
+    this._fpsStats = {};
+    this._fpsDelayHandler = null;
     this._isRendering = true;
   };
   extend(RenderManagerCore, RenderManager);
@@ -61,6 +72,19 @@ define([
       useDefaultRenderLoop: false
     });
     this._render();
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/leftdown', function() {
+      this._setFpsMode(false);
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/leftup', function() {
+      this._setFpsMode(true);
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/wheel', function() {
+      this._delayFpsMode(3000);
+    }.bind(this));
+
   };
 
   RenderManager.prototype._render = function() {
@@ -70,7 +94,7 @@ define([
     // This is adapted from CesiumWidget.
 
     if (widget.isDestroyed() || !this._isRendering) {
-      console.debug('Not rendering', widget.isDestroyed(), !this._isRendering);
+//      console.debug('Not rendering', widget.isDestroyed(), !this._isRendering);
       widget._renderLoopRunning = false;
       return;
     }
@@ -79,11 +103,22 @@ define([
     try {
       setTimeout(function() {
         widget.resize();
-//        console.time("render");
+        // Use the time taken for rendering as a measure of the demand and scale the frame rates
+        // accordingly.
+        var start = new Date().getTime();
         widget.render();
-//        console.timeEnd("render");
+        var elapsed = new Date().getTime() - start;
+        if (this._fpsMode) {
+          this._updateFpsStats(elapsed);
+          this._fps = this._getTargetFps(elapsed);
+        } else {
+          this._fps = this._maxFPS;
+        }
+        this._delta = elapsed;
+//        console.debug('this._fpsStats', this._fpsStats, 'elapsed', elapsed, 'fps', this._fps, 'avg',
+//            this._fpsStats.avg);
         requestAnimationFrame(tick);
-      }, 1000 / this._fps);
+      }.bind(this), 1000 / this._fps);
     } catch (e) {
       widget._useDefaultRenderLoop = false;
       widget._renderLoopRunning = false;
@@ -93,6 +128,156 @@ define([
         console.error(e);
       }
     }
+  };
+
+  RenderManager.prototype._updateFpsStats = function(elapsed) {
+    if (elapsed >= this._maxDelta) {
+      return;
+    }
+    var stats = this._fpsStats;
+
+    stats.frameCount = stats.frameCount || 0;
+    if (stats.frameCount > this._fpsStatsCountLimit) {
+      return;
+    }
+    stats.frameCount++;
+
+    var existingMin = stats.min,
+        existingMax = stats.max;
+    stats.min = existingMin !== undefined ? Math.min(existingMin, elapsed) : elapsed;
+    stats.max = existingMax !== undefined ? Math.max(existingMax, elapsed) : elapsed;
+
+    var values = this._fpsStats.values = this._fpsStats.values || [];
+    values.push(elapsed);
+    if (values.length >= 30) {
+      values.shift();
+    }
+    var sum = 0;
+    values.forEach(function(i) {
+      sum += i;
+    });
+    stats.avg = sum / values.length;
+
+    var binCount = this._maxDelta / this._deltaBinSize;
+    if (!stats.bins) {
+      stats.bins = [];
+      for (var i = 0; i < binCount; i++) {
+        stats.bins[i * this._deltaBinSize] = 0;
+      }
+    }
+    var bins = stats.bins,
+        roundDelta = elapsed - (elapsed % this._deltaBinSize);
+    bins[roundDelta]++;
+
+    // Loop from last bin to second last and compare with previous bin to find outliers.
+//    var outlierIndex = -1;
+    var stride = this._deltaBinSize;
+
+    stats.outlierMin = stats.min;
+//    for (var k = stride; k < bins.length - stride; k = k + stride) {
+//      var currBin = bins[k],
+//          prevBin = bins[k - stride];
+//      if (currBin > 0 && prevBin < currBin) {
+////        outlierIndex = k;
+//        stats.outlierMin = k - stride;
+//        break;
+//      }
+//    }
+
+    stats.outlierMax = stats.max;
+//    for (var j = bins.length - 1; j >= stride; j = j - stride) {
+//      var currBin = bins[j],
+//          prevBin = bins[j - stride],
+//          prevPrevBin = bins[j - stride * 2];
+//      if (prevBin > 0 && prevPrevBin > 0 && prevBin > currBin * 2) {
+////        outlierIndex = j;
+//        stats.outlierMax = j;
+//        break;
+//      }
+//    }
+
+    var sum = 0;
+    for (var k = 0; k < bins.length - stride; k = k + stride) {
+      sum += bins[k];
+      if (sum >= 0.9 * stats.frameCount) {
+        stats.outlierMax = k + stride;
+//        console.error('outlierMax', stats.outlierMax, k);
+        break;
+      }
+    }
+
+//    if (outlierIndex > 0) {
+//      console.error('outlierMax', outlierIndex, bins[outlierIndex], stats.outlierMax);
+//    }
+
+  };
+
+  RenderManager.prototype._getTargetFps = function(elapsed) {
+    var stats = this._fpsStats;
+    if (stats.frameCount < this._fpsInitialDelay) {
+      return this._maxFPS;
+    }
+
+    var delta = stats.avg;//elapsed;
+
+//    console.debug('done recording');
+    var ratio = (delta - stats.outlierMin) / (stats.outlierMax - stats.outlierMin);
+
+//    var yRatio = Math.sqrt(1 - Math.pow(ratio - 1, 2));
+//    console.debug('ratio', ratio, 'yRatio', yRatio);
+
+    // TODO(aramk) remove
+    return 1;
+
+    // TODO(aramk) Don't hard code these.
+    var fps = this._minFPS + (this._maxFPS - this._minFPS) * Math.pow(ratio, 2);
+    if (fps > 60) {
+      fps = 60;
+    } else if (fps > 30 && fps < 60) {
+      fps = 30;
+    } else if (fps > 15 && fps < 30) {
+      fps = 15;
+    } else if (fps < 5) {
+      fps = 1;
+    } else {
+      fps = fps - (fps % 5);
+    }
+
+//    var turnFpsOff = function() {
+//      var nextFps = this._getTargetFps(this._delta);
+//      if (nextFps < 30) {
+//        console.debug('enabled fps');
+//        this._fpsMode = true;
+//      } else {
+//        setTimeout(turnFpsOff, 5000);
+//      }
+//    }.bind(this);
+//
+//    if (fps > 15) {
+//      this._fpsMode = false;
+//      console.debug('disabled fps');
+//      setTimeout(turnFpsOff, 5000);
+//    }
+
+    // TODO use a window of averages for the last 10 frames.2
+
+    return fps;
+//    return this._minFPS + (this._maxFPS - this._minFPS) * ratio;
+  };
+
+  RenderManager.prototype._delayFpsMode = function(ms) {
+    this._setFpsMode(false);
+    this._fpsDelayHandler = setTimeout(function () {
+      this._setFpsMode(true);
+    }.bind(this), ms);
+  };
+
+  RenderManager.prototype._setFpsMode = function (value) {
+    if (this._fpsDelayHandler) {
+      clearTimeout(this._fpsDelayHandler);
+      this._fpsDelayHandler = null;
+    }
+    this._fpsMode = value;
   };
 
   RenderManager.prototype.setup = function() {
