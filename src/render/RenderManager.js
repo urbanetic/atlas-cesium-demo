@@ -41,18 +41,18 @@ define([
 
     this._widget = null;
     this._performanceDisplay = null;
+    
     // TODO(aramk) Allow passing arguments for this.
-    this._fpsMode = false;
-    this._minFPS = 1;
-    this._maxFPS = 60;
+    this._isSleeping = false;
+    this._minFps = 1;
+    this._maxFps = 60;
     this._delta = 0;
     this._deltaHistorySize = 30;
-    // TODO(aramk) Make this more intelligent.
     this._fpsInitialDelay = 50;
     this._deltaBinSize = 5;
     this._maxDelta = 50;
     this._fpsStatsCountLimit = 1000;
-    this._fps = this._maxFPS;
+    this._fps = this._maxFps;
     this._fpsStats = {};
     this._fpsDelay = 3000;
     this._preventFpsDelay = false;
@@ -72,7 +72,7 @@ define([
     if (this._widget !== null) {
       return;
     }
-    this._shim();
+    this._imageryShim();
     this._widget = new CesiumViewer(elem, {
       animation: false,
       baseLayerPicker: true,
@@ -84,37 +84,25 @@ define([
       useDefaultRenderLoop: false
     });
     this._render();
-
-    this._atlasManagers.event.addEventHandler('intern', 'input/leftdown', function() {
-      this._setFpsMode(false);
-      // Prevents setting FPS mode on during drag.
-      this._preventFpsDelay = true;
-    }.bind(this));
-
-    this._atlasManagers.event.addEventHandler('intern', 'input/leftup', function() {
-      this._preventFpsDelay = false;
-      this._delayFpsMode(this._fpsDelay);
-    }.bind(this));
-
-    this._atlasManagers.event.addEventHandler('intern', 'input/wheel', function() {
-      this._delayFpsMode(this._fpsDelay);
-    }.bind(this));
-
   };
 
-  // TODO(aramk) Move this into a file under "shims" folder. Eventually handle this with custom events?
-  RenderManager.prototype._shim = function() {
+  /**
+   * Adds a shim to allow monitoring when Imagery (image tiles) are being loaded to prevent
+   * sleep and avoid slowing down this process.
+   * @private
+   */
+  RenderManager.prototype._imageryShim = function() {
     var that = this;
     var prototype = Imagery.prototype;
     prototype.__defineSetter__('state', function(value) {
       if (value === ImageryState.TRANSITIONING && this._state !== ImageryState.TRANSITIONING) {
         that._loadingImageryCount++;
-        that._setFpsMode(false);
+        that._setSleeping(false);
       } else if (value !== ImageryState.TRANSITIONING &&
           this._state === ImageryState.TRANSITIONING) {
         that._loadingImageryCount--;
         if (that._loadingImageryCount === 0) {
-          that._delayFpsMode(this._fpsDelay);
+          that._delaySleep(this._fpsDelay);
         }
       }
       this._state = value;
@@ -124,6 +112,11 @@ define([
     });
   };
 
+  /**
+   * A custom render loop. If sleeping, the frame rate is maintained based on the duration of
+   * render cycles. If not, it is set to the maximum FPS.
+   * @private
+   */
   RenderManager.prototype._render = function() {
     var widget = this._widget,
         tick = this._render.bind(this);
@@ -131,11 +124,9 @@ define([
     // This is adapted from CesiumWidget.
 
     if (widget.isDestroyed() || !this._isRendering) {
-//      console.debug('Not rendering', widget.isDestroyed(), !this._isRendering);
       widget._renderLoopRunning = false;
       return;
     }
-
     widget._renderLoopRunning = true;
 
     var _render = function() {
@@ -144,21 +135,18 @@ define([
       // accordingly.
       var start = new Date().getTime();
       widget.render();
-      var elapsed = new Date().getTime() - start;
-      if (this._fpsMode) {
+      var elapsed = this._delta = new Date().getTime() - start;
+      if (this._isSleeping) {
         this._updateFpsStats(elapsed);
-        this._fps = this._getTargetFps(elapsed);
+        this._fps = this._getSleepFps();
       } else {
-        this._fps = this._maxFPS;
+        this._fps = this._maxFps;
       }
-      this._delta = elapsed;
-//      console.debug('this._fpsStats', this._fpsStats, 'elapsed', elapsed, 'fps', this._fps, 'avg',
-//          this._fpsStats.avg);
       requestAnimationFrame(tick);
     }.bind(this);
 
     try {
-      if (this._fps === this._maxFPS) {
+      if (this._fps >= this._maxFps) {
         // Execute immediately to avoid timing delays.
         requestAnimationFrame(_render);
       } else {
@@ -175,13 +163,19 @@ define([
     }
   };
 
+  /**
+   * Creates statistics on the history of rendered frames. Used to determine the target FPS when
+   * sleeping.
+   * @param elapsed
+   * @private
+   */
   RenderManager.prototype._updateFpsStats = function(elapsed) {
     if (elapsed >= this._maxDelta) {
       return;
     }
     var stats = this._fpsStats;
-
     stats.frameCount = stats.frameCount || 0;
+    // After the limit, prevent this function from being called - we have gathered enough data.
     if (stats.frameCount > this._fpsStatsCountLimit) {
       return;
     }
@@ -192,6 +186,7 @@ define([
     stats.min = existingMin !== undefined ? Math.min(existingMin, elapsed) : elapsed;
     stats.max = existingMax !== undefined ? Math.max(existingMax, elapsed) : elapsed;
 
+    // Average last several render durations (delta) to prevent outliers causing jitter.
     var values = this._fpsStats.values = this._fpsStats.values || [];
     values.push(elapsed);
     if (values.length >= this._deltaHistorySize) {
@@ -203,6 +198,8 @@ define([
     });
     stats.avg = sum / values.length;
 
+    // Create bins and count the frequency of deltas in each to determine outliers. Outliers are
+    // ignored to give a realistic distribution of deltas.
     var binCount = this._maxDelta / this._deltaBinSize;
     if (!stats.bins) {
       stats.bins = [];
@@ -211,22 +208,15 @@ define([
       }
     }
     var bins = stats.bins,
-        roundDelta = elapsed - (elapsed % this._deltaBinSize);
+        roundDelta = elapsed - (elapsed % this._deltaBinSize),
+        stride = this._deltaBinSize;
     bins[roundDelta]++;
 
     // Loop from last bin to second last and compare with previous bin to find outliers.
-    var stride = this._deltaBinSize;
-
+    // Note that over time when sleeping the bins for smaller deltas will be positively biased,
+    // hence we search from the end for outliers.
     stats.outlierMin = stats.min;
     stats.outlierMax = stats.max;
-//    var sum = 0;
-//    for (var k = 0; k < bins.length - stride; k = k + stride) {
-//      sum += bins[k];
-//      if (sum >= 0.95 * stats.frameCount) {
-//        stats.outlierMax = k + stride;
-//        break;
-//      }
-//    }
     for (var j = bins.length - 1; j >= stride; j = j - stride) {
       var currBin = bins[j],
           prevBin = bins[j - stride],
@@ -238,54 +228,63 @@ define([
     }
   };
 
-  RenderManager.prototype._getTargetFps = function(elapsed) {
+  /**
+   * @returns {Number} The FPS to use when sleeping. Calculated based on the average duration of
+   * the last few render calls compared to the recorded history of possible durations (minus
+   * outliers).
+   * @private
+   */
+  RenderManager.prototype._getSleepFps = function() {
     var stats = this._fpsStats;
     if (stats.frameCount < this._fpsInitialDelay) {
-      return this._maxFPS;
+      return this._maxFps;
     }
     var delta = stats.avg;
     var ratio = (delta - stats.outlierMin) / (stats.outlierMax - stats.outlierMin);
-
-//    var yRatio = Math.sqrt(1 - Math.pow(ratio - 1, 2));
-//    console.debug('ratio', ratio, 'yRatio', yRatio);
-
-    // TODO(aramk) remove
-//    return 1;
-
-    // TODO(aramk) Don't hard code these.
-    var fps = this._minFPS + (this._maxFPS - this._minFPS) * Math.pow(ratio, 2);
-//    console.debug('real', fps, 'ratio', ratio);
-    if (fps > 60) {
-      fps = 60;
-    } else if (fps > 30 && fps < 60) {
+    // Quadratic is for mitigating effect of large outliers and reducing lower FPS.
+    var fps = this._minFps + (this._maxFps - this._minFps) * Math.pow(ratio, 2);
+    // Snap the FPS to avoid jitter.
+    if (fps > this._maxFps) {
+      fps = this._maxFps;
+    } else if (fps > 30 && this._minFps <= 30 && fps < this._maxFps) {
       fps = 30;
-    } else if (fps > 15 && fps < 30) {
+    } else if (fps > 15 && this._minFps <= 15 && fps < 30) {
       fps = 15;
-    } else if (fps > 10 && fps < 15) {
+    } else if (fps > 10 && this._minFps <= 10 && fps < 15) {
       fps = 10;
     } else {
-      fps = 1;
+      fps = this._minFps;
     }
     return fps;
   };
 
-  RenderManager.prototype._delayFpsMode = function(ms) {
+  /**
+   * Delays sleeping for the given milliseconds before enabling it again. If sleeping is already
+   * enabled, this does nothing.
+   * @param {Number} ms
+   * @private
+   */
+  RenderManager.prototype._delaySleep = function(ms) {
     if (this._preventFpsDelay) {
       return;
     }
-    this._setFpsMode(false);
+    this._setSleeping(false);
     this._fpsDelayHandler = setTimeout(function() {
-      this._setFpsMode(true);
+      this._setSleeping(true);
     }.bind(this), ms);
   };
 
-  RenderManager.prototype._setFpsMode = function(value) {
+  /**
+   * Sets whether sleeping is enabled. If sleeping is delayed, this also clears the timer.
+   * @param {Boolean} value
+   * @private
+   */
+  RenderManager.prototype._setSleeping = function(value) {
     if (this._fpsDelayHandler) {
       clearTimeout(this._fpsDelayHandler);
       this._fpsDelayHandler = null;
-      console.error('this._fpsMode clear');
     }
-    this._fpsMode = value;
+    this._isSleeping = value;
   };
 
   RenderManager.prototype.setup = function() {
@@ -304,6 +303,23 @@ define([
       } else if (this._performanceDisplay) {
         this._widget.scene.getPrimitives().remove(this._performanceDisplay);
       }
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/leftdown', function() {
+      this._setSleeping(false);
+      // Prevents setting FPS mode on during drag.
+      this._preventFpsDelay = true;
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/leftup', function() {
+      this._preventFpsDelay = false;
+      this._delaySleep(this._fpsDelay);
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('intern', 'input/wheel', function() {
+      // Delay is higher for wheel since event is triggered before inertial movement.
+      // TODO(aramk) Capture when the camera is moving instead.
+      this._delaySleep(this._fpsDelay * 2);
     }.bind(this));
   };
 
