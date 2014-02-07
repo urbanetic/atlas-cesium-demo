@@ -100,7 +100,6 @@ define([
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
       // Generate new cartesians if the vertices have changed.
-      console.debug(this._dirty);
       if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
         console.error('entity', this.getId(), 'updating geometry');
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
