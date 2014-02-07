@@ -53,6 +53,7 @@ define([
     // Setup the manager objects. These are independent unless stated otherwise.
     this._managers.camera.setup();
     this._managers.edit.setup();
+    this._managers.render.setup();
     this._managers.entity.setup({constructors: {"Feature": Feature, "Polygon": Polygon}});
     //this._managers.input.setup(); // Initialise the InputManager after the DOM is set.
     this._managers.selection.setup();
