@@ -17,9 +17,8 @@ define([
   'atlas-cesium/cesium/Source/Core/defined',
   // Base class
   'atlas/render/RenderManager'
-], function(extend, Vertex, Feature, CesiumViewer, PerformanceDisplay, requestAnimationFrame,
-            Imagery, ImageryLayer, TileProviderError, ImageryState, when, defined,
-            RenderManagerCore) {
+], function(extend, Vertex, Feature, Viewer, PerformanceDisplay, requestAnimationFrame, Imagery,
+            ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore) {
   "use strict";
 
   /**
@@ -64,14 +63,15 @@ define([
    * Creates and initialises the Cesium viewer widget. Sets which
    * control components are included in the widget.
    * @see {@link http://cesiumjs.org/Cesium/Build/Documentation/Viewer.html}
-   * @param {String} elem - The ID of the DOM element to place the widget in.
+   * @param {String|HTMLElement} elem - The ID of the DOM element or the element to place the widget
+   * in.
    */
   RenderManager.prototype.createWidget = function(elem) {
     if (this._widget !== null) {
       return;
     }
     this._imageryShim();
-    this._widget = new CesiumViewer(elem, {
+    this._widget = new Viewer(elem, {
       animation: false,
       baseLayerPicker: true,
       fullscreenButton: false,
@@ -286,7 +286,7 @@ define([
   RenderManager.prototype.bindEvents = function() {
     // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
     this._atlasManagers.event.addEventHandler('extern', 'debugMode', function(debug) {
-      if (debug) {
+      if (debug && !this._performanceDisplay) {
         this._performanceDisplay = this._performanceDisplay || new PerformanceDisplay();
         this._widget.scene.getPrimitives().add(this._performanceDisplay);
       } else if (this._performanceDisplay) {
