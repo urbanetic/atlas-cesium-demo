@@ -42,13 +42,14 @@ define([
     this._performanceDisplay = null;
 
     // TODO(aramk) Allow passing arguments for this.
+    // TODO(aramk) Add docs for these.
     this._isSleeping = false;
     this._minFps = 1;
     this._maxFps = 60;
     this._delta = 0;
     this._deltaHistorySize = 30;
     this._deltaBinSize = 5;
-    this._maxDelta = 50;
+    this._maxDelta = 100;
     this._fps = this._maxFps;
     this._fpsStats = {};
     this._fpsDelay = 3000;
@@ -134,8 +135,8 @@ define([
       var start = new Date().getTime();
       widget.render();
       var elapsed = this._delta = new Date().getTime() - start;
+      this._updateFpsStats(elapsed);
       if (this._isSleeping) {
-        this._updateFpsStats(elapsed);
         this._fps = this._getSleepFps();
       } else {
         this._fps = this._maxFps;
@@ -203,7 +204,6 @@ define([
         roundDelta = elapsed - (elapsed % this._deltaBinSize),
         stride = this._deltaBinSize;
     bins[roundDelta]++;
-
     // Loop from last bin to second last and compare with previous bin to find outliers.
     // Note that over time when sleeping the bins for smaller deltas will be positively biased,
     // hence we search from the end for outliers.
