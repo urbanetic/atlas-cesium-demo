@@ -60,6 +60,13 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The style of the GeoEntity when before a change in style (e.g. during selection).
+     * @type {atlas.model.Style}
+     * @protected
+     */
+    _previousStyle: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -190,7 +197,7 @@ define([
     // -------------------------------------------
 
     onSelect: function () {
-      this.setStyle(Polygon.SELECTED_STYLE);
+      this._previousStyle = this.setStyle(Polygon.SELECTED_STYLE);
       if (this.isVisible()) {
         this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
       }
@@ -198,7 +205,7 @@ define([
     },
 
     onDeselect: function () {
-      this.setStyle(Polygon.DEFAULT_STYLE);
+      this.setStyle(this._previousStyle || Polygon.DEFAULT_STYLE);
       if (this.isVisible()) {
         this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
       }
