@@ -101,7 +101,7 @@ define([
 
       // Generate new cartesians if the vertices have changed.
       if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
-        console.error('updating geometry for entity ' + this.getId());
+        console.debug('updating geometry for entity ' + this.getId());
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
 
@@ -152,7 +152,7 @@ define([
      * Cesium.
      */
     _build: function () {
-      if (!this._primitive || this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+      if (!this._primitive || this._dirty['vertices'] || this._dirty['model']) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
         }

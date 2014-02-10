@@ -134,7 +134,7 @@ define([
      * Cesium.
      */
     _build: function () {
-      if (!this._primitive || this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+      if (!this._primitive || this._dirty['vertices'] || this._dirty['model']) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
         }
@@ -259,9 +259,9 @@ define([
           this._appearance = ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
         } else {
           if (!this._appearance) {
-            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', '')).color;
+            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
           }
-          this._appearance = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+          this._appearance.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
         }
       }
       return this._appearance;
