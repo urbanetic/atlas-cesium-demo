@@ -57,6 +57,7 @@ define([
     this._managers.entity.setup({constructors: {"Feature": Feature, "Polygon": Polygon}});
     //this._managers.input.setup(); // Initialise the InputManager after the DOM is set.
     this._managers.selection.setup();
+    this._managers.visualisation.setup();
 
     /**
      * Contains a map of event name to EventHandler object.
