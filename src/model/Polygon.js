@@ -10,20 +10,12 @@ define([
   'atlas-cesium/cesium/Source/Core/Color',
   // Base class
   'atlas/model/Polygon'
-], function (Style,
-             Colour,
-             GeometryInstance,
-             PolygonGeometry,
-             Primitive,
-             Cartographic,
-             EllipsoidSurfaceAppearance,
-             MaterialAppearance,
-             CesiumColour,
-             PolygonCore) {
+], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+            EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, PolygonCore) {
   "use strict";
 
   //var Polygon = function (id, vertices, args) {
-  var Polygon = PolygonCore.extend( /** @lends atlas-cesium.model.Polygon# */ {
+  var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
      * The Cesium GeometryInstance of the Polygon.
@@ -60,6 +52,13 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The style of the GeoEntity when before a change in style (e.g. during selection).
+     * @type {atlas.model.Style}
+     * @protected
+     */
+    _previousStyle: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -69,7 +68,7 @@ define([
      * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
      * @returns {Boolean} - Whether the Polygon is visible.
      */
-    isVisible: function () {
+    isVisible: function() {
       return !!(this._primitive && this._primitive.show);
     },
 
@@ -81,7 +80,7 @@ define([
      * Generates the data structures required to render a Polygon
      * in Cesium.
      */
-    _createPrimitive: function () {
+    _createPrimitive: function() {
       console.debug('creating primitive for entity', this.getId());
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
@@ -96,7 +95,7 @@ define([
      * @returns {GeometryInstance}
      * @private
      */
-    _updateGeometry: function () {
+    _updateGeometry: function() {
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
       // Generate new cartesians if the vertices have changed.
@@ -129,7 +128,7 @@ define([
      * Updates the appearance data.
      * @private
      */
-    _updateAppearance: function () {
+    _updateAppearance: function() {
 
       if (this._dirty['entity'] || this._dirty['style']) {
         console.debug('updating appearance for entity ' + this.getId());
@@ -142,7 +141,8 @@ define([
             faceForward: true
           });
         }
-        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color =
+            Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       return this._appearance;
     },
@@ -151,7 +151,7 @@ define([
      * Builds the geometry and appearance data required to render the Polygon in
      * Cesium.
      */
-    _build: function () {
+    _build: function() {
       if (!this._primitive || this._dirty['vertices'] || this._dirty['model']) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
@@ -167,34 +167,37 @@ define([
     /**
      * Shows the Polygon. If the current rendering data is out of data, the polygon is
      * rebuilt and then rendered.
+     * @returns {Boolean} Whether the polygon is shown.
      */
-    show: function () {
+    show: function() {
       if (this.isVisible() && this.isRenderable()) {
         console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
+        console.debug('showing entity ' + this.getId());
         if (!this.isRenderable()) {
           this._build();
         }
-        console.log('showing entity ' + this.getId());
         this._primitive.show = true;
       }
-      return this.isRenderable() && this._primitive.show;
+      return this.isRenderable() && this.isVisible();
     },
 
     /**
      * Hides the Polygon.
+     * @returns {Boolean} Whether the polygon is hidden.
      */
-    hide: function () {
+    hide: function() {
       if (this.isVisible()) {
+        console.debug('hiding entity ' + this.getId());
         this._primitive.show = false;
       }
-      return this._primitive.show;
+      return !this.isVisible();
     },
 
     /**
      * Function to permanently remove the Polygon from the scene (vs. hiding it).
      */
-    remove: function () {
+    remove: function() {
       this._super();
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
@@ -203,18 +206,20 @@ define([
     // BEHAVIOUR
     // -------------------------------------------
 
-    onSelect: function () {
-      this.setStyle(Polygon.SELECTED_STYLE);
+    onSelect: function() {
+      this._previousStyle = this.setStyle(Polygon.SELECTED_STYLE);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color =
+            Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       this.onEnableEditing();
     },
 
-    onDeselect: function () {
-      this.setStyle(Polygon.DEFAULT_STYLE);
+    onDeselect: function() {
+      this.setStyle(this._previousStyle || Polygon.DEFAULT_STYLE);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color =
+            Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       this.onDisableEditing();
     }
@@ -245,12 +250,12 @@ define([
    * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
-  Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
+  Polygon._coordArrayToCartesianArray = function(ellipsoid, coords) {
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
       cartographics.push(Cartographic.fromDegrees(
-        /*longitude*/ coords[i].y,
-        /*latitude*/  coords[i].x)
+          /*longitude*/ coords[i].y,
+          /*latitude*/  coords[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
@@ -274,7 +279,7 @@ define([
    * @returns {Color} The converted Cesium Color object.
    * @private
    */
-  Polygon._convertAtlasToCesiumColor = function (color) {
+  Polygon._convertAtlasToCesiumColor = function(color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };

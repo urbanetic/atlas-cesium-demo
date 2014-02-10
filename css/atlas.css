@@ -1,5 +1,7 @@
 @import url(../lib/cesium/Source/Widgets/widgets.css);
 
+/* TODO(aramk) If this isn't created by Cesium, we should aim to use classes namespaced by .atlas
+to avoid clashes and improve reuse. */
 #Map {
     background: #000;
     color: #eee;
