@@ -86,8 +86,9 @@ define([
      * Shows the Mesh. The rendering data is recreated if it has been invalidated.
      */
     show: function () {
+      // TODO(bpstudds): Update this to new format.
       if (!this.isRenderable()) {
-        // TODO(bpstudds): Work out how to correctly move the silly primitives.
+        /*// TODO(bpstudds): Work out how to correctly move the silly primitives.
         // Remove existing primitive
         if (this._primitive) {
           //console.debug('removing primitive');
@@ -95,11 +96,12 @@ define([
         }
         // TODO(bpstudds): Move this into a _build() function.
         //console.debug('building primitive');
-        this._modelMatrix = this._createModelMatrix();
-        this._geometry = this._createGeometry();
+        this._geometry = this._updateGeometry();
+        this._modelMatrix = this._updateModelMatrix();
         this._primitive = this._createPrimitive();
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-        this.setRenderable(true);
+        this.setRenderable(true);*/
+        this._build();
       }
       //console.debug('Showing entity', this.getId());
       this._primitive.show = true;
@@ -138,6 +140,23 @@ define([
     },
 
     /**
+     * Builds the geometry and appearance data required to render the Polygon in
+     * Cesium.
+     */
+    _build: function () {
+      if (!this._primitive || this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+        if (this._primitive) {
+          this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+        }
+        this._primitive = this._createPrimitive();
+        this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+      } else if (this._dirty['style']) {
+        this._updateAppearance();
+      }
+      this.clean();
+    },
+
+    /**
      * Creates the Cesium primitive object required to render the Mesh.
      * The Primitive object contains data to transform the Mesh from model space to
      * world space, as well as controlling the appearance of the Mesh.
@@ -147,31 +166,25 @@ define([
     _createPrimitive: function () {
       if (this.isRenderable()) { return null; }
 
-      var thePrimitive;
-      var instance = new GeometryInstance({
-        id: this.getId().replace('mesh', ''),
-        geometry: this._geometry,
-        modelMatrix: this._modelMatrix,
-        attributes : {
-          color : ColorGeometryInstanceAttribute.fromColor(this._style._fillColour)
-        }
-      });
+      var thePrimitive,
+          geometry = this._updateGeometry(),
+          modelMatrix = this._updateModelMatrix(),
+          color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
+          instance = new GeometryInstance({
+            id: this.getId().replace('mesh', ''),
+            geometry: geometry,
+            modelMatrix: modelMatrix,
+            attributes: {
+              color: color
+            }
+          });
 
-      /*
       // TODO(bpstudds): Work out how to get MaterialAppearance working.
-      this._appearance = new MaterialAppearance({
-          closed: true,
-          translucent: false,
-          faceForward: true
-      });
-      this._appearance.material.uniforms.color = Mesh._convertAtlasToCesiumColor(this._uniformColor);
-      */
-
       thePrimitive = new Primitive({
         geometryInstances: instance,
         appearance: new PerInstanceColorAppearance({
-          flat : false,
-          translucent : false
+          flat: false,
+          translucent: false
         }),
         debugShowBoundingVolume: false
       });
@@ -180,64 +193,90 @@ define([
     },
 
     /**
-     * Creates Cesium Geometry object required to render the Mesh.
-     * The Geometry represents the Mesh in 'model space'.
-     * @returns {Geometry}
+     * Updates the geometry data as required.
+     * @returns {GeometryInstance}
      * @private
      */
-    _createGeometry: function () {
-      var theGeometry = {};
-      var attributes = new GeometryAttributes({
-        position: new GeometryAttribute({
-          componentDatatype: ComponentDatatype.DOUBLE,
-          componentsPerAttribute: 3,
-          values: this._positions
-        })
-      });
+    _updateGeometry: function () {
+      var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
-      var geometry = new Geometry({
-        attributes: attributes,
-        indices: this._indices,
-        primitiveType: PrimitiveType.TRIANGLES,
-        boundingSphere: BoundingSphere.fromVertices(this._positions)
-      });
-      // Compute normals if they are not passed int.
-      if (!this._normals) {
-        geometry = GeometryPipeline.computeNormal(geometry);
-      } else {
-        geometry.attributes.normal = new GeometryAttribute({
-          componentDatatype: ComponentDatatype.FLOAT,
-          componentsPerAttribute: 3,
-          values: this._normals
+      // Generate new cartesians if the vertices have changed.
+      if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+        var theGeometry = {};
+        var attributes = new GeometryAttributes({
+          position: new GeometryAttribute({
+            componentDatatype: ComponentDatatype.DOUBLE,
+            componentsPerAttribute: 3,
+            values: this._positions
+          })
         });
+
+        var geometry = new Geometry({
+          attributes: attributes,
+          indices: this._indices,
+          primitiveType: PrimitiveType.TRIANGLES,
+          boundingSphere: BoundingSphere.fromVertices(this._positions)
+        });
+        // Compute normals if they are not passed int.
+        if (!this._normals) {
+          geometry = GeometryPipeline.computeNormal(geometry);
+        } else {
+          geometry.attributes.normal = new GeometryAttribute({
+            componentDatatype: ComponentDatatype.FLOAT,
+            componentsPerAttribute: 3,
+            values: this._normals
+          });
+        }
+
+        theGeometry.attributes = geometry.attributes;
+        theGeometry.indices = geometry.indices;
+        theGeometry.primitiveType = geometry.primitiveType;
+        theGeometry.boundingSphere = geometry.boundingSphere;
       }
 
-      theGeometry.attributes = geometry.attributes;
-      theGeometry.indices = geometry.indices;
-      theGeometry.primitiveType = geometry.primitiveType;
-      theGeometry.boundingSphere = geometry.boundingSphere;
-
-      return theGeometry;
+      return theGeometry || this._geometry;
     },
 
-    _createModelMatrix: function () {
+    _updateModelMatrix: function () {
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0,0,0);
       }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
-      var rotationTranslation = Matrix4.fromRotationTranslation(
-        // Input angle must be in radians.
-        Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-        new Cartesian3(0.0, 0.0, 35));
-      // Apply rotation, translation and scale transformations.
-      return Matrix4.multiplyByScale(
-        Matrix4.multiply(
-          Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-            Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-          rotationTranslation),
-        this._scale);
+      if (this._dirty['entity'] || this._dirty['model']) {
+        var rotationTranslation = Matrix4.fromRotationTranslation(
+          // Input angle must be in radians.
+          Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
+          new Cartesian3(0.0, 0.0, 35));
+        // Apply rotation, translation and scale transformations.
+        var modelMatrix = Matrix4.multiplyByScale(
+          Matrix4.multiply(
+            Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
+              Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+            rotationTranslation),
+          this._scale);
+      }
+      return modelMatrix || this._modelMatrix;
+    },
+
+    /**
+     * Updates the appearance data.
+     * @private
+     */
+    _updateAppearance: function () {
+
+      if (this._dirty['entity'] || this._dirty['style']) {
+        if (!this._primitive) {
+          this._appearance = ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+        } else {
+          if (!this._appearance) {
+            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', '')).color;
+          }
+          this._appearance = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+        }
+      }
+      return this._appearance;
     },
 
     /**
