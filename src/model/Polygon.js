@@ -135,17 +135,13 @@ define([
         //console.debug('entity', this.getId(), 'updating appearance');
         if (!this._appearance) {
           // Generate appearance data
-          if (false && !this._height) {
-            this._appearance = new EllipsoidSurfaceAppearance();
-          } else {
-            // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
-            //                 This may require sorting of vertices before rendering.
-            this._appearance = new MaterialAppearance({
-              closed: false,
-              translucent: false,
-              faceForward: true
-            });
-          }
+          // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
+          //                 This may require sorting of vertices before rendering.
+          this._appearance = new MaterialAppearance({
+            closed: false,
+            translucent: false,
+            faceForward: true
+          });
         }
         this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
       }
