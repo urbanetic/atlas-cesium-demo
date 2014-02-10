@@ -10,20 +10,12 @@ define([
   'atlas-cesium/cesium/Source/Core/Color',
   // Base class
   'atlas/model/Polygon'
-], function (Style,
-             Colour,
-             GeometryInstance,
-             PolygonGeometry,
-             Primitive,
-             Cartographic,
-             EllipsoidSurfaceAppearance,
-             MaterialAppearance,
-             CesiumColour,
-             PolygonCore) {
+], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+            EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, PolygonCore) {
   "use strict";
 
   //var Polygon = function (id, vertices, args) {
-  var Polygon = PolygonCore.extend( /** @lends atlas-cesium.model.Polygon# */ {
+  var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
      * The Cesium GeometryInstance of the Polygon.
@@ -76,7 +68,7 @@ define([
      * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
      * @returns {Boolean} - Whether the Polygon is visible.
      */
-    isVisible: function () {
+    isVisible: function() {
       return !!(this._primitive && this._primitive.show);
     },
 
@@ -88,7 +80,7 @@ define([
      * Generates the data structures required to render a Polygon
      * in Cesium.
      */
-    _createPrimitive: function () {
+    _createPrimitive: function() {
       console.debug('creating primitive for entity', this.getId());
       if (!this.isRenderable()) {
         if (this._primitive) {
@@ -98,11 +90,14 @@ define([
             this._renderManager.getMinimumTerrainHeight(this._vertices));
         this._primitive =
             new Primitive({geometryInstances: this.getGeometry(),
-                appearance: this.getAppearance()});
+              appearance: this.getAppearance()});
       }
       // Check that the primitive has been correctly created.
       this._renderable = (this._primitive instanceof Primitive);
-      if (!this._renderable) console.error('Cesium Primitive not correctly created', this._primitive);
+      if (!this._renderable) {
+        console.error('Cesium Primitive not correctly created',
+            this._primitive);
+      }
     },
 
     /**
@@ -112,7 +107,7 @@ define([
      * @param {Number} minTerrainElevation - The minimum height of the terrain
      *        in the area covered by this polygon.
      */
-    _build: function (ellipsoid, minTerrainElevation) {
+    _build: function(ellipsoid, minTerrainElevation) {
       // TODO(bpstudds): Need to cache computed geometry and appearance data somehow.
       console.debug('building entity', this.getId());
       this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
@@ -145,49 +140,54 @@ define([
           faceForward: true
         });
       }
-      this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+      this._appearance.material.uniforms.color =
+          Polygon._convertStyleToCesiumColors(this._style).fill;
     },
 
     /**
      * Shows the Polygon. If the current rendering data is out of data, the polygon is
      * rebuilt and then rendered.
+     * @returns {Boolean} Whether the polygon is shown.
      */
-    show: function () {
+    show: function() {
       if (this.isVisible() && this.isRenderable()) {
         console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
+        console.debug('showing entity ' + this.getId());
         if (!this.isRenderable()) {
-          if (!this._primitive) {
-            // Create the primitive is it doesn't exist.
-            this._createPrimitive();
-            this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-          } else {
-            // Otherwise rebuild primitive as required.
-            // TODO(bpstudds): Work out how to do the rebuild.
-            this._createPrimitive();
-            this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-          }
+          // TODO(bpstudds): Work out how to do the rebuild if primitive already exists.
+          this._createPrimitive();
         }
-        console.log('showing entity ' + this.getId());
+        // TODO(aramk) Cesium's CompositePrimitive has poor performance with large numbers of
+        // entities - it uses an array instead of a map. We should extend it and provide it as the
+        // scene when creating the Viewer. Avoiding Array.splice() will make a difference for 8k
+        // entities. We should also make it render the visible entities by keeping a map of those
+        // which are visible instead of iterating over each one and checking per frame.
+        var primitives = this._renderManager._widget.scene.getPrimitives();
+        if (!primitives.contains(this._primitive)) {
+          primitives.add(this._primitive);
+        }
         this._primitive.show = true;
       }
-      return this.isRenderable() && this._primitive.show;
+      return this.isRenderable() && this.isVisible();
     },
 
     /**
      * Hides the Polygon.
+     * @returns {Boolean} Whether the polygon is hidden.
      */
-    hide: function () {
+    hide: function() {
       if (this.isVisible()) {
+        console.debug('hiding entity ' + this.getId());
         this._primitive.show = false;
       }
-      return this._primitive.show;
+      return !this.isVisible();
     },
 
     /**
      * Function to permanently remove the Polygon from the scene (vs. hiding it).
      */
-    remove: function () {
+    remove: function() {
       this._super();
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
@@ -196,18 +196,20 @@ define([
     // BEHAVIOUR
     // -------------------------------------------
 
-    onSelect: function () {
+    onSelect: function() {
       this._previousStyle = this.setStyle(Polygon.SELECTED_STYLE);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color =
+            Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       this.onEnableEditing();
     },
 
-    onDeselect: function () {
+    onDeselect: function() {
       this.setStyle(this._previousStyle || Polygon.DEFAULT_STYLE);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Polygon._convertStyleToCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color =
+            Polygon._convertStyleToCesiumColors(this._style).fill;
       }
       this.onDisableEditing();
     }
@@ -238,12 +240,12 @@ define([
    * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
    * @returns {Cartesian3} Array of Cartesian3 coordinates.
    */
-  Polygon._coordArrayToCartesianArray = function (ellipsoid, coords) {
+  Polygon._coordArrayToCartesianArray = function(ellipsoid, coords) {
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
       cartographics.push(Cartographic.fromDegrees(
-        /*longitude*/ coords[i].y,
-        /*latitude*/  coords[i].x)
+          /*longitude*/ coords[i].y,
+          /*latitude*/  coords[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
@@ -267,7 +269,7 @@ define([
    * @returns {Color} The converted Cesium Color object.
    * @private
    */
-  Polygon._convertAtlasToCesiumColor = function (color) {
+  Polygon._convertAtlasToCesiumColor = function(color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };

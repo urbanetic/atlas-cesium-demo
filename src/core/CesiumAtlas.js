@@ -100,7 +100,7 @@ define([
         name: 'entity/hide',
         callback: function (args) {
           var entity = this._managers.entity.getById(args.id);
-          entity && entity.hide();
+          entity.hide();
         }.bind(this)
       }/*,
       // TODO(bpstudds): Move Overlay testing code somewhere intelligent.
