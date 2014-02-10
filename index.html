@@ -60,7 +60,7 @@
 //      cesiumAtlas.publish('entity/bulk/show', args);
 
       // Test mesh
-      args.id++;
+      args.id = 100;
       args.displayMode = 'mesh';
       delete args.footprint;
       args.mesh = testMesh;
@@ -120,24 +120,24 @@
       // -------------------------------------------
       setTimeout(function () {
         // For the dynamic projection, the 'static' projection used
-        var ids = [0, 1, 2, 3, 4, 5, 6],
+        var ids = [0, 1, 2, 3, 4, 5, 6, 100],
             data = [
-              {index: 1, values: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}},
-              {index: 2, values: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1}},
-              {index: 3, values: {0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2}},
-              {index: 4, values: {0: 3, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3}},
-              {index: 5, values: {0: 4, 1: 4, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4}},
-              {index: 6, values: {0: 5, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5}},
+              {index: 1, values: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 100: 5}},
+              {index: 2, values: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 100: 4}},
+              {index: 3, values: {0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 100: 3}},
+              {index: 4, values: {0: 3, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 100: 2}},
+              {index: 5, values: {0: 4, 1: 4, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 100: 1}},
+              {index: 6, values: {0: 5, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 100: 0}},
               {index: 7}
             ],
             codomain = {startProj: Colour.BLUE, endProj: Colour.RED},
             config = {
-              bins: {numBins: 5, firstValue: 0, lastValue: 6},
+              bins: {numBins: 5, firstValue: 0, lastValue: 5},
               codomain: codomain,
               type: 'discrete'
             };
         this.publish('projection/dynamic/add', {
-          type: 'height', ids: ids, data: data, config: config, fps: 1, delta: 1
+          type: 'colour', ids: ids, data: data, config: config, fps: 1, delta: 1
         });
       }.bind(cesiumAtlas), 10000)
 
