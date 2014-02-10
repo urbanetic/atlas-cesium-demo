@@ -88,22 +88,12 @@ define([
     show: function () {
       // TODO(bpstudds): Update this to new format.
       if (!this.isRenderable()) {
-        /*// TODO(bpstudds): Work out how to correctly move the silly primitives.
-        // Remove existing primitive
-        if (this._primitive) {
-          //console.debug('removing primitive');
-          this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
-        }
-        // TODO(bpstudds): Move this into a _build() function.
-        //console.debug('building primitive');
-        this._geometry = this._updateGeometry();
-        this._modelMatrix = this._updateModelMatrix();
-        this._primitive = this._createPrimitive();
-        this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-        this.setRenderable(true);*/
         this._build();
+      } else if (this.isVisible()) {
+        console.debug('Tried to show entity ' + this.getId() + ', which is already correctly rendered.');
+        return;
       }
-      //console.debug('Showing entity', this.getId());
+      console.debug('Showing entity', this.getId());
       this._primitive.show = true;
     },
 
@@ -227,13 +217,11 @@ define([
             values: this._normals
           });
         }
-
         theGeometry.attributes = geometry.attributes;
         theGeometry.indices = geometry.indices;
         theGeometry.primitiveType = geometry.primitiveType;
         theGeometry.boundingSphere = geometry.boundingSphere;
       }
-
       return theGeometry || this._geometry;
     },
 
