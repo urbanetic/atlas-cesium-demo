@@ -134,13 +134,13 @@ define([
      * Cesium.
      */
     _build: function () {
-      if (!this._primitive || this._dirty['vertices'] || this._dirty['model']) {
+      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
         }
         this._primitive = this._createPrimitive();
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-      } else if (this._dirty['style']) {
+      } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
       this.clean();
@@ -191,7 +191,7 @@ define([
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
       // Generate new cartesians if the vertices have changed.
-      if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         var theGeometry = {};
         var attributes = new GeometryAttributes({
           position: new GeometryAttribute({
@@ -232,7 +232,7 @@ define([
       }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
-      if (this._dirty['entity'] || this._dirty['model']) {
+      if (this.isDirty('entity') || this.isDirty('model')) {
         var rotationTranslation = Matrix4.fromRotationTranslation(
           // Input angle must be in radians.
           Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
@@ -254,7 +254,7 @@ define([
      */
     _updateAppearance: function () {
 
-      if (this._dirty['entity'] || this._dirty['style']) {
+      if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._primitive) {
           this._appearance = ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
         } else {

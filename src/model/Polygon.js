@@ -99,7 +99,7 @@ define([
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
       // Generate new cartesians if the vertices have changed.
-      if (this._dirty['entity'] || this._dirty['vertices'] || this._dirty['model']) {
+      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         console.debug('updating geometry for entity ' + this.getId());
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
@@ -130,7 +130,7 @@ define([
      */
     _updateAppearance: function() {
 
-      if (this._dirty['entity'] || this._dirty['style']) {
+      if (this.isDirty('entity') || this.isDirty('style')) {
         console.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
           // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
@@ -152,13 +152,13 @@ define([
      * Cesium.
      */
     _build: function() {
-      if (!this._primitive || this._dirty['vertices'] || this._dirty['model']) {
+      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
         }
         this._primitive = this._createPrimitive();
         this._renderManager._widget.scene.getPrimitives().add(this._primitive);
-      } else if (this._dirty['style']) {
+      } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
       this.clean();
