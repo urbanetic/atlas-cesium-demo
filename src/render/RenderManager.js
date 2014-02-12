@@ -7,7 +7,6 @@ define([
   'atlas-cesium/model/Feature',
   // Cesium imports.
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
-  'atlas-cesium/cesium/Source/Scene/PerformanceDisplay',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryLayer',
@@ -17,7 +16,7 @@ define([
   'atlas-cesium/cesium/Source/Core/defined',
   // Base class
   'atlas/render/RenderManager'
-], function(extend, Vertex, Feature, Viewer, PerformanceDisplay, requestAnimationFrame, Imagery,
+], function(extend, Vertex, Feature, Viewer, requestAnimationFrame, Imagery,
             ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore) {
   "use strict";
 
@@ -39,7 +38,6 @@ define([
     RenderManager.base.constructor.call(this, atlasManagers);
 
     this._widget = null;
-    this._performanceDisplay = null;
 
     // TODO(aramk) Allow passing arguments for this.
     // TODO(aramk) Add docs for these.
@@ -286,12 +284,8 @@ define([
   RenderManager.prototype.bindEvents = function() {
     // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
     this._atlasManagers.event.addEventHandler('extern', 'debugMode', function(debug) {
-      if (debug && !this._performanceDisplay) {
-        this._performanceDisplay = this._performanceDisplay || new PerformanceDisplay();
-        this._widget.scene.getPrimitives().add(this._performanceDisplay);
-      } else if (this._performanceDisplay) {
-        this._widget.scene.getPrimitives().remove(this._performanceDisplay);
-      }
+      var scene = this._widget.scene;
+      scene.debugShowFramesPerSecond = debug;
     }.bind(this));
 
     // TODO(aramk) Capture when the camera is moving instead of these?
