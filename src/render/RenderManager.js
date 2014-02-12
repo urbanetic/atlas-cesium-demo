@@ -15,9 +15,10 @@ define([
   'atlas-cesium/cesium/Source/ThirdParty/when',
   'atlas-cesium/cesium/Source/Core/defined',
   // Base class
-  'atlas/render/RenderManager'
+  'atlas/render/RenderManager',
+  'atlas/lib/utility/Log'
 ], function(extend, Vertex, Feature, Viewer, requestAnimationFrame, Imagery,
-            ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore) {
+            ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore, Log) {
   "use strict";
 
   /**
@@ -80,6 +81,7 @@ define([
       timeline: false,
       useDefaultRenderLoop: false
     });
+    this._drawShim();
     this._render();
   };
 
@@ -107,6 +109,23 @@ define([
     prototype.__defineGetter__('state', function() {
       return this._state;
     });
+  };
+
+  RenderManager.prototype._drawShim = function() {
+    var primitives = this._widget.scene.getPrimitives();
+    var oldAdd = primitives.add,
+        oldRemove = primitives.remove,
+        delay = 1000;
+    primitives.add = function () {
+      var results = oldAdd.apply(primitives, arguments);
+      this._delaySleep(delay);
+      return results;
+    }.bind(this);
+    primitives.remove = function () {
+      var results = oldRemove.apply(primitives, arguments);
+      this._delaySleep(delay);
+      return results;
+    }.bind(this);
   };
 
   /**
@@ -155,7 +174,7 @@ define([
       widget._renderLoopError.raiseEvent(widget, e);
       if (widget._showRenderLoopErrors) {
         widget.showErrorPanel('An error occurred while rendering.  Rendering has stopped.', e);
-        console.error(e);
+        Log.error(e);
       }
     }
   };
@@ -255,6 +274,9 @@ define([
     if (this._preventFpsDelay) {
       return;
     }
+    if (ms === undefined) {
+      ms = this._fpsDelay;
+    }
     this._setSleeping(false);
     this._fpsDelayHandler = setTimeout(function() {
       this._setSleeping(true);
@@ -298,7 +320,7 @@ define([
 
     this._atlasManagers.event.addEventHandler('intern', 'input/leftup', function() {
       this._preventFpsDelay = false;
-      this._delaySleep(this._fpsDelay);
+      this._delaySleep();
     }.bind(this));
 
     this._atlasManagers.event.addEventHandler('intern', 'input/wheel', function() {

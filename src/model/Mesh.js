@@ -23,48 +23,40 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   //Base class.
-  'atlas/model/Mesh'
-], function (
-  DeveloperError,
-  Colour,
-  Style,
-  Vertex,
-  BoundingSphere,
-  Cartographic,
-  Cartesian3,
-  CesiumColor,
-  ColorGeometryInstanceAttribute,
-  ComponentDatatype,
-  Geometry,
-  GeometryAttribute,
-  GeometryAttributes,
-  GeometryInstance,
-  GeometryPipeline,
-  Matrix3,
-  Matrix4,
-  PrimitiveType,
-  Transforms,
-  MaterialAppearance,
-  PerInstanceColorAppearance,
-  Primitive,
-  MeshCore) {
+  'atlas/model/Mesh',
+  'atlas/lib/utility/Log'
+], function(DeveloperError, Colour, Style, Vertex, BoundingSphere, Cartographic, Cartesian3,
+            CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
+            GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
+            Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
+            Primitive, MeshCore, Log) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
-   * @param {String} id - The ID of th/pull-request/20/converting-geoentity-and-its-subtypes-to/diff#chg-src/model/Polygon.jse Mesh.
+   * @param {String} id - The ID of the Mesh.
    * @param {String} meshData - The data required to render the Mesh.
-   * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every triangle vertex to ensure shading works correctly.
-   * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements forming a vertex, ie a (x, y, z) coordinate tuple in model space.
-   * @param {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh. Every 3 elements forming a new triangle with counter-clockwise winding order.
-   * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
-   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a [red, green, blue, alpha] formatted array.
+   * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an
+   * [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every
+   * triangle vertex to ensure shading works correctly.
+   * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements
+   * forming a vertex, ie a (x, y, z) coordinate tuple in model space.
+   * @param {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh.
+   * Every 3 elements forming a new triangle with counter-clockwise winding order.
+   * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
+   * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
+   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
+   * [red, green, blue, alpha] formatted array.
    * @param {Array.<Number>} [meshData.scale] - The scale of the Mesh.
    * @param {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
    * @param {Object} args - Required and optional arguments to construct the Mesh object.
-   * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and <code>args</code> are provided as arguments)
-   * @param {atlas.render.RenderManager} args.renderManager - The RenderManager object responsible for the GeoEntity.
-   * @param {atlas.events.EventManager} args.eventManager - The EventManager object responsible for the Event system.
-   * @param {atlas.events.EventTarget} [args.parent] - The parent EventTarget object of the GeoEntity.g
+   * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and
+   * <code>args</code> are provided as arguments)
+   * @param {atlas.render.RenderManager} args.renderManager - The RenderManager object responsible
+   * for the GeoEntity.
+   * @param {atlas.events.EventManager} args.eventManager - The EventManager object responsible for
+   * the Event system.
+   * @param {atlas.events.EventTarget} [args.parent] - The parent EventTarget object of the
+   * GeoEntity.
    *
    * @see {@link atlas.model.Mesh}
    * @see {@link atlas.model.GeoEntity}
@@ -72,7 +64,7 @@ define([
    * @class atlas-cesium.model.Mesh
    * @extends atlas.model.Mesh
    */
-  var Mesh = MeshCore.extend( /** @lends atlas-cesium.model.Mesh# */ {
+  var Mesh = MeshCore.extend(/** @lends atlas-cesium.model.Mesh# */ {
 
     /**
      * The Cesium Primitive object.
@@ -81,50 +73,54 @@ define([
      */
     _primitive: null,
 
-
     /**
      * Shows the Mesh. The rendering data is recreated if it has been invalidated.
      */
-    show: function () {
+    show: function() {
       // TODO(bpstudds): Update this to new format.
       if (!this.isRenderable()) {
         this._build();
       } else if (this.isVisible()) {
-        console.debug('Tried to show entity ' + this.getId() + ', which is already correctly rendered.');
+        Log.debug('Tried to show entity ' + this.getId() +
+            ', which is already correctly rendered.');
         return;
       }
-      console.debug('Showing entity', this.getId());
+      Log.debug('Showing entity', this.getId());
       this._primitive.show = true;
     },
 
     /**
      * Hides the Mesh.
      */
-    hide: function () {
+    hide: function() {
       this._primitive && (this._primitive.show = false);
     },
 
     /**
      * @returns {Boolean} Whether the Mesh is visible.
      */
-    isVisible: function () {
+    isVisible: function() {
       return this._primitive && this._primitive.show;
     },
 
-    onSelect: function () {
+    onSelect: function() {
       this.setStyle(MeshCore.SELECTED_STYLE);
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
+            ''));
+        attributes.color =
+            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onEnableEditing();
     },
 
-    onDeselect: function () {
+    onDeselect: function() {
       this.setStyle(this._previousStyle);
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
+            ''));
+        attributes.color =
+            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onDisableEditing();
     },
@@ -133,7 +129,7 @@ define([
      * Builds the geometry and appearance data required to render the Polygon in
      * Cesium.
      */
-    _build: function () {
+    _build: function() {
       if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
         if (this._primitive) {
           this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
@@ -153,8 +149,10 @@ define([
      * @returns {Primitive}
      * @private
      */
-    _createPrimitive: function () {
-      if (this.isRenderable()) { return null; }
+    _createPrimitive: function() {
+      if (this.isRenderable()) {
+        return null;
+      }
 
       var thePrimitive,
           geometry = this._updateGeometry(),
@@ -187,7 +185,7 @@ define([
      * @returns {GeometryInstance}
      * @private
      */
-    _updateGeometry: function () {
+    _updateGeometry: function() {
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
 
       // Generate new cartesians if the vertices have changed.
@@ -225,25 +223,25 @@ define([
       return theGeometry || this._geometry;
     },
 
-    _updateModelMatrix: function () {
+    _updateModelMatrix: function() {
       var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
       if (!(this._rotation instanceof Vertex)) {
-        this._rotation = new Vertex(0,0,0);
+        this._rotation = new Vertex(0, 0, 0);
       }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
       if (this.isDirty('entity') || this.isDirty('model')) {
         var rotationTranslation = Matrix4.fromRotationTranslation(
-          // Input angle must be in radians.
-          Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-          new Cartesian3(0.0, 0.0, 35));
+            // Input angle must be in radians.
+            Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
+            new Cartesian3(0.0, 0.0, 35));
         // Apply rotation, translation and scale transformations.
         var modelMatrix = Matrix4.multiplyByScale(
-          Matrix4.multiply(
-            Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-              Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
-            rotationTranslation),
-          this._scale);
+            Matrix4.multiply(
+                Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
+                    Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+                rotationTranslation),
+            this._scale);
       }
       return modelMatrix || this._modelMatrix;
     },
@@ -252,16 +250,19 @@ define([
      * Updates the appearance data.
      * @private
      */
-    _updateAppearance: function () {
+    _updateAppearance: function() {
 
       if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._primitive) {
-          this._appearance = ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+          this._appearance =
+              ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
         } else {
           if (!this._appearance) {
-            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
+            this._appearance =
+                this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
           }
-          this._appearance.color = ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+          this._appearance.color =
+              ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
         }
       }
       return this._appearance;
@@ -270,7 +271,7 @@ define([
     /**
      * Function to permanently remove the Mesh from the scene (vs. hiding it).
      */
-    remove: function () {
+    remove: function() {
       this._super();
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     }
@@ -285,7 +286,7 @@ define([
   };
 
   // TODO(bpstudds): Move this to some central location.
-  Mesh._convertAtlasToCesiumColor = function (color) {
+  Mesh._convertAtlasToCesiumColor = function(color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };

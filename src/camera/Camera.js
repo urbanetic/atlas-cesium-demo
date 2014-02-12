@@ -5,14 +5,10 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Scene/CameraFlightPath',
   // Base class.
-  'atlas/camera/Camera'
+  'atlas/camera/Camera',
+  'atlas/lib/utility/Log'
 ], function (
-  DeveloperError,
-  Vertex,
-  Cartographic,
-  CameraFlightPath,
-  CameraCore) {
-
+  DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
   /**
    * @classdesc The Camera object controls the position and orientation of the camera.
    * It exposes an API to set position and orientation, zoom to a given GeoEntity
@@ -41,7 +37,7 @@ define([
 
     _animateCamera: function (newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
-      console.debug('animating camera change');
+      Log.debug('animating camera change');
       var latitude = newCamera.position.lat * Math.PI / 180,
           longitude = newCamera.position.lng * Math.PI / 180,
           altitude = newCamera.position.elevation,

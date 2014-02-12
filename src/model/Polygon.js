@@ -9,9 +9,10 @@ define([
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Core/Color',
   // Base class
-  'atlas/model/Polygon'
+  'atlas/model/Polygon',
+  'atlas/lib/utility/Log'
 ], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, PolygonCore) {
+            EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, PolygonCore, Log) {
   "use strict";
 
   //var Polygon = function (id, vertices, args) {
@@ -81,7 +82,7 @@ define([
      * in Cesium.
      */
     _createPrimitive: function() {
-      console.debug('creating primitive for entity', this.getId());
+      Log.debug('creating primitive for entity', this.getId());
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
       return new Primitive({
@@ -100,7 +101,7 @@ define([
 
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        console.debug('updating geometry for entity ' + this.getId());
+        Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
 
@@ -131,7 +132,7 @@ define([
     _updateAppearance: function() {
 
       if (this.isDirty('entity') || this.isDirty('style')) {
-        console.debug('updating appearance for entity ' + this.getId());
+        Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
           // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
           //                 This may require sorting of vertices before rendering.
@@ -171,9 +172,9 @@ define([
      */
     show: function() {
       if (this.isVisible() && this.isRenderable()) {
-        console.debug('entity ' + this.getId() + 'already visible and correctly rendered');
+        Log.debug('entity ' + this.getId() + 'already visible and correctly rendered');
       } else {
-        console.debug('showing entity ' + this.getId());
+        Log.debug('showing entity ' + this.getId());
         if (!this.isRenderable()) {
           this._build();
         }
@@ -188,7 +189,7 @@ define([
      */
     hide: function() {
       if (this.isVisible()) {
-        console.debug('hiding entity ' + this.getId());
+        Log.debug('hiding entity ' + this.getId());
         this._primitive.show = false;
       }
       return !this.isVisible();
