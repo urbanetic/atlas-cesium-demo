@@ -114,13 +114,17 @@ define([
         }
       }
 
+      // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
+      var elevation = this._minTerrainElevation + this._elevation +
+          this._zIndex * this._zIndexOffset;
+
       // Generate geometry data.
       return new GeometryInstance({
         id: this.getId().replace('polygon', ''),
         geometry: PolygonGeometry.fromPositions({
           positions: this._cartesians,
-          height: this._minTerrainElevation + this._elevation,
-          extrudedHeight: this._minTerrainElevation + this._elevation + this._height
+          height: elevation,
+          extrudedHeight: elevation + this._height
         })
       });
     },
@@ -130,7 +134,6 @@ define([
      * @private
      */
     _updateAppearance: function() {
-
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
