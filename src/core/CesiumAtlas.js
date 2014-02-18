@@ -75,14 +75,15 @@ define([
    * Registers event handlers with the EventManager for global events.
    */
   CesiumAtlas.prototype.bindEvents = function() {
+    var entityManager = this._managers.entity;
     var handlerParams = [
       { // Define an event handler for showing an entity.
         source: 'extern',
         name: 'entity/show',
         callback: function(args) {
-          var entity = this._managers.entity.getById(args.id);
-          (!entity) && (entity = this.addFeature(args.id, args));
           Log.time('entity/show');
+          var entity = entityManager.getById(args.id);
+          (!entity) && (entity = entityManager.createFeature(args.id, args));
           entity.show();
           Log.timeEnd('entity/show');
         }.bind(this)
@@ -91,8 +92,8 @@ define([
         source: 'extern',
         name: 'entity/hide',
         callback: function(args) {
-          var entity = this._managers.entity.getById(args.id);
           Log.time('entity/hide');
+          var entity = entityManager.getById(args.id);
           entity.hide();
           Log.timeEnd('entity/hide');
         }.bind(this)
@@ -117,35 +118,6 @@ define([
     ];
     // Add the event handlers to the EventManager.
     this._eventHandlers = this._managers.event.addEventHandlers(handlerParams);
-  };
-
-  /**
-   * Creates and adds a new Feature object to atlas-cesium.
-   * @param {String} id - The ID of the Feature to add.
-   * @param {Object} args - Arguments describing the Feature to add.
-   * @param {String|Array.atlas.model.Vertex} [args.footprint=null] - Either a WKT string or array
-   * of Vertices describing the Features' footprint.
-   * @param {Object} [args.mesh=null] - A object in the C3ML format describing the Features' Mesh.
-   * @param {Number} [args.height=0] - The extruded height when displaying as a extruded polygon.
-   * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of
-   * the Mesh or Polygon.
-   * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when
-   * created.
-   * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of
-   * 'footprint', 'extrusion' or 'mesh'.
-   */
-  Atlas.prototype.addFeature = function(id, args) {
-    //return this._managers.render.addFeature(id, args);
-    if (id === undefined) {
-      throw new DeveloperError('Can add Feature without specifying id');
-    } else {
-      Log.debug('adding feature', id);
-      // Add EventManger to the args for the feature.
-      args.eventManager = this._managers.event;
-      // Add the RenderManager to the args for the feature.
-      args.renderManager = this._managers.render;
-      return this._managers.entity.createFeature(id, args);
-    }
   };
 
   return CesiumAtlas;
