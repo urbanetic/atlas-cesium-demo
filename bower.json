@@ -16,7 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "cesium": "https://github.com/AnalyticalGraphicsInc/cesium.git#b25",
+    "cesium": "https://github.com/AnalyticalGraphicsInc/cesium.git#b19",
     "utility": "https://bitbucket.org/mutopia/utility.git"
   }
 }
