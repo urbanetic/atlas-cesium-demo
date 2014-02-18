@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+  var path = require('path');
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
 
@@ -33,8 +34,8 @@ module.exports = function(grunt) {
         command: [
             'echo "----- Building Cesium               -----"',
             'cd lib/cesium',
-            './Tools/apache-ant-1.8.2/bin/ant build',
-            'cd ../..',
+            path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
+            'cd ' + path.join('..', '..'),
             'echo "----- Cesium built                  -----"',
         ].join('&&')
       },
