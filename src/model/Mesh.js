@@ -150,10 +150,6 @@ define([
      * @private
      */
     _createPrimitive: function() {
-      if (this.isRenderable()) {
-        return null;
-      }
-
       var thePrimitive,
           geometry = this._updateGeometry(),
           modelMatrix = this._updateModelMatrix(),

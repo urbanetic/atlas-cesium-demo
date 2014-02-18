@@ -5,14 +5,14 @@ define([
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Core/Cartographic',
-  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
+//  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Core/Color',
   // Base class
   'atlas/model/Polygon',
   'atlas/lib/utility/Log'
 ], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            EllipsoidSurfaceAppearance, MaterialAppearance, CesiumColour, PolygonCore, Log) {
+            /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, CesiumColour, PolygonCore, Log) {
   "use strict";
 
   //var Polygon = function (id, vertices, args) {
@@ -83,6 +83,7 @@ define([
      */
     _createPrimitive: function() {
       Log.debug('creating primitive for entity', this.getId());
+      // TODO(aramk) _geometry isn't actually set.
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
       return new Primitive({
@@ -175,7 +176,7 @@ define([
      */
     show: function() {
       if (this.isVisible() && this.isRenderable()) {
-        Log.debug('entity ' + this.getId() + 'already visible and correctly rendered');
+        Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
       } else {
         Log.debug('showing entity ' + this.getId());
         if (!this.isRenderable()) {

@@ -44,6 +44,7 @@ define([
       var args = {
         id: 12345
       };
+      // TODO(aramk) Use createFeature on EntityManager instead.
       renderManager.addFeature(args.id, args);
       doh.assertTrue(renderManager._entities[args.id] instanceof Feature);
     }
