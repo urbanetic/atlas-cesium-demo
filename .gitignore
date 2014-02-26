@@ -1,6 +1,10 @@
 # KML files
 src/data/layers
 
+# Build
+/lib
+/node_modules
+
 # Data
 data/*
 
