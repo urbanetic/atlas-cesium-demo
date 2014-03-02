@@ -1,11 +1,12 @@
 define([
   'atlas/util/Extends',
   'atlas-cesium/model/Feature',
-  'atlas-cesium/model/Polygon',
+  'atlas-cesium/model/Line',
   'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Polygon',
   // Base class
   'atlas/entity/EntityManager'
-], function (extend, Feature, Polygon, Mesh, EntityManagerCore) {
+], function (extend, Feature, Line, Mesh, Polygon, EntityManagerCore) {
 
   var EntityManager = function (atlasManagers) {
     EntityManager.base.constructor.call(this, atlasManagers);
@@ -27,6 +28,7 @@ define([
      */
     this._entityTypes = {
       'Feature': Feature,
+      'Line': Line,
       'Polygon': Polygon,
       'Mesh': Mesh
     };
