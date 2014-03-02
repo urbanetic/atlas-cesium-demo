@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>atlas-cesium demo</title>
-  <link rel="stylesheet" href="./atlas-cesium/lib/cesium/Source/Widgets/Viewer/Viewer.css">
+  <link rel="stylesheet" href="atlas-cesium/lib/cesium/Source/Widgets/Viewer/Viewer.css">
   <link rel="stylesheet" href="atlas/css/atlas.css">
-  <!--link rel="stylesheet" href="./atlas/css/Atlas.css"-->
   <script src="atlas/lib/require.js"></script>
   <script>
     "use strict";
@@ -30,12 +29,13 @@
       ] */
     });
     require(['atlas-cesium/core/CesiumAtlas',
-               'atlas/assets/testWKT',
-               'atlas/assets/testMesh2',
-               'atlas/model/Colour'
-               //'atlas/assets/PrahranModel',
-               //'atlas/assets/LargePrahranModel'
-    ], function (CesiumAtlas, testWKT, testMesh, Colour, prahranModel, largePrahranModel) {
+             'atlas/model/Colour',
+             'atlas-cesium/model/Line',
+             'atlas/assets/testWKT',
+             'atlas/assets/testMesh2'
+             //'atlas/assets/PrahranModel',
+             //'atlas/assets/LargePrahranModel'
+    ], function (CesiumAtlas, Colour, Line, testWKT, testMesh, prahranModel, largePrahranModel) {
       console.debug('Creating atlas-cesium');
       cesiumAtlas = new CesiumAtlas();
 
@@ -118,29 +118,46 @@
       // -------------------------------------------
       // Test dynamic projection (using publish).
       // -------------------------------------------
-      setTimeout(function () {
-        // For the dynamic projection, the 'static' projection used
-        var ids = [0, 1, 2, 3, 4, 5, 6, 100],
-            data = [
-              {index: 1, values: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 100: 5}},
-              {index: 2, values: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 100: 4}},
-              {index: 3, values: {0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 100: 3}},
-              {index: 4, values: {0: 3, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 100: 2}},
-              {index: 5, values: {0: 4, 1: 4, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 100: 1}},
-              {index: 6, values: {0: 5, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 100: 0}},
-              {index: 7}
-            ],
-            codomain = {startProj: Colour.BLUE, endProj: Colour.RED},
-            config = {
-              bins: {numBins: 5, firstValue: 0, lastValue: 5},
-              codomain: codomain,
-              type: 'discrete'
-            };
-        this.publish('projection/dynamic/add', {
-          type: 'colour', ids: ids, data: data, config: config, fps: 1, delta: 1
-        });
-      }.bind(cesiumAtlas), 10000)
+//      setTimeout(function () {
+//        // For the dynamic projection, the 'static' projection used
+//        var ids = [0, 1, 2, 3, 4, 5, 6, 100],
+//            data = [
+//              {index: 1, values: {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 100: 5}},
+//              {index: 2, values: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 100: 4}},
+//              {index: 3, values: {0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 100: 3}},
+//              {index: 4, values: {0: 3, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 100: 2}},
+//              {index: 5, values: {0: 4, 1: 4, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 100: 1}},
+//              {index: 6, values: {0: 5, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 100: 0}},
+//              {index: 7}
+//            ],
+//            codomain = {startProj: Colour.BLUE, endProj: Colour.RED},
+//            config = {
+//              bins: {numBins: 5, firstValue: 0, lastValue: 5},
+//              codomain: codomain,
+//              type: 'discrete'
+//            };
+//        this.publish('projection/dynamic/add', {
+//          type: 'colour', ids: ids, data: data, config: config, fps: 1, delta: 1
+//        });
+//      }.bind(cesiumAtlas), 10000)
 
+      // -------------------------------------------------
+      // Test out the new Lines class
+      // -------------------------------------------------
+      var args = {
+            id: '1000',
+            line: [
+              {x: -37, y: 143},
+              {x: -37, y: 144}
+            ],
+            eventManager: cesiumAtlas._managers.event,
+            renderManager: cesiumAtlas._managers.render
+          };
+      // Construct using WKT.
+      args.line = 'LINESTRING (-37 144, -37 143)';
+      cesiumAtlas.publish('entity/show', args);
+      //line.show();
+      console.error('Drawn line?');
     });
   </script>
 </head>
