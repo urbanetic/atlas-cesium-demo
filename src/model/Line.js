@@ -8,7 +8,7 @@ define([
   //'atlas-cesium/cesium/Source/Core/SimplePolylineGeometry',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/model/Polygon',
-  'utility/Log'
+  'atlas/lib/utility/Log'
 ], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, Primitive, MaterialAppearance,
             Polygon, Log) {
   "use strict";
