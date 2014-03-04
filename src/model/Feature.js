@@ -40,10 +40,7 @@ define([
         this._line = new Line(id + 'line', args);
       }
       if (args.footprint) {
-        args.color = args.footprint.color;
-        args.elevation = args.footprint.elevation;
-        args.height = args.footprint.height;
-        args.vertices = args.footprint.vertices;
+        args.vertices = args.footprint;
         this._footprint = new Polygon(id + 'polygon', args);
       }
       if (args.mesh) {

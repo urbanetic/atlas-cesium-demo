@@ -201,9 +201,16 @@ define([
           primitiveType: PrimitiveType.TRIANGLES,
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
-        // Compute normals.
-        geometry = GeometryPipeline.computeNormal(geometry);
-
+        // Compute normals if they are not passed int.
+        if (!this._normals) {
+          geometry = GeometryPipeline.computeNormal(geometry);
+        } else {
+          geometry.attributes.normal = new GeometryAttribute({
+            componentDatatype: ComponentDatatype.FLOAT,
+            componentsPerAttribute: 3,
+            values: this._normals
+          });
+        }
         theGeometry.attributes = geometry.attributes;
         theGeometry.indices = geometry.indices;
         theGeometry.primitiveType = geometry.primitiveType;
@@ -223,7 +230,7 @@ define([
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
             Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-            new Cartesian3(0.0, 0.0, 0));
+            new Cartesian3(0.0, 0.0, 35));
         // Apply rotation, translation and scale transformations.
         var modelMatrix = Matrix4.multiplyByScale(
             Matrix4.multiply(
