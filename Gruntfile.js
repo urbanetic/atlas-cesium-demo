@@ -33,7 +33,7 @@ module.exports = function(grunt) {
         },
         command: [
             'echo "----- Building Cesium               -----"',
-            'cd lib/cesium',
+            'cd ' + path.join('lib', 'cesium'),
             path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
             'cd ' + path.join('..', '..'),
             'echo "----- Cesium built                  -----"',
@@ -53,9 +53,9 @@ module.exports = function(grunt) {
        files: [
          {
            expand: true,
-           cwd: 'src/cesium-overrides/',
+           cwd: path.join('src','cesium-overrides'),
            src: '**/*.js',
-           dest: './lib/cesium/',
+           dest: path.join('.', 'lib', 'cesium'),
            ext: '.js'
          }
        ]
