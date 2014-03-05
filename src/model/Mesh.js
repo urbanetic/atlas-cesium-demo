@@ -202,7 +202,8 @@ define([
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
         // Compute normals if they are not passed int.
-        if (!this._normals) {
+        // Always compute normals.
+        if (true || !this._normals) {
           geometry = GeometryPipeline.computeNormal(geometry);
         } else {
           geometry.attributes.normal = new GeometryAttribute({
