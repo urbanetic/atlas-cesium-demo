@@ -212,7 +212,7 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._previousStyle = this.setStyle(Polygon.SELECTED_STYLE);
+      this._previousStyle = this.setStyle(PolygonCore.getSelectedStyle());
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;
@@ -221,7 +221,7 @@ define([
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle || Polygon.DEFAULT_STYLE);
+      this.setStyle(this._previousStyle || PolygonCore.getDefaultStyle());
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;
@@ -233,18 +233,6 @@ define([
   // -------------------------------------------
   // STATICS
   // -------------------------------------------
-
-  /**
-   * Defines the default style to use when rendering a polygon.
-   * @type {atlas.model.Colour}
-   */
-  Polygon.DEFAULT_STYLE = new Style({fillColour: Colour.GREEN});
-
-  /**
-   * Defines the default style to use when rendering a selected polygon.
-   * @type {atlas.model.Colour}
-   */
-  Polygon.SELECTED_STYLE = new Style({fillColour: Colour.RED});
 
   /**
    * Function to covert an array of lat/long coordinates to

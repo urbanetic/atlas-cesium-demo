@@ -104,7 +104,7 @@ define([
     },
 
     onSelect: function() {
-      this.setStyle(MeshCore.SELECTED_STYLE);
+      this.setStyle(MeshCore.getSelectedStyle());
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
@@ -201,7 +201,7 @@ define([
           primitiveType: PrimitiveType.TRIANGLES,
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
-        // Compute normals if they are not passed int.
+        // Compute normals if they are not passed in.
         if (!this._normals) {
           geometry = GeometryPipeline.computeNormal(geometry);
         } else {

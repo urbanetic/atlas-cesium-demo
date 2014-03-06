@@ -36,20 +36,10 @@ define([
         args.style = this._style;
       }
       if (args.line) {
-        args.vertices = args.line;
-        this._line = new Line(id + 'line', args);
+        this._line = new Line(id + 'line', args.line, args);
       }
-      if (args.footprint) {
-        // If the footprint is a WKT string, pass it through. If it's an object, unpack it.
-        if (typeof args.footprint === 'string') {    
-          args.vertices = args.footprint;
-        } else {
-          args.color = args.footprint.color;
-          args.elevation = args.footprint.elevation;
-          args.height = args.footprint.height;
-          args.vertices = args.footprint.vertices;
-        }
-        this._footprint = new Polygon(id + 'polygon', args);
+      if (args.polygon) {
+        this._footprint = new Polygon(id + 'polygon', args.polygon, args);
       }
       if (args.mesh) {
         this._mesh = new Mesh(id + 'mesh', args.mesh, args);
