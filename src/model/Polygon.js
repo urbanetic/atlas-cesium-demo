@@ -125,7 +125,7 @@ define([
         geometry: PolygonGeometry.fromPositions({
           positions: this._cartesians,
           height: elevation,
-          extrudedHeight: elevation + this._showAsExtrusion ? this._height : 0
+          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
         })
       });
     },
