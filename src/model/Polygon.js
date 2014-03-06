@@ -212,7 +212,7 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._previousStyle = this.setStyle(PolygonCore.SELECTED_STYLE());
+      this._previousStyle = this.setStyle(PolygonCore.getSelectedStyle());
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;
@@ -221,7 +221,7 @@ define([
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle || PolygonCore.DEFAULT_STYLE());
+      this.setStyle(this._previousStyle || PolygonCore.getDefaultStyle());
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;
