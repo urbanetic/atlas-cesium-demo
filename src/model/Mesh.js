@@ -104,7 +104,7 @@ define([
     },
 
     onSelect: function() {
-      this.setStyle(MeshCore.SELECTED_STYLE);
+      this.setStyle(MeshCore.getSelectedStyle());
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
