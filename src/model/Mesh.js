@@ -201,9 +201,8 @@ define([
           primitiveType: PrimitiveType.TRIANGLES,
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
-        // Compute normals if they are not passed int.
-        // Always compute normals.
-        if (true || !this._normals) {
+        // Compute normals if they are not passed in.
+        if (!this._normals) {
           geometry = GeometryPipeline.computeNormal(geometry);
         } else {
           geometry.attributes.normal = new GeometryAttribute({
