@@ -202,6 +202,7 @@ define([
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
         // Force compute normals to fix abnormal normals from winding orders.
+        // TODO(Brandon) Gets server to calculate correct normals.
         geometry = GeometryPipeline.computeNormal(geometry);
 
         theGeometry.attributes = geometry.attributes;
