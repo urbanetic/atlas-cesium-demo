@@ -106,7 +106,6 @@ define([
     },
 
     onSelect: function() {
-      //this.setStyle(MeshCore.getSelectedStyle());
       var attributes;
       this._selected = true;
       if (this._primitive) {
@@ -119,7 +118,6 @@ define([
     },
 
     onDeselect: function() {
-      //this.setStyle(this._previousStyle);
       this._selected = false;
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',

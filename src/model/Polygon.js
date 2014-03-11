@@ -182,7 +182,7 @@ define([
         return true;
       }
       this._selected && this.onSelect();
-      Log.debug('showing entity ' + this.getId());
+      Log.debug('Showing entity ' + this.getId());
       this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
@@ -212,7 +212,6 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      //this._previousStyle = this.setStyle(PolygonCore.getSelectedStyle());
       this._selected = true;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
@@ -222,7 +221,6 @@ define([
     },
 
     onDeselect: function() {
-      //this.setStyle(this._previousStyle || PolygonCore.getDefaultStyle());
       this._selected = false;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
