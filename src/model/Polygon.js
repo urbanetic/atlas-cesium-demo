@@ -175,15 +175,15 @@ define([
      * @returns {Boolean} Whether the polygon is shown.
      */
     show: function() {
-      if (this.isVisible() && this.isRenderable()) {
+      if (!this.isRenderable()) {
+        this._build();
+      } else if (this.isVisible()) {
         Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
-      } else {
-        Log.debug('showing entity ' + this.getId());
-        if (!this.isRenderable()) {
-          this._build();
-        }
-        this._primitive.show = true;
+        return true;
       }
+      this._selected && this.onSelect();
+      Log.debug('Showing entity ' + this.getId());
+      this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
 
@@ -212,16 +212,16 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._previousStyle = this.setStyle(PolygonCore.getSelectedStyle());
+      this._selected = true;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(this._style).fill;
+            Polygon._convertStyleToCesiumColors(PolygonCore.getSelectedStyle()).fill;
       }
       this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle || PolygonCore.getDefaultStyle());
+      this._selected = false;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;

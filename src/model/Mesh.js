@@ -83,10 +83,12 @@ define([
       } else if (this.isVisible()) {
         Log.debug('Tried to show entity ' + this.getId() +
             ', which is already correctly rendered.');
-        return;
+        return true;
       }
+      this._selected && this.onSelect();
       Log.debug('Showing entity', this.getId());
       this._primitive.show = true;
+      return this.isRenderable() && this.isVisible();
     },
 
     /**
@@ -104,23 +106,25 @@ define([
     },
 
     onSelect: function() {
-      this.setStyle(MeshCore.getSelectedStyle());
+      var attributes;
+      this._selected = true;
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
-            ''));
+        attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+            ColorGeometryInstanceAttribute.toValue(
+                Mesh._convertStyleToCesiumColors(MeshCore.getSelectedStyle()).fill);
       }
       this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle);
+      this._selected = false;
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+            ColorGeometryInstanceAttribute.toValue(
+                Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onDisableEditing();
     },
@@ -243,17 +247,12 @@ define([
     _updateAppearance: function() {
 
       if (this.isDirty('entity') || this.isDirty('style')) {
-        if (!this._primitive) {
+        if (!this._appearance) {
           this._appearance =
-              ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
-        } else {
-          if (!this._appearance) {
-            this._appearance =
-                this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-          }
-          this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+              this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         }
+        this._appearance.color =
+            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
       }
       return this._appearance;
     },
