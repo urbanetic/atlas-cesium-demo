@@ -125,7 +125,7 @@ define([
         geometry: PolygonGeometry.fromPositions({
           positions: this._cartesians,
           height: elevation,
-          extrudedHeight: elevation + this._height
+          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
         })
       });
     },
@@ -175,15 +175,15 @@ define([
      * @returns {Boolean} Whether the polygon is shown.
      */
     show: function() {
-      if (this.isVisible() && this.isRenderable()) {
+      if (!this.isRenderable()) {
+        this._build();
+      } else if (this.isVisible()) {
         Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
-      } else {
-        Log.debug('showing entity ' + this.getId());
-        if (!this.isRenderable()) {
-          this._build();
-        }
-        this._primitive.show = true;
+        return true;
       }
+      this._selected && this.onSelect();
+      Log.debug('Showing entity ' + this.getId());
+      this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
 
@@ -212,16 +212,16 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._previousStyle = this.setStyle(Polygon.SELECTED_STYLE);
+      this._selected = true;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(this._style).fill;
+            Polygon._convertStyleToCesiumColors(PolygonCore.getSelectedStyle()).fill;
       }
       this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle || Polygon.DEFAULT_STYLE);
+      this._selected = false;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Polygon._convertStyleToCesiumColors(this._style).fill;
@@ -233,18 +233,6 @@ define([
   // -------------------------------------------
   // STATICS
   // -------------------------------------------
-
-  /**
-   * Defines the default style to use when rendering a polygon.
-   * @type {atlas.model.Colour}
-   */
-  Polygon.DEFAULT_STYLE = new Style({fillColour: Colour.GREEN});
-
-  /**
-   * Defines the default style to use when rendering a selected polygon.
-   * @type {atlas.model.Colour}
-   */
-  Polygon.SELECTED_STYLE = new Style({fillColour: Colour.RED});
 
   /**
    * Function to covert an array of lat/long coordinates to

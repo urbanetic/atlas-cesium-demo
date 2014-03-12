@@ -83,10 +83,12 @@ define([
       } else if (this.isVisible()) {
         Log.debug('Tried to show entity ' + this.getId() +
             ', which is already correctly rendered.');
-        return;
+        return true;
       }
+      this._selected && this.onSelect();
       Log.debug('Showing entity', this.getId());
       this._primitive.show = true;
+      return this.isRenderable() && this.isVisible();
     },
 
     /**
@@ -104,23 +106,25 @@ define([
     },
 
     onSelect: function() {
-      this.setStyle(MeshCore.SELECTED_STYLE);
+      var attributes;
+      this._selected = true;
       if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
-            ''));
+        attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+            ColorGeometryInstanceAttribute.toValue(
+                Mesh._convertStyleToCesiumColors(MeshCore.getSelectedStyle()).fill);
       }
       this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this.setStyle(this._previousStyle);
+      this._selected = false;
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+            ColorGeometryInstanceAttribute.toValue(
+                Mesh._convertAtlasToCesiumColor(this._style._fillColour));
       }
       this.onDisableEditing();
     },
@@ -201,16 +205,10 @@ define([
           primitiveType: PrimitiveType.TRIANGLES,
           boundingSphere: BoundingSphere.fromVertices(this._positions)
         });
-        // Compute normals if they are not passed int.
-        if (!this._normals) {
-          geometry = GeometryPipeline.computeNormal(geometry);
-        } else {
-          geometry.attributes.normal = new GeometryAttribute({
-            componentDatatype: ComponentDatatype.FLOAT,
-            componentsPerAttribute: 3,
-            values: this._normals
-          });
-        }
+        // Force compute normals to fix abnormal normals from winding orders.
+        // TODO(Brandon) Gets server to calculate correct normals.
+        geometry = GeometryPipeline.computeNormal(geometry);
+
         theGeometry.attributes = geometry.attributes;
         theGeometry.indices = geometry.indices;
         theGeometry.primitiveType = geometry.primitiveType;
@@ -230,7 +228,7 @@ define([
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
             Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-            new Cartesian3(0.0, 0.0, 35));
+            new Cartesian3(0.0, 0.0, 0));
         // Apply rotation, translation and scale transformations.
         var modelMatrix = Matrix4.multiplyByScale(
             Matrix4.multiply(
@@ -249,17 +247,12 @@ define([
     _updateAppearance: function() {
 
       if (this.isDirty('entity') || this.isDirty('style')) {
-        if (!this._primitive) {
+        if (!this._appearance) {
           this._appearance =
-              ColorGeometryInstanceAttribute.fromColour(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
-        } else {
-          if (!this._appearance) {
-            this._appearance =
-                this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-          }
-          this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+              this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         }
+        this._appearance.color =
+            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
       }
       return this._appearance;
     },
