@@ -37,7 +37,6 @@ define([
 
     _animateCamera: function (newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
-      Log.debug('animating camera change');
       var latitude = newCamera.position.lat * Math.PI / 180,
           longitude = newCamera.position.lng * Math.PI / 180,
           altitude = newCamera.position.elevation,
@@ -59,6 +58,7 @@ define([
         controller.tilt = (90 - newCamera.orientation.tilt) * Math.PI / 180;
         controller.heading = (360 - newCamera.orientation.bearing) * Math.PI / 180;
       }
+      Log.debug('animating camera change', newCamera);
       this._position = newCamera.position;
       this._orientation = newCamera.orientation;
     }
