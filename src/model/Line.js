@@ -5,13 +5,12 @@ define([
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  //'atlas-cesium/cesium/Source/Core/SimplePolylineGeometry',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
+  'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas-cesium/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, Primitive, MaterialAppearance,
-            Polygon, Log) {
-  "use strict";
+], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, Primitive,
+            PolylineColorAppearance, Polygon, Log) {
+
   /**
    * @class atlas-cesium.model.Line
    * @extends atlas.model.Line
@@ -29,7 +28,7 @@ define([
 
     /**
      * The Cesium appearance data of the Polygon.
-     * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
+     * @type {PolylineColorAppearance}
      * @private
      */
     _appearance: null,
@@ -95,33 +94,28 @@ define([
         Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-
-//        // For 3D extruded polygons, ensure polygon is not closed as it causes
-//        // rendering to hang.
-//        if (this._height > 0) {
-//          if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
-//            this._cartesians.pop();
-//          }
-//        }
       }
 
-//      var polyline = new SimplePolylineGeometry({
-//        positions: Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices),
-//        colors: Polygon._convertStyleToCesiumColors(this._style)
-//      });
-//      var geometry = SimplePolylineGeometry.createGeometry(polyline);
-
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      var elevation = this._minTerrainElevation;/* + this._elevation +
-          this._zIndex * this._zIndexOffset;*/
+      var colours = [],
+          elevation = this._minTerrainElevation;/* + this._elevation +
+              this._zIndex * this._zIndexOffset;*/
+
+      // TODO(bpstudds): Add support for different colours per line segment.
+      for (var i = this._cartesians.length; i > 0; i--) {
+        colours.push(this._style.getBorderColour());
+      }
 
       // Generate geometry data.
       return new GeometryInstance({
         id: this.getId().replace('line', ''),
-        geometry: PolylineGeometry.fromPositions({
-          positions: this._cartesians,
-          height: elevation,
-          width: 5
+        geometry: new PolylineGeometry({
+          positions : this._cartesians,
+          width : 10.0,
+          vertexFormat : PolylineColorAppearance.VERTEX_FORMAT,
+          colors: colours,
+          // TODO(bpstudds): Add optional per vertex graduated colour along each line segment.
+          colorsPerVertex: false
         })
       });
     },
@@ -134,30 +128,12 @@ define([
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-          // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
-          //                 This may require sorting of vertices before rendering.
-          this._appearance = new MaterialAppearance({
-            closed: false,
-            translucent: false,
-            faceForward: true
-          });
+          this._appearance = new PolylineColorAppearance();
         }
-        this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(this._style).fill;
+        // TODO(bpstudds): Uhhh, we might not be able to change the colour easily?
       }
       return this._appearance;
     },
-
-//    _build: function() {
-//      var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
-//      var polyline = new SimplePolylineGeometry({
-//        positions: Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices),
-//        colors: Polygon._convertStyleToCesiumColors(this._style)
-//      });
-//      this._geometry = SimplePolylineGeometry.createGeometry(polyline);
-//
-//      this.clean();
-//    },
 
     show: function() {
       if (this.isVisible() && this.isRenderable()) {
