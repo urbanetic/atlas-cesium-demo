@@ -8,11 +8,22 @@ define([
         anOrientation = { tilt: 10, heading: 20, rotation: 30 };
 
     beforeEach(function () {
-      camera = new Camera();
     });
 
     afterEach(function () {
       camera = null;
+    });
+
+    it ('can be constructed', function () {
+      var args = {
+        position: aPosition,
+        orientation: anOrientation,
+        renderManager: {}
+      };
+      camera = new Camera(args);
+      expect(camera).not.toBeNull();
+      expect(camera._position).toEqual(aPosition);
+      expect(camera._orientation).toEqual(anOrientation);
     });
 
     it ('can move the camera to new position', function () {
