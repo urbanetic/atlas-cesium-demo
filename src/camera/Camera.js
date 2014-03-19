@@ -1,4 +1,5 @@
 define([
+  'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
   'atlas/model/Vertex',
   // Cesium imports
@@ -7,8 +8,8 @@ define([
   // Base class.
   'atlas/camera/Camera',
   'atlas/lib/utility/Log'
-], function (
-  DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
+], function (AtlasMath, DeveloperError, Vertex, Cartographic, CameraFlightPath,
+             CameraCore, Log) {
   /**
    * @classdesc The Camera object controls the position and orientation of the camera.
    * It exposes an API to set position and orientation, zoom to a given GeoEntity
@@ -37,8 +38,8 @@ define([
 
     _animateCamera: function (newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
-      var latitude = newCamera.position.lat * Math.PI / 180,
-          longitude = newCamera.position.lng * Math.PI / 180,
+      var latitude = AtlasMath.toRadians(newCamera.position.lat),
+          longitude = AtlasMath.toRadians(newCamera.position.lng),
           altitude = newCamera.position.elevation,
           position = new Cartographic(longitude, latitude, altitude);
       if (newCamera.duration > 0) {
@@ -55,8 +56,8 @@ define([
         var cesiumCamera = this._renderManager.getCesiumCamera(),
             controller = cesiumCamera.controller;
         controller.setPositionCartographic(position);
-        controller.tilt = (90 - newCamera.orientation.tilt) * Math.PI / 180;
-        controller.heading = (360 - newCamera.orientation.bearing) * Math.PI / 180;
+        controller.tilt = AtlasMath.toRadians(90 - newCamera.orientation.tilt);
+        controller.heading = AtlasMath.toRadians(360 - newCamera.orientation.bearing);
       }
       Log.debug('animating camera change', newCamera);
       this._position = newCamera.position;
