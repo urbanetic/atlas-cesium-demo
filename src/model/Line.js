@@ -18,6 +18,7 @@ define([
   return Line.extend(/** @lends atlas-cesium.model.Line# */{
 
     // TODO(aramk) Refactor this wth Polygon and Mesh, a lot of building logic is very similar.
+    // TODO(aramk) See above - this will add support for elevation.
 
     /**
      * The Cesium GeometryInstance of the Polygon.
@@ -111,7 +112,7 @@ define([
         id: this.getId().replace('line', ''),
         geometry: new PolylineGeometry({
           positions : this._cartesians,
-          width : 10.0,
+          width : this._width,
           vertexFormat : PolylineColorAppearance.VERTEX_FORMAT,
           colors: colours,
           // TODO(bpstudds): Add optional per vertex graduated colour along each line segment.
