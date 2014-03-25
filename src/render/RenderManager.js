@@ -7,6 +7,7 @@ define([
   'atlas/util/Extends',
   'atlas-cesium/model/Feature',
   // Cesium imports.
+  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/defined',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
@@ -17,7 +18,7 @@ define([
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, Vertex, extend, Feature, defined, requestAnimationFrame, Imagery, ImageryLayer, ImageryState, TileProviderError, when, Viewer, RenderManagerCore) {
+], function(Log, Vertex, extend, Feature, Cartographic, defined, requestAnimationFrame, Imagery, ImageryLayer, ImageryState, TileProviderError, when, Viewer, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
@@ -381,7 +382,7 @@ define([
     var ellipsoid = this._widget.centralBody.getEllipsoid(),
         cesiumCart = new Cartographic({longitude: cart.y, latitude: cart.x, height: cart.z});
 
-    return ellipsoid.cartographicToCartesian(cart);
+    return ellipsoid.cartographicToCartesian(cesiumCart);
   };
 
   return RenderManager;
