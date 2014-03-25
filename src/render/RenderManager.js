@@ -2,24 +2,22 @@
  * The Cesium implementation of the atlas RenderManager
  */
 define([
-  'atlas/util/Extends',
+  'atlas/lib/utility/Log',
   'atlas/model/Vertex',
+  'atlas/util/Extends',
   'atlas-cesium/model/Feature',
   // Cesium imports.
-  'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
+  'atlas-cesium/cesium/Source/Core/defined',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryLayer',
-  'atlas-cesium/cesium/Source/Scene/TileProviderError',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
+  'atlas-cesium/cesium/Source/Scene/TileProviderError',
   'atlas-cesium/cesium/Source/ThirdParty/when',
-  'atlas-cesium/cesium/Source/Core/defined',
+  'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
-  'atlas/render/RenderManager',
-  'atlas/lib/utility/Log'
-], function(extend, Vertex, Feature, Viewer, requestAnimationFrame, Imagery,
-            ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore, Log) {
-  "use strict";
+  'atlas/render/RenderManager'
+], function(Log, Vertex, extend, Feature, defined, requestAnimationFrame, Imagery, ImageryLayer, ImageryState, TileProviderError, when, Viewer, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
