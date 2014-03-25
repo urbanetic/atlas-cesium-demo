@@ -70,16 +70,19 @@ define([
 
         it ('geometry data', function () {
           var geometry = ellipse._updateGeometry();
+          expect(geometry).not.toBeNull();
           expect(geometry instanceof GeometryInstance).toBe(true);
         });
 
         it ('appearance data', function () {
           var appearance = ellipse._updateAppearance();
+          expect(appearance).not.toBeNull();
           expect(appearance instanceof MaterialAppearance).toBe(true);
         });
 
         it ('primitive object', function () {
           var primitive = ellipse._createPrimitive();
+          expect(primitive).not.toBeNull();
           expect(primitive instanceof Primitive).toBe(true);
         });
 

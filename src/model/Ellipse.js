@@ -97,10 +97,13 @@ define([
       Log.debug('creating primitive for entity', this.getId());
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
-      return new Primitive({
+      var p = new Primitive({
         geometryInstances: this.getGeometry(),
-        appearance: this.getAppearance()
+        appearance: this.getAppearance(),
+        debugShowBoundingVolume: true
       });
+      console.debug(p);
+      return p;
     },
 
     /**
@@ -110,27 +113,27 @@ define([
      */
     _updateGeometry: function() {
       // Generate new cartesians if the vertices have changed.
-      if (this.isDirty('entity') || this.isDirty('model')) {
+      if (this.isDirty('entity') || this.isDirty('model') || !this._geometry) {
         Log.debug('updating geometry for entity ' + this.getId());
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices) || 0.0;
-      }
-
-      // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      var elevation = this._minTerrainElevation + this._elevation +
+        // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
+        var elevation = this._minTerrainElevation + this._elevation +
           this._zIndex * this._zIndexOffset;
-
-      // Generate geometry data.
-      return new GeometryInstance({
-        id: this.getId().replace('ellipse', ''),
-        geometry: new EllipseGeometry({
-          center: this._renderManager.cartesianFromCartographic(this.getCentroid()),
-          semiMajorAxis: this.getSemiMajorAxis(),
-          semiMinorAxis: this.getSemiMinorAxis(),
-          rotation: AtlasMath.toRadians(this.getRotation()),
-          height: elevation,
-          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
-        })
-      });
+            // Generate new geometry data.
+        return new GeometryInstance({
+          id: this.getId().replace('ellipse', ''),
+          geometry: new EllipseGeometry({
+            center: this._renderManager.cartesianFromCartographic(this.getCentroid()),
+            semiMajorAxis: this.getSemiMajorAxis(),
+            semiMinorAxis: this.getSemiMinorAxis(),
+            rotation: AtlasMath.toRadians(this.getRotation()),
+            height: elevation,
+            //extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0),
+            vertexFormat: MaterialAppearance.VERTEX_FORMAT
+          })
+        });
+      }
+      return this._geometry;
     },
 
     /**
@@ -139,7 +142,7 @@ define([
      * @private
      */
     _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style')) {
+      if (this.isDirty('entity') || this.isDirty('style') || !this._appearance) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
           // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
@@ -189,6 +192,18 @@ define([
       Log.debug('Showing entity ' + this.getId());
       this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
+
+//      var ellipseInstance = new GeometryInstance({
+//        geometry : new EllipseGeometry({
+//          center : center,
+//          semiMinorAxis : semiMinorAxis,
+//          semiMajorAxis : semiMajorAxis,
+//          rotation : rotation,
+//          stRotation : Cesium.Math.toRadians(22),
+//          vertexFormat : Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT
+//        })
+//      });
+
     },
 
     /**
