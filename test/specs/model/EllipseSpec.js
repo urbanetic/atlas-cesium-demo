@@ -19,7 +19,7 @@ define([
         getMinimumTerrainHeight: function () { return 0; },
         _widget: {
           scene: {
-            getPrimatives: function () {
+            getPrimitives: function () {
               return {
                 add: function () { ; },
                 remove: function () { ; }
@@ -79,6 +79,21 @@ define([
         var primitive = ellipse._createPrimitive();
         expect(primitive instanceof Primitive).toBe(true);
       });
-    })
+
+      it ('but does not regenerate data if not required', function () {
+        ellipse.show();
+        var geometry1 = ellipse._geometry,
+            appearance1 = ellipse._appearance,
+            primitive1 = ellipse._primitive;
+        ellipse.hide();
+        ellipse.show();
+        var geometry2 = ellipse._geometry,
+            appearance2 = ellipse._appearance,
+            primitive2 = ellipse._primitive;
+        expect(geometry1).toEqual(geometry2);
+        expect(appearance1).toEqual(appearance2);
+        expect(primitive1).toEqual(primitive2);
+      })
+    }); // End 'can generate data required to render'
   }); // End 'An Ellipse'
 });
