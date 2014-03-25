@@ -60,40 +60,63 @@ define([
       });
     }); // End 'cannot be constructed'
 
-    describe ('can generate data required to render', function () {
+    describe ('when constructed', function () {
+
       beforeEach (function () {
         ellipse = new Ellipse('id', ellipseData, args);
       });
 
-      it ('geometry data', function () {
-        var geometry = ellipse._updateGeometry();
-        expect(geometry instanceof GeometryInstance).toBe(true);
-      });
+      describe ('can generate data required to render', function () {
 
-      it ('appearance data', function () {
-        var appearance = ellipse._updateAppearance();
-        expect(appearance instanceof MaterialAppearance).toBe(true);
-      });
+        it ('geometry data', function () {
+          var geometry = ellipse._updateGeometry();
+          expect(geometry instanceof GeometryInstance).toBe(true);
+        });
 
-      it ('primitive object', function () {
-        var primitive = ellipse._createPrimitive();
-        expect(primitive instanceof Primitive).toBe(true);
-      });
+        it ('appearance data', function () {
+          var appearance = ellipse._updateAppearance();
+          expect(appearance instanceof MaterialAppearance).toBe(true);
+        });
 
-      it ('but does not regenerate data if not required', function () {
-        ellipse.show();
-        var geometry1 = ellipse._geometry,
-            appearance1 = ellipse._appearance,
-            primitive1 = ellipse._primitive;
-        ellipse.hide();
-        ellipse.show();
-        var geometry2 = ellipse._geometry,
-            appearance2 = ellipse._appearance,
-            primitive2 = ellipse._primitive;
-        expect(geometry1).toEqual(geometry2);
-        expect(appearance1).toEqual(appearance2);
-        expect(primitive1).toEqual(primitive2);
-      })
-    }); // End 'can generate data required to render'
+        it ('primitive object', function () {
+          var primitive = ellipse._createPrimitive();
+          expect(primitive instanceof Primitive).toBe(true);
+        });
+
+        it ('but does not regenerate data if not required', function () {
+          ellipse.show();
+          var geometry1 = ellipse._geometry,
+              appearance1 = ellipse._appearance,
+              primitive1 = ellipse._primitive;
+          ellipse.hide();
+          ellipse.show();
+          var geometry2 = ellipse._geometry,
+              appearance2 = ellipse._appearance,
+              primitive2 = ellipse._primitive;
+          expect(geometry2).toEqual(geometry1);
+          expect(appearance2).toEqual(appearance1);
+          expect(primitive2).toEqual(primitive1);
+        });
+      }); // End 'can generate data required to render'
+
+      describe ('can partially update', function () {
+        it ('when the centroid is moved', function () {
+          // Initial conditions
+          ellipse.show();
+          var appearance1 = ellipse._appearance,
+              primitive1 = ellipse._primitive;
+          // Change geometry of Ellipse and check only that changed.
+          ellipse.translate({x: 10, y: 20});
+          ellipse.show();
+          var appearance2 = ellipse._appearance,
+              primitive2 = ellipse._primitive;
+          // Do a dodgy to check primitive hasn't been recreated.
+          primitive2.geometryInstances = primitive1.geometryInstances;
+          expect(appearance2).toEqual(appearance1);
+          expect(primitive2).toEqual(primitive1);
+        });
+
+      }); // End 'can partially update'
+    }); // End 'when constructed'
   }); // End 'An Ellipse'
 });
