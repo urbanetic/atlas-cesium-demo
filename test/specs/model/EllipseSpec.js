@@ -116,6 +116,39 @@ define([
           expect(primitive2).toEqual(primitive1);
         });
 
+        it ('when the semi major/minor axis is changed', function () {
+          // Initial conditions
+          ellipse.show();
+          var appearance1 = ellipse._appearance,
+              primitive1 = ellipse._primitive;
+          // Change geometry of Ellipse and check only that changed.
+          ellipse.scale({x: 1, y: 1});
+          ellipse.show();
+          var appearance2 = ellipse._appearance,
+              primitive2 = ellipse._primitive;
+          // Do a dodgy to check primitive hasn't been recreated.
+          primitive2.geometryInstances = primitive1.geometryInstances;
+          expect(appearance2).toEqual(appearance1);
+          expect(primitive2).toEqual(primitive1);
+        });
+
+        it ('when style is changed, geometry is unchanged', function () {
+          // Initial conditions
+          ellipse.show();
+          var geometry1 = ellipse._geometry,
+              appearance1 = ellipse._appearance,
+              primitive1 = ellipse._primitive;
+          // Change geometry of Ellipse and check only that changed.
+          ellipse.modifyStyle({fillColour: {red: 1, green: 1, blue: 1}});
+          ellipse.show();
+          var geometry2 = ellipse._geometry,
+              appearance2 = ellipse._appearance,
+              primitive2 = ellipse._primitive;
+          expect(geometry2).toEqual(geometry1);
+          // Do a dodgy to check primitive hasn't been recreated.
+          primitive2.appearance = primitive1.appearance;
+          expect(primitive2).toEqual(primitive1);
+        });
       }); // End 'can partially update'
     }); // End 'when constructed'
   }); // End 'An Ellipse'
