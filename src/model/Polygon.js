@@ -119,11 +119,23 @@ define([
       var elevation = this._minTerrainElevation + this._elevation +
           this._zIndex * this._zIndexOffset;
 
+      var holes = [];
+      if (this._holes) {
+        for (var i in this._holes) {
+          var hole = this._holes[i];
+          var cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, hole.coordinates);
+          holes.push({positions : cartesians});
+        }
+      }
       // Generate geometry data.
+      var polygonHierarchy = {
+          positions : this._cartesians,
+          holes : holes
+        };
       return new GeometryInstance({
         id: this.getId().replace('polygon', ''),
-        geometry: PolygonGeometry.fromPositions({
-          positions: this._cartesians,
+        geometry: new PolygonGeometry({
+          polygonHierarchy: polygonHierarchy,
           height: elevation,
           extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
         })
