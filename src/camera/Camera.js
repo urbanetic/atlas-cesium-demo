@@ -1,4 +1,5 @@
 define([
+  'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
   'atlas/model/Vertex',
   // Cesium imports
@@ -7,8 +8,8 @@ define([
   // Base class.
   'atlas/camera/Camera',
   'atlas/lib/utility/Log'
-], function (
-  DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
+], function (AtlasMath, DeveloperError, Vertex, Cartographic, CameraFlightPath,
+             CameraCore, Log) {
   /**
    * @classdesc The Camera object controls the position and orientation of the camera.
    * It exposes an API to set position and orientation, zoom to a given GeoEntity
@@ -16,30 +17,62 @@ define([
    * @author Brendan Studds
    *
    * @param {atlas.render.RenderManager} renderManager - The current Atlas RenderManager instance.
-   * @param {Object} [position] - The initial position of the Camera.
-   * @property {Number} [position.lat=-37] - The initial latitude in decimal degrees in the range [-90, 90].
-   * @property {Number} [position.lng=144] - The initial longitude in decimal degrees in the range [-180, 180].
-   * @property {Number} [position.elevation=20000] - The initial elevation above the Earth's surface metres.
-   * @param {Object} [orientation] - The initial orientation of the Camera.
-   * @property {Number} [orientation.tilt=0] - The tilt (or pitch) about the Camera's transverse axis in decimal degrees in the range [0, 180]. At 0 degrees the Camera is pointing at the point directly below it, at 180 degrees it is looking the opposite direction.
-   * @property {Number} [orientation.bearing=0] - The bearing (or yaw) about the normal axis from the surface to the camera in decimal degrees in the range [0, 360]. At 0 (and 360) degrees the Camera is facing North, 90 degrees it is facing East, etc.
-   * @property {Number} [orientation.rotation=0] - The rotation (or roll) about the orientation vector of the Camera in decimal degrees in the range [-180, 180].
+   * @param {Object} args - The arguments for the constructor.
+   * @param {Object} [args.position] - The initial position of the Camera.
+   * @property {Number} [args.position.lat=-37] - The initial latitude in decimal degrees in the range [-90, 90].
+   * @property {Number} [args.position.lng=144] - The initial longitude in decimal degrees in the range [-180, 180].
+   * @property {Number} [args.position.elevation=20000] - The initial elevation above the Earth's surface in metres.
+   * @param {Object} [args.orientation] - The initial orientation of the Camera.
+   * @property {Number} [args.orientation.tilt=0] - The tilt (or pitch) about the Camera's transverse axis in decimal degrees in the range [0, 180]. At 0 degrees the Camera is pointing at the point directly below it, at 180 degrees it is looking the opposite direction.
+   * @property {Number} [args.orientation.bearing=0] - The bearing (or yaw) about the normal axis from the surface to the camera in decimal degrees in the range [0, 360]. At 0 (and 360) degrees the Camera is facing North, 90 degrees it is facing East, etc.
+   * @property {Number} [args.orientation.rotation=0] - The rotation (or roll) about the orientation vector of the Camera in decimal degrees in the range [-180, 180].
+   * @param {atlas.render.RenderManager} [args.renderManager] - The Atlas render manager instance.
    *
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
    */
   return CameraCore.extend( /** @lends atlas-cesium.camera.Camera# */ {
 
-    _init: function (renderManager, position, orientation) {
-      this._super(position, orientation);
-      this._renderManager = renderManager;
+    _init: function (args) {
+      if (!args.renderManager) {
+        throw new DeveloperError('Can not create Atlas-Cesium Camera without render manager.');
+      }
+      this._super(args);
+      this._renderManager = args.renderManager;
     },
+
+    // -------------------------------------------
+    // GETTERS AND SETTERS
+    // -------------------------------------------
+
+    /**
+     * @returns {atlas.model.GeoPoint} The current position of the Camera.
+     */
+    getPosition: function () {
+      var cesiumCamera = this._renderManager.getCesiumCamera(),
+          cartesian = cesiumCamera.position;
+      return this._renderManager.cartographicFromCartesian(cartesian);
+    },
+
+    /**
+     * @returns {{bearing: Number, rotation: Number, tilt: Number}} The current orientation of the Camera.
+     */
+    getOrientation: function () {
+      var cesiumCamera = this._renderManager.getCesiumCamera(),
+          controller = cesiumCamera.controller,
+          bearing = AtlasMath.toDegrees(controller.heading),
+          tilt = AtlasMath.toDegrees(controller.tilt);
+      return {bearing: bearing, rotation: 0, tilt: tilt};
+    },
+
+    // -------------------------------------------
+    // BEHAVIOUR
+    // -------------------------------------------
 
     _animateCamera: function (newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
-      Log.debug('animating camera change');
-      var latitude = newCamera.position.lat * Math.PI / 180,
-          longitude = newCamera.position.lng * Math.PI / 180,
+      var latitude = AtlasMath.toRadians(newCamera.position.lat),
+          longitude = AtlasMath.toRadians(newCamera.position.lng),
           altitude = newCamera.position.elevation,
           position = new Cartographic(longitude, latitude, altitude);
       if (newCamera.duration > 0) {
@@ -56,9 +89,12 @@ define([
         var cesiumCamera = this._renderManager.getCesiumCamera(),
             controller = cesiumCamera.controller;
         controller.setPositionCartographic(position);
-        controller.tilt = (90 - newCamera.orientation.tilt) * Math.PI / 180;
-        controller.heading = (360 - newCamera.orientation.bearing) * Math.PI / 180;
+        controller.tilt = AtlasMath.toRadians(90 - newCamera.orientation.tilt);
+        controller.heading = AtlasMath.toRadians(360 - newCamera.orientation.bearing);
       }
+      Log.debug('animating camera change', newCamera);
+      Log.debug('position', this.getPosition());
+      Log.debug('orientation', this.getOrientation());
       this._position = newCamera.position;
       this._orientation = newCamera.orientation;
     }
