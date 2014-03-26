@@ -3,6 +3,7 @@
  */
 define([
   'atlas/lib/utility/Log',
+  'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/Extends',
   'atlas-cesium/model/Feature',
@@ -18,7 +19,9 @@ define([
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, Vertex, extend, Feature, Cartographic, defined, requestAnimationFrame, Imagery, ImageryLayer, ImageryState, TileProviderError, when, Viewer, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, extend, Feature, Cartographic, defined,
+            requestAnimationFrame, Imagery, ImageryLayer, ImageryState,
+            TileProviderError, when, Viewer, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
@@ -31,10 +34,6 @@ define([
    * @constructor
    */
   var RenderManager = function(atlasManagers) {
-    /*=====
-     Inherited from RenderManagerCore
-     this._atlasManagers;
-     =====*/
     RenderManager.base.constructor.call(this, atlasManagers);
 
     this._widget = null;
@@ -348,6 +347,10 @@ define([
     return this._widget.scene.getCamera();
   };
 
+  RenderManager.prototype.getEllipsoid = function () {
+    return this._widget.centralBody.getEllipsoid();
+  },
+
   /**
    * Returns the minimum terrain height, given currently configured terrain options, for
    * an array of Vertices.
@@ -364,7 +367,7 @@ define([
 
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
     var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
-    var cartographic = this._widget.centralBody.getEllipsoid().cartesianToCartographic(cartesian);
+    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
     var f = 180 / Math.PI;
     return new Vertex(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
   };
@@ -383,6 +386,16 @@ define([
         cesiumCart = new Cartographic({longitude: cart.y, latitude: cart.x, height: cart.z});
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
+  };
+
+  /**
+   * Converts a cartesian coordinate to a cartographic location on the rendered globe.
+   * @param cartesian The cartesian coordinates.
+   * @returns {atlas.model.GeoPoint}
+   */
+  RenderManager.prototype.cartographicFromCartesian = function (cartesian) {
+    var cesiumCartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
+    return GeoPoint.fromLatLngHeight(cesiumCartographic);
   };
 
   return RenderManager;

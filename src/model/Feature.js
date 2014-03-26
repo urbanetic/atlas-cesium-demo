@@ -36,6 +36,8 @@ define([
       if (args.style === undefined) {
         args.style = this._style;
       }
+
+      // TODO(bpstudds): Refactor all the model initialisers so they have the same signature.
       if (args.line) {
         this._line = new Line(id + 'line', args.line, args);
       }

@@ -1,8 +1,9 @@
 define([
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
-  'atlas-cesium/model/Polygon',
+  'atlas-cesium/model/Line',
   'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Polygon',
   // Base class
   'atlas/entity/EntityManager'
 ], function (Ellipse, Feature, Polygon, Mesh, EntityManagerCore) {
@@ -17,6 +18,7 @@ define([
      */
     _entityTypes: {
       'Feature': Feature,
+      'Line': Line,
       'Polygon': Polygon,
       'Mesh': Mesh
     },
