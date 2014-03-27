@@ -97,13 +97,11 @@ define([
       Log.debug('creating primitive for entity', this.getId());
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
-      var p = new Primitive({
+      return new Primitive({
         geometryInstances: this.getGeometry(),
         appearance: this.getAppearance(),
         debugShowBoundingVolume: true
       });
-      console.debug(p);
-      return p;
     },
 
     /**
@@ -192,18 +190,6 @@ define([
       Log.debug('Showing entity ' + this.getId());
       this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
-
-//      var ellipseInstance = new GeometryInstance({
-//        geometry : new EllipseGeometry({
-//          center : center,
-//          semiMinorAxis : semiMinorAxis,
-//          semiMajorAxis : semiMajorAxis,
-//          rotation : rotation,
-//          stRotation : Cesium.Math.toRadians(22),
-//          vertexFormat : Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT
-//        })
-//      });
-
     },
 
     /**
