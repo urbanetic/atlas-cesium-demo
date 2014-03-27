@@ -6,7 +6,7 @@ define([
   'atlas-cesium/model/Polygon',
   // Base class
   'atlas/entity/EntityManager'
-], function (Ellipse, Feature, Polygon, Mesh, EntityManagerCore) {
+], function (Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
 
   var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
