@@ -39,14 +39,6 @@ define([
     _primitive: null,
 
     /**
-     * An array of Cesium cartesian coordinates describing the position of the Ellipse
-     * on the Cesium globe.
-     * @see  {@link http://cesiumjs.org/Cesium/Build/Documentation/Cartesian3.html}
-     * @type {Cartesian3}
-     */
-    _cartesians: null,
-
-    /**
      * The minimum terrain elevation underneath the Ellipse.
      * @type {Number}
      */
@@ -121,7 +113,7 @@ define([
         return new GeometryInstance({
           id: this.getId().replace('ellipse', ''),
           geometry: new EllipseGeometry({
-            center: this._renderManager.cartesianFromCartographic(this.getCentroid()),
+            center: this._renderManager.cartesianFromGeoPoint(this.getCentroid()),
             semiMajorAxis: this.getSemiMajorAxis(),
             semiMinorAxis: this.getSemiMinorAxis(),
             rotation: AtlasMath.toRadians(this.getRotation()),

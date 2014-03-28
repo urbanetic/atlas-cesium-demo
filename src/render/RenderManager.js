@@ -375,15 +375,28 @@ define([
   /**
    * Converts a Vertex representing a geographic position and converts it to a
    * Cesium Cartestian3 object.
-   * @param {atlas.model.Vertex} cart - The geographic position.
+   * @param {atlas.model.Vertex} cart - The vertex.
    * @param {Number} cart.x - The longitude in decimal degrees.
    * @param {Number} cart.y - The latitude in decimal degrees.
    * @param {Number} cart.z - The elevation in metres.
    * @returns {Cartesian3}
    */
-  RenderManager.prototype.cartesianFromCartographic = function (cart) {
+  RenderManager.prototype.cartesianFromVertex = function (cart) {
     var ellipsoid = this._widget.centralBody.getEllipsoid(),
         cesiumCart = new Cartographic(cart.x, cart.y, cart.z);
+
+    return ellipsoid.cartographicToCartesian(cesiumCart);
+  };
+
+  /**
+   * Converts a GeoPoint  to a Cesium Cartestian3 object.
+   * @param {atlas.model.GeoPoint} cart - The geographic position.
+   * @returns {Cartesian3}
+   */
+  RenderManager.prototype.cartesianFromGeoPoint = function (cart) {
+    var radCart = cart.toRadians(),
+        ellipsoid = this._widget.centralBody.getEllipsoid(),
+        cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
   };
