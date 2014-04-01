@@ -7,8 +7,7 @@ define([
   // Base class.
   'atlas/camera/Camera',
   'atlas/lib/utility/Log'
-], function (
-  DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
+], function(DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
   /**
    * @classdesc The Camera object controls the position and orientation of the camera.
    * It exposes an API to set position and orientation, zoom to a given GeoEntity
@@ -28,37 +27,27 @@ define([
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
    */
-  return CameraCore.extend( /** @lends atlas-cesium.camera.Camera# */ {
+  return CameraCore.extend(/** @lends atlas-cesium.camera.Camera# */ {
 
-    _init: function (renderManager, position, orientation) {
+    _init: function(renderManager, position, orientation) {
       this._super(position, orientation);
       this._renderManager = renderManager;
     },
 
-    _animateCamera: function (newCamera) {
+    _animateCamera: function(newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
       Log.debug('animating camera change');
       var latitude = newCamera.position.lat * Math.PI / 180,
           longitude = newCamera.position.lng * Math.PI / 180,
           altitude = newCamera.position.elevation,
           position = new Cartographic(longitude, latitude, altitude);
-      if (newCamera.duration > 0) {
-        // Use a flight for non-zero zoom duration...
-        var flight = CameraFlightPath.createAnimationCartographic(
+      var flight = CameraFlightPath.createAnimationCartographic(
           this._renderManager._widget.scene, {
             destination: position,
             duration: newCamera.duration
           }
-        );
-        this._renderManager.getAnimations().add(flight);
-      } else {
-        // ... otherwise just move camera directly to target position.
-        var cesiumCamera = this._renderManager.getCesiumCamera(),
-            controller = cesiumCamera.controller;
-        controller.setPositionCartographic(position);
-        controller.tilt = (90 - newCamera.orientation.tilt) * Math.PI / 180;
-        controller.heading = (360 - newCamera.orientation.bearing) * Math.PI / 180;
-      }
+      );
+      this._renderManager.getAnimations().add(flight);
       this._position = newCamera.position;
       this._orientation = newCamera.orientation;
     }
