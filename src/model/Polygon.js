@@ -69,14 +69,23 @@ define([
      * one on the Polygon itself.
      */
     getEditingHandles: function () {
+      if (this._editingHandles) { return this._editingHandles; }
+
       var handles = [],
           centroid = this.getCentroid();
       handles.push(new Handle({linked: this, renderManager: this._renderManager}));
 
+      // Pop the first vertex if the polygon is closed.
+      var doubledVertex;
+      if (this._vertices.first === this._vertices.last) {
+        doubledVertex = this._vertices.pop();
+      }
       this._vertices.forEach(function (vertex) {
-        handles.push(new Handle({linked: vertex, target: this, renderManager: this._renderManager}));
-      }.bind(this));
-      return handles;
+        handles.push(new Handle({linked: vertex, target: this, renderManager: this._renderManager
+      })); }.bind(this));
+      doubledVertex && this._vertices.push(doubledVertex);
+
+      return (this._editingHandles = handles);
     },
 
     /**
@@ -86,6 +95,13 @@ define([
      */
     isVisible: function() {
       return !!(this._primitive && this._primitive.show);
+    },
+
+    setDirty: function () {
+      this._super(arguments);
+      if (this._dirty['vertices']) {
+        delete this._editingHandles;
+      }
     },
 
     // -------------------------------------------
