@@ -335,10 +335,11 @@ define([
 
   RenderManager.prototype.getAt = function(screenCoords) {
     // Get the relative coordinates within the Atlas widget.
-    var widgetRect = this._widget._container.getBoundingClientRect();
+    var widgetRect = this._atlasManagers.dom.getBoundingRect();
     screenCoords.x -= widgetRect.left;
     screenCoords.y -= widgetRect.top;
-    console.log(screenCoords, this._widget);
+    console.log(screenCoords.x, screenCoords.y);
+
     var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
     var pickedIds = [];
     pickedPrimitives.forEach(function(p) {
