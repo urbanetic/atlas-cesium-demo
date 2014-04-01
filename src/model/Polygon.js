@@ -97,13 +97,6 @@ define([
       return !!(this._primitive && this._primitive.show);
     },
 
-    setDirty: function () {
-      this._super(arguments);
-      if (this._dirty['vertices']) {
-        delete this._editingHandles;
-      }
-    },
-
     // -------------------------------------------
     // MODIFIERS
     // -------------------------------------------
