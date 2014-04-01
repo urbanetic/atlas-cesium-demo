@@ -58,9 +58,6 @@ define([
     _renderManager: null,
 
     _init: function (id, ellipseData, args) {
-      if (!args.renderManager) {
-        throw new DeveloperError ('Can not create Ellipse without specifying RenderManager.');
-      }
       this._super(id, ellipseData, args);
     },
 

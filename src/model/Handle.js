@@ -1,7 +1,15 @@
 define([
+  'atlas/model/GeoPoint',
+  'atlas-cesium/model/Ellipse',
   // Base class.
   'atlas/model/Handle'
-], function (HandleCore) {
+], function (GeoPoint, Ellipse, HandleCore) {
+
+  /**
+   * @typedef atlas-cesium.model.Handle
+   * @ignore
+   */
+  var Handle;
 
   /**
    * @classdesc This class extends the Atlas Handle class so it can be rendered
@@ -10,18 +18,40 @@ define([
    * @class atlas-cesium.model.Handle
    * @extends atlas.model.Handle
    */
-  return HandleCore.extend( /** @lends atlas.model.Handle# */ {
+  Handle = HandleCore.extend( /** @lends atlas.model.Handle# */ {
 
+    // TODO(bpstudds): Using an Ellipse isn't going to work. I'll have to switch it for
+    // a billboard or similar.
     /**
-     * The Polygon representing the handle.
-     * @type {atlas-cesium.model.Polygon}
+     * The Ellipse representing the handle.
+     * @type {atlas-cesium.model.Ellipse}
      * @private
      */
-    _polygon: null,
+    _dot: null,
 
     _init: function (args) {
       this._super(args);
+      var vertex = this.getLinked().getCentroid ? this.getLinked().getCentroid() : this.getLinked(),
+          centroid = GeoPoint.fromVertex(vertex);
+      this._dot = new Ellipse(this._id, {centroid: centroid, semiMajor: Handle.DOT_RADIUS}, args);
+      this.render();
     },
+
+    render: function () {
+      this._dot.show();
+    },
+
+    unrender: function () {
+      this._dot.remove();
+    }
   });
+
+  /**
+   * The radius of the dot in metres.
+   * @type {number}
+   */
+  Handle.DOT_RADIUS = 0.5;
+
+  return Handle;
 
 });

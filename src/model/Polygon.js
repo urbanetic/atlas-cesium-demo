@@ -71,10 +71,10 @@ define([
     getEditingHandles: function () {
       var handles = [],
           centroid = this.getCentroid();
-      handles.push(new Handle({centroid: centroid, linked: this, renderManager: this._renderManager}));
+      handles.push(new Handle({linked: this, renderManager: this._renderManager}));
 
       this._vertices.forEach(function (vertex) {
-        handles.push(new Handle({centroid: vertex, linked: vertex, target: this}));
+        handles.push(new Handle({linked: vertex, target: this, renderManager: this._renderManager}));
       }.bind(this));
       return handles;
     },
