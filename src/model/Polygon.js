@@ -1,6 +1,7 @@
 define([
-  'atlas/model/Style',
   'atlas/model/Colour',
+  'atlas/model/Style',
+  'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
@@ -11,9 +12,8 @@ define([
   // Base class
   'atlas/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
             /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, CesiumColour, PolygonCore, Log) {
-  "use strict";
 
   //var Polygon = function (id, vertices, args) {
   var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
@@ -63,6 +63,21 @@ define([
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
+
+    /**
+     * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
+     * one on the Polygon itself.
+     */
+    getEditingHandles: function () {
+      var handles = [],
+          centroid = this.getCentroid();
+      handles.push(new Handle({centroid: centroid, linked: this, renderManager: this._renderManager}));
+
+      this._vertices.forEach(function (vertex) {
+        handles.push(new Handle({centroid: vertex, linked: vertex, target: this}));
+      }.bind(this));
+      return handles;
+    },
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
