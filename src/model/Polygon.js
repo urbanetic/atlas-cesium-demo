@@ -72,15 +72,19 @@ define([
       if (this._editingHandles) { return this._editingHandles; }
 
       var handles = [],
-          centroid = this.getCentroid();
-      handles.push(new Handle({linked: this, renderManager: this._renderManager}));
+          centroid = this.getCentroid(),
+          elevation = this.getElevation(),
+          doubledVertex;
 
+      // Add a Handle for the Polygon itself.
+      handles.push(new Handle({linked: this, renderManager: this._renderManager}));
       // Pop the first vertex if the polygon is closed.
-      var doubledVertex;
       if (this._vertices.first === this._vertices.last) {
         doubledVertex = this._vertices.pop();
       }
+      // Add Handles for each vertex.
       this._vertices.forEach(function (vertex) {
+        vertex.z = elevation;
         handles.push(new Handle({linked: vertex, target: this, renderManager: this._renderManager
       })); }.bind(this));
       doubledVertex && this._vertices.push(doubledVertex);

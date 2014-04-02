@@ -33,7 +33,7 @@ define([
       this._super(args);
       var vertex = this.getLinked().getCentroid ? this.getLinked().getCentroid() : this.getLinked(),
           centroid = GeoPoint.fromVertex(vertex);
-      this._dot = new Ellipse(this._id, {centroid: centroid, semiMajor: Handle.DOT_RADIUS}, args);
+      this._dot = new Ellipse(this._id, {centroid: centroid, semiMajor: Handle.DOT_RADIUS, elevation: vertex.z}, args);
     },
 
     render: function () {
@@ -47,9 +47,9 @@ define([
 
   /**
    * The radius of the dot in metres.
-   * @type {number}
+   * @type {Number}
    */
-  Handle.DOT_RADIUS = 0.5;
+  Handle.DOT_RADIUS = 1;
 
   return Handle;
 

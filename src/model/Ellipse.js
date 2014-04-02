@@ -89,7 +89,7 @@ define([
       return new Primitive({
         geometryInstances: this.getGeometry(),
         appearance: this.getAppearance(),
-        debugShowBoundingVolume: true
+        debugShowBoundingVolume: false
       });
     },
 
@@ -198,6 +198,7 @@ define([
      */
     remove: function() {
       this._super();
+      this.setDirty('model');
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
 
