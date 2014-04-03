@@ -71,7 +71,7 @@ define([
      * @returns {Boolean} - Whether the Ellipse is visible.
      */
     isVisible: function() {
-      return !!(this._primitive && this._primitive.show);
+      return this._primitive && this._primitive.show === true;
     },
 
     // -------------------------------------------
