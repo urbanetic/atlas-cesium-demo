@@ -388,6 +388,18 @@ define([
     return ellipsoid.cartographicToCartesian(cesiumCart);
   };
 
+  RenderManager.prototype.cartesianArrayFromVertexArray = function (vertexes) {
+    var cartographics = [],
+        ellipsoid = this.getEllipsoid();
+    for (var i = 0; i < vertexes.length; i++) {
+      cartographics.push(Cartographic.fromDegrees(
+          /*longitude*/ vertexes[i].y,
+          /*latitude*/  vertexes[i].x)
+      );
+    }
+    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
+  };
+
   /**
    * Converts a GeoPoint  to a Cesium Cartestian3 object.
    * @param {atlas.model.GeoPoint} cart - The geographic position.
