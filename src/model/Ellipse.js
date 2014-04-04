@@ -71,7 +71,7 @@ define([
      * @returns {Boolean} - Whether the Ellipse is visible.
      */
     isVisible: function() {
-      return !!(this._primitive && this._primitive.show);
+      return this._primitive && this._primitive.show === true;
     },
 
     // -------------------------------------------
@@ -230,26 +230,6 @@ define([
   // -------------------------------------------
 
   /**
-   * Function to covert an array of lat/long coordinates to
-   *     the Cartesian (x,y,z with respect to globe 3d ellipsoid) format
-   *     required for Cesium.[_coordArrayToCartesianArray description]
-   * @private
-   * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
-   * @returns {Cartesian3} Array of Cartesian3 coordinates.
-   */
-  Ellipse._coordArrayToCartesianArray = function(ellipsoid, coords) {
-    var cartographics = [];
-    for (var i = 0; i < coords.length; i++) {
-      cartographics.push(Cartographic.fromDegrees(
-          /*longitude*/ coords[i].y,
-          /*latitude*/  coords[i].x)
-      );
-    }
-    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
-  };
-
-  /**
    * Takes an atlas Style object and converts it to Cesium Color objects.
    * @param style
    * @private
@@ -264,7 +244,7 @@ define([
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
    * @param {atlas.model.Colour} color - The Colour to convert.
-   * @returns {Color} The converted Cesium Color object.
+   * @returns {CesiumColour} The converted Cesium Color object.
    * @private
    */
   Ellipse._convertAtlasToCesiumColor = function(color) {

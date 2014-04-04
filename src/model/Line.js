@@ -93,7 +93,7 @@ define([
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
+        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
 
@@ -154,7 +154,7 @@ define([
      * @returns {Boolean} - Whether the Polygon is visible.
      */
     isVisible: function() {
-      return !!(this._primitive && this._primitive.show);
+      return this._primitive && this._primitive.show === true;
     },
 
     /**

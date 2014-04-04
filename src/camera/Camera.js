@@ -8,8 +8,7 @@ define([
   // Base class.
   'atlas/camera/Camera',
   'atlas/lib/utility/Log'
-], function (AtlasMath, DeveloperError, Vertex, Cartographic, CameraFlightPath,
-             CameraCore, Log) {
+], function(AtlasMath, DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, Log) {
   /**
    * @classdesc The Camera object controls the position and orientation of the camera.
    * It exposes an API to set position and orientation, zoom to a given GeoEntity
@@ -31,9 +30,9 @@ define([
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
    */
-  return CameraCore.extend( /** @lends atlas-cesium.camera.Camera# */ {
+  return CameraCore.extend(/** @lends atlas-cesium.camera.Camera# */ {
 
-    _init: function (args) {
+    _init: function(args) {
       if (!args.renderManager) {
         throw new DeveloperError('Can not create Atlas-Cesium Camera without render manager.');
       }
@@ -48,7 +47,7 @@ define([
     /**
      * @returns {atlas.model.GeoPoint} The current position of the Camera.
      */
-    getPosition: function () {
+    getPosition: function() {
       var cesiumCamera = this._renderManager.getCesiumCamera(),
           cartesian = cesiumCamera.position;
       return this._renderManager.cartographicFromCartesian(cartesian);
@@ -57,7 +56,7 @@ define([
     /**
      * @returns {{bearing: Number, rotation: Number, tilt: Number}} The current orientation of the Camera.
      */
-    getOrientation: function () {
+    getOrientation: function() {
       var cesiumCamera = this._renderManager.getCesiumCamera(),
           controller = cesiumCamera.controller,
           bearing = AtlasMath.toDegrees(controller.heading),
@@ -69,29 +68,19 @@ define([
     // BEHAVIOUR
     // -------------------------------------------
 
-    _animateCamera: function (newCamera) {
+    _animateCamera: function(newCamera) {
       // TODO(bpstudds): Allow for a non-default orientation.
       var latitude = AtlasMath.toRadians(newCamera.position.lat),
           longitude = AtlasMath.toRadians(newCamera.position.lng),
           altitude = newCamera.position.elevation,
           position = new Cartographic(longitude, latitude, altitude);
-      if (newCamera.duration > 0) {
-        // Use a flight for non-zero zoom duration...
-        var flight = CameraFlightPath.createAnimationCartographic(
+      var flight = CameraFlightPath.createAnimationCartographic(
           this._renderManager._widget.scene, {
             destination: position,
             duration: newCamera.duration
           }
-        );
-        this._renderManager.getAnimations().add(flight);
-      } else {
-        // ... otherwise just move camera directly to target position.
-        var cesiumCamera = this._renderManager.getCesiumCamera(),
-            controller = cesiumCamera.controller;
-        controller.setPositionCartographic(position);
-        controller.tilt = AtlasMath.toRadians(90 - newCamera.orientation.tilt);
-        controller.heading = AtlasMath.toRadians(360 - newCamera.orientation.bearing);
-      }
+      );
+      this._renderManager.getAnimations().add(flight);
       Log.debug('animating camera change', newCamera);
       this._position = newCamera.position;
       this._orientation = newCamera.orientation;

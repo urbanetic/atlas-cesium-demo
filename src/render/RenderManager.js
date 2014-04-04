@@ -331,6 +331,9 @@ define([
   // -------------------------------------------
 
   RenderManager.prototype.getAt = function(screenCoords) {
+    // Get the relative coordinates within the Atlas widget.
+    screenCoords = this._atlasManagers.dom.translateEventCoords(screenCoords);
+
     var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
     var pickedIds = [];
     pickedPrimitives.forEach(function(p) {
@@ -386,6 +389,18 @@ define([
         cesiumCart = new Cartographic(cart.x, cart.y, cart.z);
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
+  };
+
+  RenderManager.prototype.cartesianArrayFromVertexArray = function (vertexes) {
+    var cartographics = [],
+        ellipsoid = this.getEllipsoid();
+    for (var i = 0; i < vertexes.length; i++) {
+      cartographics.push(Cartographic.fromDegrees(
+          /*longitude*/ vertexes[i].y,
+          /*latitude*/  vertexes[i].x)
+      );
+    }
+    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
   };
 
   /**
