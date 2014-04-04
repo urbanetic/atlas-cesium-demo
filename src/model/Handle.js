@@ -33,6 +33,8 @@ define([
       this._super(args);
       var vertex = this.getLinked().getCentroid ? this.getLinked().getCentroid() : this.getLinked(),
           centroid = GeoPoint.fromVertex(vertex);
+      args.renderManager = this.getTarget()._renderManager;
+      args.eventManager = this.getTarget()._eventManager;
       this._dot = new Ellipse(this._id, {centroid: centroid, semiMajor: this._dotRadius}, args);
     },
 

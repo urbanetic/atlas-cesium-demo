@@ -83,8 +83,8 @@ define([
 
       // Attach a Handle to each of the vertices in the Polygon.
       this._vertices.forEach(function (vertex) {
-        handles.push(new Handle({linked: vertex, target: this, renderManager: this._renderManager
-      })); }.bind(this));
+        handles.push(new Handle({linked: vertex, target: this}));
+      }.bind(this));
 
       // If there was a doubled up vertex, add it back in.
       doubledVertex && this._vertices.push(doubledVertex);

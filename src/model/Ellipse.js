@@ -89,7 +89,7 @@ define([
       return new Primitive({
         geometryInstances: this.getGeometry(),
         appearance: this.getAppearance(),
-        debugShowBoundingVolume: true
+        debugShowBoundingVolume: false
       });
     },
 
