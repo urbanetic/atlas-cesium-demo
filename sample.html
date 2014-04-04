@@ -3,6 +3,12 @@
 <head>
   <meta charset="utf-8">
   <title>atlas-cesium demo</title>
+  <style>
+    html, body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
   <link rel="stylesheet" href="atlas-cesium/css/atlas.css">
   <script src="./atlas-cesium/lib/Requirejs/require.js"></script>
   <script>
@@ -19,21 +25,16 @@
         { name: 'atlas', location: 'atlas/src'},
         { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
         { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-        { name: 'atlas-cesium', location: 'atlas-cesium/src'}
-      ]/*,
-       paths: [
-       { name: 'atlas/lib', location: 'atlas/lib'},
-       { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
-       { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
-       { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-       ] */
+        { name: 'atlas-cesium', location: 'atlas-cesium/src'},
+        { name: 'utility', location: 'atlas-cesium/lib/utility'}
+      ]
     });
 
     require(['atlas-cesium/core/CesiumAtlas',
              'atlas/assets/testWKT'
     ], function (CesiumAtlas, testWKT) {
       console.debug('Creating atlas-cesium');
-      cesiumAtlas = new CesiumAtlas();
+      var cesiumAtlas = new CesiumAtlas();
 
       console.debug('Attaching atlas-cesium');
       cesiumAtlas.attachTo('cesium');
@@ -56,6 +57,11 @@
           elevation: 2000
         }
       });
+
+      require(['./prototypes/CameraPrototype'], function (CameraPrototype) {
+        new CameraPrototype(cesiumAtlas);
+      });
+
     });
   </script>
 </head>
