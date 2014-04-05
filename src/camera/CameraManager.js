@@ -27,19 +27,19 @@ define([
    */
 
   CameraManager.prototype.lockCamera = function () {
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableRotate = false;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTranslate = false;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableZoom = false;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTilt = false;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableLook = false;
+    this._atlasManagers.render.getCameraController().enableRotate = false;
+    this._atlasManagers.render.getCameraController().enableTranslate = false;
+    this._atlasManagers.render.getCameraController().enableZoom = false;
+    this._atlasManagers.render.getCameraController().enableTilt = false;
+    this._atlasManagers.render.getCameraController().enableLook = false;
   };
 
   CameraManager.prototype.unlockCamera = function () {
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableRotate = true;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTranslate = true;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableZoom = true;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableTilt = true;
-    this._atlasManagers.render._widget.scene.getScreenSpaceCameraController().enableLook = true;
+    this._atlasManagers.render.getCameraController().enableRotate = true;
+    this._atlasManagers.render.getCameraController().enableTranslate = true;
+    this._atlasManagers.render.getCameraController().enableZoom = true;
+    this._atlasManagers.render.getCameraController().enableTilt = true;
+    this._atlasManagers.render.getCameraController().enableLook = true;
   };
 
   return CameraManager;

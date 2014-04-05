@@ -113,7 +113,7 @@ define([
   };
 
   RenderManager.prototype._drawShim = function() {
-    var primitives = this._widget.scene.getPrimitives();
+    var primitives = this._widget.scene.primitives;
     var oldAdd = primitives.add,
         oldRemove = primitives.remove,
         delay = 1000;
@@ -346,16 +346,24 @@ define([
   };
 
   RenderManager.prototype.getAnimations = function() {
-    return this._widget.scene.getAnimations();
+    return this._widget.scene.animations;
   };
 
   RenderManager.prototype.getCesiumCamera = function() {
-    return this._widget.scene.getCamera();
+    return this._widget.scene.camera;
+  };
+
+  RenderManager.prototype.getCameraController = function () {
+    return this._widget.scene.screenSpaceCameraController;
+  };
+
+  RenderManager.prototype.getPrimitives = function() {
+    return this._widget.scene.primitives;
   };
 
   RenderManager.prototype.getEllipsoid = function () {
-    return this._widget.centralBody.getEllipsoid();
-  },
+    return this._widget.centralBody.ellipsoid;
+  };
 
   /**
    * Returns the minimum terrain height, given currently configured terrain options, for
@@ -372,7 +380,7 @@ define([
   };
 
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
-    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
+    var cartesian = this.getCameraController().pickEllipsoid(screenCoords);
     var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
     var f = 180 / Math.PI;
     return new Vertex(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
@@ -385,7 +393,7 @@ define([
    */
   RenderManager.prototype.cartographicFromCartesian = function (cartesian) {
     var cesiumCartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-    return GeoPoint.fromLatLngHeight(cesiumCartographic);
+    return GeoPoint.fromCartographicRadians(cesiumCartographic);
   };
 
   return RenderManager;
