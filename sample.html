@@ -14,7 +14,7 @@
   <script>
     "use strict";
     var cesiumAtlas;
-    
+
     console.debug('Requiring CesiumAtlas');
 
     require.config({
@@ -31,23 +31,27 @@
     });
 
     require(['atlas-cesium/core/CesiumAtlas',
-             'atlas/assets/testWKT'
-    ], function (CesiumAtlas, testWKT) {
+      'atlas/assets/testWKT'
+    ], function(CesiumAtlas, testWKT) {
       console.debug('Creating atlas-cesium');
       var cesiumAtlas = new CesiumAtlas();
 
       console.debug('Attaching atlas-cesium');
       cesiumAtlas.attachTo('cesium');
 
+      cesiumAtlas.publish('debugMode', true);
+
       var i = 0;
       var args = {};
-      args.elevation = 0;
-      args.height = 50;
       args.show = true;
       args.displayMode = 'extrusion';
-      testWKT.forEach(function (wkt) {
+      testWKT.forEach(function(wkt) {
         args.id = i++;
-        args.footprint = wkt;
+        args.polygon = {
+          vertices: wkt,
+          elevation: 0,
+          height: 50
+        };
         cesiumAtlas.publish('entity/show', args);
       });
       cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
@@ -58,9 +62,11 @@
         }
       });
 
-      require(['./prototypes/CameraPrototype'], function (CameraPrototype) {
-        new CameraPrototype(cesiumAtlas);
-      });
+      setTimeout(function() {
+        require(['./prototypes/CameraPrototype'], function(CameraPrototype) {
+          new CameraPrototype(cesiumAtlas);
+        });
+      }, 2000);
 
     });
   </script>
