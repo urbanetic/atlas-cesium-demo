@@ -18,8 +18,8 @@ define([
   // Base class
   'atlas/render/RenderManager',
   'atlas/lib/utility/Log'
-], function(GeoPoint, Vertex, extend, Feature, Viewer, requestAnimationFrame, Imagery,
-            ImageryLayer, TileProviderError, ImageryState, when, defined, RenderManagerCore, Log) {
+], function(GeoPoint, Vertex, extend, Feature, Viewer, requestAnimationFrame, Imagery, ImageryLayer,
+            TileProviderError, ImageryState, when, defined, RenderManagerCore, Log) {
   "use strict";
 
   /**
@@ -117,12 +117,12 @@ define([
     var oldAdd = primitives.add,
         oldRemove = primitives.remove,
         delay = 1000;
-    primitives.add = function () {
+    primitives.add = function() {
       var results = oldAdd.apply(primitives, arguments);
       this._delaySleep(delay);
       return results;
     }.bind(this);
-    primitives.remove = function () {
+    primitives.remove = function() {
       var results = oldRemove.apply(primitives, arguments);
       this._delaySleep(delay);
       return results;
@@ -345,26 +345,6 @@ define([
     return pickedIds;
   };
 
-  RenderManager.prototype.getAnimations = function() {
-    return this._widget.scene.animations;
-  };
-
-  RenderManager.prototype.getCesiumCamera = function() {
-    return this._widget.scene.camera;
-  };
-
-  RenderManager.prototype.getCameraController = function () {
-    return this._widget.scene.screenSpaceCameraController;
-  };
-
-  RenderManager.prototype.getPrimitives = function() {
-    return this._widget.scene.primitives;
-  };
-
-  RenderManager.prototype.getEllipsoid = function () {
-    return this._widget.centralBody.ellipsoid;
-  };
-
   /**
    * Returns the minimum terrain height, given currently configured terrain options, for
    * an array of Vertices.
@@ -391,9 +371,35 @@ define([
    * @param cartesian The cartesian coordinates.
    * @returns {atlas.model.GeoPoint}
    */
-  RenderManager.prototype.cartographicFromCartesian = function (cartesian) {
+    // TODO(aramk) This should be in GeoPoint since it has nothing to do with rendering (we're just
+    // using the ellipsoid).
+  RenderManager.prototype.geoPointFromCartesian = function(cartesian) {
     var cesiumCartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-    return GeoPoint.fromCartographicRadians(cesiumCartographic);
+    return GeoPoint.fromRadians(cesiumCartographic);
+  };
+
+  RenderManager.prototype.getAnimations = function() {
+    return this._widget.scene.animations;
+  };
+
+  RenderManager.prototype.getCesiumCamera = function() {
+    return this._widget.scene.camera;
+  };
+
+  RenderManager.prototype.getCameraController = function() {
+    return this._widget.scene.screenSpaceCameraController;
+  };
+
+  RenderManager.prototype.getPrimitives = function() {
+    return this._widget.scene.primitives;
+  };
+
+  RenderManager.prototype.getEllipsoid = function() {
+    return this._widget.centralBody.ellipsoid;
+  };
+
+  RenderManager.prototype.getScene = function() {
+    return this._widget.scene;
   };
 
   return RenderManager;
