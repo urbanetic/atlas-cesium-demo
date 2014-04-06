@@ -58,9 +58,19 @@ define([
 
 //      camera.pointAt(targetGeoPoint);
 
-      // TODO(aramk) Change tilt of the camera manually and read the direction. Create a clone of
-      // the camera and perform this change, read the direction and use it for the animation in
-      // Camera.js.
+//      var direction1 = cesiumCamera.direction.clone();
+//      var tilt1 = cesiumCamera.tilt;
+
+      // Change tilt of the camera manually and read the direction.
+
+//      var angle = AtlasMath.toRadians(50);
+//      // Look up
+////      cesiumCamera.tilt = cesiumCamera.tilt - angle;
+//      // Look down
+//      cesiumCamera.look(cesiumCamera.right, angle);
+
+//      var tilt2 = cesiumCamera.tilt;
+//      var direction2 = cesiumCamera.direction.clone();
 
       // Move between bookmarks.
 
@@ -68,13 +78,15 @@ define([
       var defaultPosition = Camera.DEFAULT_POSITION();
       var otherPosition = Camera.DEFAULT_POSITION();
       otherPosition.latitude += 1;
+      // TODO(aramk) Save direction instead?
       var args = [
-        {position: defaultPosition, duration: 3000, orientation: {}},
-        {position: otherPosition, duration: 2000, orientation: {tilt: 0}}
+        {position: defaultPosition, duration: 3000, orientation: {tilt: 90}},
+        {position: otherPosition, duration: 2000, orientation: {tilt: 45}}
       ];
       setInterval(function() {
         posIndex = posIndex % args.length;
         var arg = args[posIndex];
+        arg._temp = true;
         camera.zoomTo(arg);
         posIndex++;
       }, 5000);
