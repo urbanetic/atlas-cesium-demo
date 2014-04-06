@@ -368,6 +368,13 @@ define([
     return 0;
   };
 
+  RenderManager.prototype.geoPointFromScreenCoords = function(screenCoords) {
+    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
+    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
+    var f = 180 / Math.PI;
+    return new GeoPoint(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
+  };
+
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
     var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
     var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
