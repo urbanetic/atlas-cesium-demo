@@ -28,9 +28,9 @@ module.exports = function(config) {
     ],
 
     // Pre-process for code coverage
-    preprocessors: {
-      'atlas-cesium/src/**/*.js': 'coverage'
-    },
+//    preprocessors: {
+//      'atlas-cesium/src/**/*.js': 'coverage'
+//    },
 
     coverageReporter: {
       type: 'lcov',
@@ -39,7 +39,7 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'gowl', 'coverage'
-    reporters: ['progress', 'coverage'],
+    reporters: ['progress'],
 
     // web server port
     port: 9876,
