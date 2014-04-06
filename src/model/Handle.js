@@ -43,10 +43,9 @@ define([
     },
 
     unrender: function () {
-      this._dot.remove();
+      this._dot.hide();
     }
   });
 
   return Handle;
-
 });
