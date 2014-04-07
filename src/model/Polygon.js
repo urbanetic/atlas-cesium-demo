@@ -72,16 +72,10 @@ define([
       if (this._editingHandles) { return this._editingHandles; }
 
       var handles = [],
-          elevation = this.getElevation(),
-          doubledVertex;
+          elevation = this.getElevation();
 
       // Add a Handle for the Polygon itself.
       handles.push(new Handle({linked: this}));
-
-      // Pop the first vertex if the polygon is closed.
-      if (this._vertices.first === this._vertices.last) {
-        doubledVertex = this._vertices.pop();
-      }
 
       // Add Handles for each vertex.
       this._vertices.forEach(function (vertex) {
@@ -89,7 +83,6 @@ define([
         handles.push(new Handle({linked: vertex, target: this}));
       }.bind(this));
 
-      doubledVertex && this._vertices.push(doubledVertex);
       return (this._editingHandles = handles);
     },
 
@@ -132,14 +125,6 @@ define([
         Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-
-        // For 3D extruded polygons, ensure polygon is not closed as it causes
-        // rendering to hang.
-        if (this._height > 0) {
-          if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
-            this._cartesians.pop();
-          }
-        }
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
