@@ -82,8 +82,6 @@ define([
       );
       this._renderManager.getAnimations().add(flight);
       Log.debug('animating camera change', newCamera);
-      Log.debug('position', this.getPosition());
-      Log.debug('orientation', this.getOrientation());
       this._position = newCamera.position;
       this._orientation = newCamera.orientation;
     }

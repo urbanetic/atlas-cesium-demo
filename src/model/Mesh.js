@@ -102,7 +102,7 @@ define([
      * @returns {Boolean} Whether the Mesh is visible.
      */
     isVisible: function() {
-      return this._primitive && this._primitive.show;
+      return this._primitive && this._primitive.show === true;
     },
 
     onSelect: function() {

@@ -1,6 +1,7 @@
 define([
-  'atlas/model/Style',
   'atlas/model/Colour',
+  'atlas/model/Style',
+  'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
@@ -11,9 +12,8 @@ define([
   // Base class
   'atlas/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Style, Colour, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
             /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, CesiumColour, PolygonCore, Log) {
-  "use strict";
 
   //var Polygon = function (id, vertices, args) {
   var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
@@ -65,12 +65,40 @@ define([
     // -------------------------------------------
 
     /**
+     * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
+     * one on the Polygon itself.
+     */
+    getEditingHandles: function () {
+      if (this._editingHandles) { return this._editingHandles; }
+
+      var handles = [];
+      // Attach a Handle to the Polygon itself.
+      handles.push(new Handle({linked: this, renderManager: this._renderManager}));
+
+      // If the vertices are closed, temporarily remove the last vertex so there isn't a double up
+      var doubledVertex;
+      if (this._vertices.first === this._vertices.last) {
+        doubledVertex = this._vertices.pop();
+      }
+
+      // Attach a Handle to each of the vertices in the Polygon.
+      this._vertices.forEach(function (vertex) {
+        handles.push(new Handle({linked: vertex, target: this}));
+      }.bind(this));
+
+      // If there was a doubled up vertex, add it back in.
+      doubledVertex && this._vertices.push(doubledVertex);
+
+      return (this._editingHandles = handles);
+    },
+
+    /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
      * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
      * @returns {Boolean} - Whether the Polygon is visible.
      */
     isVisible: function() {
-      return !!(this._primitive && this._primitive.show);
+      return this._primitive && this._primitive.show === true;
     },
 
     // -------------------------------------------
@@ -98,12 +126,10 @@ define([
      * @private
      */
     _updateGeometry: function() {
-      var ellipsoid = this._renderManager._widget.centralBody.getEllipsoid();
-
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
+        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
 
         // For 3D extruded polygons, ensure polygon is not closed as it causes
@@ -123,7 +149,7 @@ define([
       if (this._holes) {
         for (var i in this._holes) {
           var hole = this._holes[i];
-          var cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, hole.coordinates);
+          var cartesians = this._renderManager.cartesianArrayFromVertexArray(hole.coordinates);
           holes.push({positions : cartesians});
         }
       }
@@ -245,26 +271,6 @@ define([
   // -------------------------------------------
   // STATICS
   // -------------------------------------------
-
-  /**
-   * Function to covert an array of lat/long coordinates to
-   *     the Cartesian (x,y,z with respect to globe 3d ellipsoid) format
-   *     required for Cesium.[_coordArrayToCartesianArray description]
-   * @private
-   * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
-   * @returns {Cartesian3} Array of Cartesian3 coordinates.
-   */
-  Polygon._coordArrayToCartesianArray = function(ellipsoid, coords) {
-    var cartographics = [];
-    for (var i = 0; i < coords.length; i++) {
-      cartographics.push(Cartographic.fromDegrees(
-          /*longitude*/ coords[i].y,
-          /*latitude*/  coords[i].x)
-      );
-    }
-    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
-  };
 
   /**
    * Takes an atlas Style object and converts it to Cesium Color objects.

@@ -8,8 +8,9 @@ ehthumbs.db
 Thumbs.db
 
 # Generated output
-node_modules
+coverage/*
 docs/
 lib
+node_modules
 
 
