@@ -1,13 +1,13 @@
 define([
   'atlas/model/GeoEntity',
-  'atlas/util/DeveloperError',
+  'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
   'atlas-cesium/model/Line',
-  'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Polygon',
   // Base class
   'atlas/entity/EntityManager'
-], function (GeoEntity, DeveloperError, Feature, Line, Polygon, Mesh, EntityManagerCore) {
+], function (GeoEntity, Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
 
   var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
@@ -43,7 +43,7 @@ define([
       var entities = [];
       ids.forEach(function (id) {
         var entity = this.getById(id);
-        if (!(entity instanceof GeoEntity)) { throw new DeveloperError('Why be there non-entities in my entity manager'); }
+        if (!(entity instanceof GeoEntity)) { return; }
         entities.push(this.getById(id));
       }, this);
       return entities;
