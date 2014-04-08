@@ -78,10 +78,10 @@ define([
       handles.push(new Handle({linked: this}));
 
       // Add Handles for each vertex.
-      this._vertices.forEach(function (vertex) {
+      handles = handles.concat(this._vertices.map(function (vertex) {
         vertex.z = elevation;
-        handles.push(new Handle({linked: vertex, target: this}));
-      }.bind(this));
+        return new Handle({linked: vertex, target: this});
+      }, this));
 
       return (this._editingHandles = handles);
     },
