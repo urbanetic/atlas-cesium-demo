@@ -5,23 +5,18 @@ define([
   'atlas/lib/utility/Log',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
+  'atlas/util/AtlasMath',
   'atlas/util/Extends',
-  'atlas-cesium/model/Feature',
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/Cartographic',
-  'atlas-cesium/cesium/Source/Core/defined',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
-  'atlas-cesium/cesium/Source/Scene/ImageryLayer',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
-  'atlas-cesium/cesium/Source/Scene/TileProviderError',
-  'atlas-cesium/cesium/Source/ThirdParty/when',
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, extend, Feature, Cartographic, defined,
-            requestAnimationFrame, Imagery, ImageryLayer, ImageryState,
-            TileProviderError, when, Viewer, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, AtlasMath, extend, Cartographic, requestAnimationFrame, Imagery,
+            ImageryState, Viewer, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
@@ -369,17 +364,17 @@ define([
   };
 
   RenderManager.prototype.geoPointFromScreenCoords = function(screenCoords) {
-    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
-    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-    var f = 180 / Math.PI;
-    return new GeoPoint(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
+    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords),
+        cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
+        toDegrees = function (x) { return AtlasMath.toDegrees(x); };
+    return new GeoPoint(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
   };
 
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
-    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords);
-    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-    var f = 180 / Math.PI;
-    return new Vertex(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
+    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords),
+        cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
+      toDegrees = function (x) { return AtlasMath.toDegrees(x); };
+    return new Vertex(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
   };
 
   /**

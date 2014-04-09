@@ -67,7 +67,6 @@ define([
    */
   CesiumAtlas.prototype.attachTo = function(elem) {
     var dom = typeof elem === 'string' ? document.getElementById(elem) : elem;
-    console.log('the element is', dom);
     this._managers.dom.setDom(dom, true);
     // Hook up the InputManager to the selected DOM element.
     this._managers.input.setup(dom);

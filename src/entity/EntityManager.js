@@ -43,8 +43,9 @@ define([
       var entities = [];
       ids.forEach(function (id) {
         var entity = this.getById(id);
-        if (!(entity instanceof GeoEntity)) { return; }
-        entities.push(this.getById(id));
+        if (entity instanceof GeoEntity) {
+          entities.push(this.getById(id));
+        }
       }, this);
       return entities;
     },
