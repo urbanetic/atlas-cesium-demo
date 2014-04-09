@@ -1,4 +1,5 @@
 define([
+  'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
   'atlas-cesium/model/Line',
@@ -6,7 +7,7 @@ define([
   'atlas-cesium/model/Polygon',
   // Base class
   'atlas/entity/EntityManager'
-], function (Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
+], function (GeoEntity, Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
 
   var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
@@ -31,15 +32,20 @@ define([
     },
 
     /**
-     * Returns the GeoEntity that intersects the given Vertex or undefined.
-     * @param {atlas.model.Vertex} point - The point of interest.
+     * Returns the GeoEntities that intersect the given screen coordinates.
+     * @param {atlas.model.Vertex} point - The screen coordinates.
      * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen coordinates.
      */
     getAt: function (point) {
+      // Get the Entities at the given screen coordinates.
       var ids = this._atlasManagers.render.getAt(point);
+      // Translate entity IDs to entity objects.
       var entities = [];
       ids.forEach(function (id) {
-        entities.push(this.getById(id));
+        var entity = this.getById(id);
+        if (entity instanceof GeoEntity) {
+          entities.push(this.getById(id));
+        }
       }, this);
       return entities;
     },

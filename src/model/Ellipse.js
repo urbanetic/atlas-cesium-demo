@@ -198,6 +198,7 @@ define([
      */
     remove: function() {
       this._super();
+      this.setDirty('model');
       this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
     },
 

@@ -71,23 +71,17 @@ define([
     getEditingHandles: function () {
       if (this._editingHandles) { return this._editingHandles; }
 
-      var handles = [];
-      // Attach a Handle to the Polygon itself.
-      handles.push(new Handle({linked: this, renderManager: this._renderManager}));
+      var handles = [],
+          elevation = this.getElevation();
 
-      // If the vertices are closed, temporarily remove the last vertex so there isn't a double up
-      var doubledVertex;
-      if (this._vertices.first === this._vertices.last) {
-        doubledVertex = this._vertices.pop();
-      }
+      // Add a Handle for the Polygon itself.
+      handles.push(new Handle({linked: this}));
 
-      // Attach a Handle to each of the vertices in the Polygon.
-      this._vertices.forEach(function (vertex) {
-        handles.push(new Handle({linked: vertex, target: this}));
-      }.bind(this));
-
-      // If there was a doubled up vertex, add it back in.
-      doubledVertex && this._vertices.push(doubledVertex);
+      // Add Handles for each vertex.
+      handles = handles.concat(this._vertices.map(function (vertex) {
+        vertex.z = elevation;
+        return new Handle({linked: vertex, target: this});
+      }, this));
 
       return (this._editingHandles = handles);
     },
@@ -131,14 +125,6 @@ define([
         Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-
-        // For 3D extruded polygons, ensure polygon is not closed as it causes
-        // rendering to hang.
-        if (this._height > 0) {
-          if (this._cartesians[0] === this._cartesians[this._cartesians.length - 1]) {
-            this._cartesians.pop();
-          }
-        }
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.

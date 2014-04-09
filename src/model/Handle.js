@@ -35,7 +35,7 @@ define([
           centroid = GeoPoint.fromVertex(vertex);
       args.renderManager = this.getTarget()._renderManager;
       args.eventManager = this.getTarget()._eventManager;
-      this._dot = new Ellipse(this._id, {centroid: centroid, semiMajor: this._dotRadius}, args);
+      this._dot = new Ellipse(this.getId(), {centroid: centroid, semiMajor: this._dotRadius}, args);
     },
 
     render: function () {
@@ -43,12 +43,9 @@ define([
     },
 
     unrender: function () {
-      this._dot.remove();
+      this._dot.hide();
     }
   });
 
-
-
   return Handle;
-
 });
