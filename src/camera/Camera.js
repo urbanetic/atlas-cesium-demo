@@ -89,28 +89,6 @@ define([
       return this._renderManager.getEllipsoid().cartographicToCartesian(cartographic);
     },
 
-//    _getCameraFromPositionOrientation: function(position, orientation) {
-//      var cesiumCamera = this._renderManager.getCesiumCamera().clone();
-//      var position = position.toRadians();
-//      var cartographic =
-//          new Cartographic(position.longitude, position.latitude, position.elevation);
-//      cesiumCamera.position =
-//          this._renderManager.getEllipsoid().cartographicToCartesian(cartographic);
-//      cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
-//      cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
-//      // TODO(aramk) Rotation not handled.
-//      return cesiumCamera;
-//    },
-
-//    /**
-//     * @param {Object} direction
-//     * @returns The orientation based on the given direction.
-//     * @private
-//     */
-//    _getOrientationFromDirection: function(direction) {
-//
-//    },
-
     // -------------------------------------------
     // TARGETED MOVEMENT
     // -------------------------------------------
@@ -132,39 +110,32 @@ define([
     _animate: function(args) {
       args = mixin({}, args);
       // TODO(bpstudds): Allow for a non-default orientation.
-      var point = this._position.toRadians();
+      var position = args.position,
+          orientation = args.orientation,
+          point = position.toRadians();
       var destination = new Cartographic(point.longitude, point.latitude, point.elevation);
-
       var flightArgs = {
         destination: destination,
-//            direction: cesiumCamera.direction,
-//            up: cesiumCamera.up,
         duration: args.duration || 0
       };
-
-//      if (this._renderManager.getScene().frameState.frameNumber > 0) {
-      // Ignore the camera on the first frame, since it isn't initialized yet.
-      // TODO(aramk) Remove this check once we stop using camera clones for getting direction.
-//        var cesiumCamera = this._getCameraFromPositionOrientation(this._position,
-//            this._orientation);
-
-      // TODO(aramk) Orientation alone doesn't yet.
-
-//      if (args.direction) {
-//        var cesiumCamera = this._renderManager.getCesiumCamera();
-//        cesiumCamera.position = this._getPositionAsCartesian(this._position);
-//        cesiumCamera.direction = args.direction;
-//      }
-
-      flightArgs.direction = args.direction;// || cesiumCamera.direction;
-      flightArgs.up = args.up;// || cesiumCamera.up;
-//      }
-
+      if (!args.direction && orientation) {
+        // Use the given orientation in place of the direction.
+        var cesiumCamera = this._renderManager.getCesiumCamera();
+        cesiumCamera.position = this._getPositionAsCartesian(position);
+        cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
+        cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
+        flightArgs.direction = cesiumCamera.direction;
+        flightArgs.up = cesiumCamera.up;
+        // TODO(aramk) Handle rotation.
+      } else {
+        flightArgs.direction = args.direction;
+        flightArgs.up = args.up;
+      }
       var flight = CameraFlightPath.createAnimationCartographic(this._renderManager.getScene(),
           flightArgs);
       // TODO(aramk) This affects the global camera, not the current camera.
       this._renderManager.getAnimations().add(flight);
-      Log.debug('Animating camera to', this.getPosition(), this.getOrientation());
+      Log.debug('Animating camera to', position, orientation);
     }
   });
 });
