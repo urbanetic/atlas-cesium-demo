@@ -124,8 +124,12 @@ define([
       if (this._renderManager.getScene().frameState.frameNumber > 0) {
         // Ignore the camera on the first frame, since it isn't initialized yet.
         // TODO(aramk) Remove this check once we stop using camera clones for getting direction.
+        var direction = args.direction;
         var cesiumCamera = this._getCameraFromOrientation(this._orientation);
-        flightArgs.direction = cesiumCamera.direction;
+        if (!direction) {
+          direction = cesiumCamera.direction;
+        }
+        flightArgs.direction = direction;
         flightArgs.up = cesiumCamera.up;
       }
 
