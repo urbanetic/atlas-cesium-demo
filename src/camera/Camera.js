@@ -4,12 +4,12 @@ define([
   'atlas/model/Vertex',
   // Cesium imports
   'atlas-cesium/cesium/Source/Core/Cartographic',
-  'atlas-cesium/cesium/Source/Scene/CameraFlightPath',
   // Base class.
   'atlas/camera/Camera',
+  './CameraFlightPath',
   'atlas/util/mixin',
   'atlas/lib/utility/Log'
-], function(AtlasMath, DeveloperError, Vertex, Cartographic, CameraFlightPath, CameraCore, mixin,
+], function(AtlasMath, DeveloperError, Vertex, Cartographic, CameraCore, CameraFlightPath, mixin,
             Log) {
   /**
    * @author Brendan Studds
@@ -116,11 +116,12 @@ define([
       var destination = new Cartographic(point.longitude, point.latitude, point.elevation);
       var flightArgs = {
         destination: destination,
-        duration: args.duration || 0
+        duration: args.duration || 0,
+        path: args.path
       };
       if (!args.direction && orientation) {
         // Use the given orientation in place of the direction.
-        var cesiumCamera = this._renderManager.getCesiumCamera();
+        var cesiumCamera = this._renderManager.getCesiumCamera().clone();
         cesiumCamera.position = this._getPositionAsCartesian(position);
         cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
         cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
