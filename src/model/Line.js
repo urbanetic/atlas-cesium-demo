@@ -1,21 +1,26 @@
 define([
   'atlas/model/Line',
-  'atlas/model/Style',
-  'atlas/model/Colour',
+  './Style',
+  './Colour',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
+  'atlas-cesium/cesium/Source/Core/CorridorGeometry',
+  'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
+  'atlas-cesium/cesium/Source/Core/CornerType',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
+  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, Primitive,
-            PolylineColorAppearance, Polygon, Log) {
+], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, CorridorGeometry,
+            ColorGeometryInstanceAttribute, CornerType, Primitive, PolylineColorAppearance,
+            PerInstanceColorAppearance, Polygon, Log) {
 
   /**
    * @class atlas-cesium.model.Line
    * @extends atlas.model.Line
    */
-  return Line.extend(/** @lends atlas-cesium.model.Line# */{
+  var Line = Line.extend(/** @lends atlas-cesium.model.Line# */{
 
     // TODO(aramk) Refactor this wth Polygon and Mesh, a lot of building logic is very similar.
     // TODO(aramk) See above - this will add support for elevation.
@@ -98,26 +103,28 @@ define([
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      var colours = [],
-          elevation = this._minTerrainElevation;/* + this._elevation +
-              this._zIndex * this._zIndexOffset;*/
+//      var colours = [],
+//          elevation = this._minTerrainElevation;
+      /* + this._elevation +
+       this._zIndex * this._zIndexOffset;*/
 
       // TODO(bpstudds): Add support for different colours per line segment.
-      for (var i = this._cartesians.length; i > 0; i--) {
-        colours.push(this._style.getBorderColour());
-      }
+//      for (var i = this._cartesians.length; i > 0; i--) {
+//        colours.push(this._style.getBorderColour());
+//      }
 
       // Generate geometry data.
       return new GeometryInstance({
         id: this.getId().replace('line', ''),
-        geometry: new PolylineGeometry({
-          positions : this._cartesians,
-          width : this._width,
-          vertexFormat : PolylineColorAppearance.VERTEX_FORMAT,
-          colors: colours,
-          // TODO(bpstudds): Add optional per vertex graduated colour along each line segment.
-          colorsPerVertex: false
-        })
+        geometry: new CorridorGeometry({
+          positions: this._cartesians,
+          width: this._width,
+          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+          cornerType: CornerType.ROUNDED
+        }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(this._style.getBorderColour()))
+        }
       });
     },
 
@@ -129,7 +136,11 @@ define([
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-          this._appearance = new PolylineColorAppearance();
+//          this._appearance = new PolylineColorAppearance();
+          this._appearance = new PerInstanceColorAppearance({
+            closed: true,
+            translucent: false
+          });
         }
         // TODO(bpstudds): Uhhh, we might not be able to change the colour easily?
       }
@@ -178,4 +189,6 @@ define([
     }
 
   });
+
+  return Line;
 });

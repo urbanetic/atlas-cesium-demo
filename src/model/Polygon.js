@@ -1,6 +1,6 @@
 define([
-  'atlas/model/Style',
-  'atlas/model/Colour',
+  './Style',
+  './Colour',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
@@ -159,7 +159,7 @@ define([
           });
         }
         this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(this._style).fill;
+            Style.toCesiumColors(this._style).fill;
       }
       return this._appearance;
     },
@@ -227,7 +227,7 @@ define([
       this._selected = true;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(PolygonCore.getSelectedStyle()).fill;
+            Style.toCesiumColors(PolygonCore.getSelectedStyle()).fill;
       }
       this.onEnableEditing();
     },
@@ -236,7 +236,7 @@ define([
       this._selected = false;
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
-            Polygon._convertStyleToCesiumColors(this._style).fill;
+            Style.toCesiumColors(this._style).fill;
       }
       this.onDisableEditing();
     }
@@ -264,29 +264,6 @@ define([
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
-  };
-
-  /**
-   * Takes an atlas Style object and converts it to Cesium Color objects.
-   * @param style
-   * @private
-   */
-  Polygon._convertStyleToCesiumColors = function(style) {
-    return {
-      fill: Polygon._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Polygon._convertAtlasToCesiumColor(style.getBorderColour())
-    }
-  };
-
-  /**
-   * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.model.Colour} color - The Colour to convert.
-   * @returns {Color} The converted Cesium Color object.
-   * @private
-   */
-  Polygon._convertAtlasToCesiumColor = function(color) {
-    // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
-    return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Polygon;

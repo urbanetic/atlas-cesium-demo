@@ -1,8 +1,8 @@
 define([
   'atlas/util/DeveloperError',
-  'atlas/model/Colour',
   'atlas/model/Style',
   'atlas/model/Vertex',
+  './Colour',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
@@ -25,7 +25,7 @@ define([
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(DeveloperError, Colour, Style, Vertex, BoundingSphere, Cartographic, Cartesian3,
+], function(DeveloperError, Style, Vertex, Colour, BoundingSphere, Cartographic, Cartesian3,
             CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
@@ -109,10 +109,10 @@ define([
       var attributes;
       this._selected = true;
       if (this._primitive) {
-        attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
+        attributes =
+            this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(
-                Mesh._convertStyleToCesiumColors(MeshCore.getSelectedStyle()).fill);
+            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(MeshCore.getSelectedStyle()).fill);
       }
       this.onEnableEditing();
     },
@@ -123,8 +123,7 @@ define([
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(
-                Mesh._convertAtlasToCesiumColor(this._style._fillColour));
+            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
       }
       this.onDisableEditing();
     },
@@ -252,7 +251,7 @@ define([
               this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         }
         this._appearance.color =
-            ColorGeometryInstanceAttribute.toValue(Mesh._convertAtlasToCesiumColor(this._style.getFillColour()));
+            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
       }
       return this._appearance;
     },
@@ -265,20 +264,6 @@ define([
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
     }
   });
-
-  // TODO(bpstudds): Move this to some central location.
-  Mesh._convertStyleToCesiumColors = function(style) {
-    return {
-      fill: Mesh._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Mesh._convertAtlasToCesiumColor(style.getBorderColour())
-    }
-  };
-
-  // TODO(bpstudds): Move this to some central location.
-  Mesh._convertAtlasToCesiumColor = function(color) {
-    // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
-    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
-  };
 
   return Mesh;
 });
