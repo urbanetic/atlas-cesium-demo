@@ -39,8 +39,6 @@ define([
       this._super(elem);
       // TODO(bpstudds): Pretty sure InputManager should respond to an 'dom/set' event, rather than be imperative.
       // Don't use Cesium mouse events at the minute...
-//      this._screenSpaceEventHandler && this._screenSpaceEventHandler.destroy();
-//      this.createCesiumMouseBindings();
       // TODO(aramk) Added this to allow capturing wheel action - refactor and merge in.
       this._screenSpaceEventHandler = new ScreenSpaceEventHandler(this._element);
       this._createCesiumMouseBindings();

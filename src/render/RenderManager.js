@@ -2,25 +2,21 @@
  * The Cesium implementation of the atlas RenderManager
  */
 define([
+  'atlas/lib/utility/Log',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
+  'atlas/util/AtlasMath',
   'atlas/util/Extends',
-  'atlas-cesium/model/Feature',
   // Cesium imports.
-  'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
+  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
-  'atlas-cesium/cesium/Source/Scene/ImageryLayer',
-  'atlas-cesium/cesium/Source/Scene/TileProviderError',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
-  'atlas-cesium/cesium/Source/ThirdParty/when',
-  'atlas-cesium/cesium/Source/Core/defined',
+  'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
   // Base class
-  'atlas/render/RenderManager',
-  'atlas/lib/utility/Log'
-], function(GeoPoint, Vertex, extend, Feature, Viewer, requestAnimationFrame, Imagery, ImageryLayer,
-            TileProviderError, ImageryState, when, defined, RenderManagerCore, Log) {
-  "use strict";
+  'atlas/render/RenderManager'
+], function(Log, GeoPoint, Vertex, AtlasMath, extend, Cartographic, requestAnimationFrame, Imagery,
+            ImageryState, Viewer, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
@@ -33,10 +29,6 @@ define([
    * @constructor
    */
   var RenderManager = function(atlasManagers) {
-    /*=====
-     Inherited from RenderManagerCore
-     this._atlasManagers;
-     =====*/
     RenderManager.base.constructor.call(this, atlasManagers);
 
     this._widget = null;
@@ -359,11 +351,59 @@ define([
     return 0;
   };
 
+  RenderManager.prototype.geoPointFromScreenCoords = function(screenCoords) {
+    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords),
+        cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
+        toDegrees = function (x) { return AtlasMath.toDegrees(x); };
+    return new GeoPoint(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
+  };
+
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
-    var cartesian = this.getCameraController().pickEllipsoid(screenCoords);
-    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-    var f = 180 / Math.PI;
-    return new Vertex(f * cartographic.latitude, f * cartographic.longitude, cartographic.height);
+    var cartesian = this.getCameraController().pickEllipsoid(screenCoords),
+        cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
+        toDegrees = function (x) { return AtlasMath.toDegrees(x); };
+    return new Vertex(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
+  };
+
+  /**
+   * Converts a Vertex representing a geographic position and converts it to a
+   * Cesium Cartestian3 object.
+   * @param {atlas.model.Vertex} cart - The vertex.
+   * @param {Number} cart.x - The longitude in decimal degrees.
+   * @param {Number} cart.y - The latitude in decimal degrees.
+   * @param {Number} cart.z - The elevation in metres.
+   * @returns {Cartesian3}
+   */
+  RenderManager.prototype.cartesianFromVertex = function (cart) {
+    var ellipsoid = this._widget.centralBody.getEllipsoid(),
+        cesiumCart = new Cartographic(cart.x, cart.y, cart.z);
+
+    return ellipsoid.cartographicToCartesian(cesiumCart);
+  };
+
+  RenderManager.prototype.cartesianArrayFromVertexArray = function (vertexes) {
+    var cartographics = [],
+        ellipsoid = this.getEllipsoid();
+    for (var i = 0; i < vertexes.length; i++) {
+      cartographics.push(Cartographic.fromDegrees(
+          /*longitude*/ vertexes[i].y,
+          /*latitude*/  vertexes[i].x)
+      );
+    }
+    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
+  };
+
+  /**
+   * Converts a GeoPoint  to a Cesium Cartestian3 object.
+   * @param {atlas.model.GeoPoint} cart - The geographic position.
+   * @returns {Cartesian3}
+   */
+  RenderManager.prototype.cartesianFromGeoPoint = function (cart) {
+    var radCart = cart.toRadians(),
+        ellipsoid = this._widget.centralBody.getEllipsoid(),
+        cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
+
+    return ellipsoid.cartographicToCartesian(cesiumCart);
   };
 
   /**

@@ -1,10 +1,11 @@
 define([
-  'atlas-cesium/model/Polygon',
-  'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Line',
+  'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Polygon',
   // Base class
   'atlas/model/Feature'
-], function(Polygon, Mesh, Line, Feature) {
+], function(Ellipse, Line, Mesh, Polygon, Feature) {
   /**
    * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
@@ -36,9 +37,11 @@ define([
         args.style = this._style;
       }
 
-      // TODO(bpstudds): Refactor all the model initialisers so they have the same signature.
       if (args.line) {
         this._line = new Line(id + 'line', args.line, args);
+      }
+      if (args.ellipse) {
+        this._footprint = new Ellipse(id + 'ellipse', args.ellipse, args);
       }
       if (args.polygon) {
         this._footprint = new Polygon(id + 'polygon', args.polygon, args);
