@@ -1,24 +1,17 @@
 define([
-<<<<<<< HEAD
   './Style',
-  './Colour',
-=======
-  'atlas/model/Colour',
-  'atlas/model/Style',
   'atlas-cesium/model/Handle',
->>>>>>> develop
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Core/Cartographic',
 //  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
-  'atlas-cesium/cesium/Source/Core/Color',
   // Base class
   'atlas/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, CesiumColour, PolygonCore, Log) {
+], function(Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+            /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, PolygonCore, Log) {
 
   //var Polygon = function (id, vertices, args) {
   var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
@@ -73,8 +66,10 @@ define([
      * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
      * one on the Polygon itself.
      */
-    getEditingHandles: function () {
-      if (this._editingHandles) { return this._editingHandles; }
+    getEditingHandles: function() {
+      if (this._editingHandles) {
+        return this._editingHandles;
+      }
 
       var handles = [],
           elevation = this.getElevation();
@@ -83,7 +78,7 @@ define([
       handles.push(new Handle({linked: this}));
 
       // Add Handles for each vertex.
-      handles = handles.concat(this._vertices.map(function (vertex) {
+      handles = handles.concat(this._vertices.map(function(vertex) {
         vertex.z = elevation;
         return new Handle({linked: vertex, target: this});
       }, this));
@@ -141,14 +136,14 @@ define([
         for (var i in this._holes) {
           var hole = this._holes[i];
           var cartesians = this._renderManager.cartesianArrayFromVertexArray(hole.coordinates);
-          holes.push({positions : cartesians});
+          holes.push({positions: cartesians});
         }
       }
       // Generate geometry data.
       var polygonHierarchy = {
-          positions : this._cartesians,
-          holes : holes
-        };
+        positions: this._cartesians,
+        holes: holes
+      };
       return new GeometryInstance({
         id: this.getId().replace('polygon', ''),
         geometry: new PolygonGeometry({
@@ -175,8 +170,7 @@ define([
             faceForward: true
           });
         }
-        this._appearance.material.uniforms.color =
-            Style.toCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color = Style.toCesiumColors(this._style).fill;
       }
       return this._appearance;
     },
@@ -252,8 +246,7 @@ define([
     onDeselect: function() {
       this._selected = false;
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-            Style.toCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color = Style.toCesiumColors(this._style).fill;
       }
       this.onDisableEditing();
     }
@@ -276,8 +269,8 @@ define([
     var cartographics = [];
     for (var i = 0; i < coords.length; i++) {
       cartographics.push(Cartographic.fromDegrees(
-          /*longitude*/ coords[i].y,
-          /*latitude*/  coords[i].x)
+              /*longitude*/ coords[i].y,
+              /*latitude*/  coords[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
