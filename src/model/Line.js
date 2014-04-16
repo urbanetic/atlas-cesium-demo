@@ -3,18 +3,15 @@ define([
   './Style',
   './Colour',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
-  'atlas-cesium/cesium/Source/Core/PolylineGeometry',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/CornerType',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Line, Style, Colour, GeometryInstance, PolylineGeometry, CorridorGeometry,
-            ColorGeometryInstanceAttribute, CornerType, Primitive, PolylineColorAppearance,
-            PerInstanceColorAppearance, Polygon, Log) {
+], function(Line, Style, Colour, GeometryInstance, CorridorGeometry, ColorGeometryInstanceAttribute,
+            CornerType, Primitive, PerInstanceColorAppearance, Polygon, Log) {
 
   /**
    * @class atlas-cesium.model.Line
@@ -98,22 +95,16 @@ define([
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
+        this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-//      var colours = [],
-//          elevation = this._minTerrainElevation;
-      /* + this._elevation +
-       this._zIndex * this._zIndexOffset;*/
-
       // TODO(bpstudds): Add support for different colours per line segment.
-//      for (var i = this._cartesians.length; i > 0; i--) {
-//        colours.push(this._style.getBorderColour());
-//      }
 
       // Generate geometry data.
+      // NOTE: CorridorGeometry was used in place of PolylineGeometry to ensure line widths were
+      // in metres and resized with zooming the globe.
       return new GeometryInstance({
         id: this.getId().replace('line', ''),
         geometry: new CorridorGeometry({
@@ -165,7 +156,7 @@ define([
      * @returns {Boolean} - Whether the Polygon is visible.
      */
     isVisible: function() {
-      return this._primitive && this._primitive.show === true;
+      return !!(this._primitive && this._primitive.show);
     },
 
     /**
