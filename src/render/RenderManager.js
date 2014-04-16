@@ -35,6 +35,7 @@ define([
 
     // TODO(aramk) Allow passing arguments for this.
     // TODO(aramk) Add docs for these.
+    this._sleepMode = true;
     this._isSleeping = false;
     this._minFps = 1;
     this._maxFps = 60;
@@ -144,12 +145,17 @@ define([
       // accordingly.
       var start = new Date().getTime();
       widget.render();
-      var elapsed = this._delta = new Date().getTime() - start;
-      this._updateFpsStats(elapsed);
-      if (this._isSleeping) {
-        this._fps = this._getSleepFps();
+      if (this._sleepMode) {
+        var elapsed = this._delta = new Date().getTime() - start;
+        this._updateFpsStats(elapsed);
+        if (this._isSleeping) {
+          this._fps = this._getSleepFps();
+        } else {
+          this._fps = this._maxFps;
+        }
       } else {
-        this._fps = this._maxFps;
+        this._isSleeping = false;
+        this._fps = this._maxFps
       }
       requestAnimationFrame(tick);
     }.bind(this);
@@ -166,7 +172,7 @@ define([
       widget._renderLoopRunning = false;
       widget._renderLoopError.raiseEvent(widget, e);
       if (widget._showRenderLoopErrors) {
-        widget.showErrorPanel('An error occurred while rendering.  Rendering has stopped.', e);
+        widget.showErrorPanel('An error occurred while rendering. Rendering has stopped.', e);
         Log.error(e);
       }
     }
@@ -301,6 +307,11 @@ define([
     this._atlasManagers.event.addEventHandler('extern', 'debugMode', function(debug) {
       var scene = this._widget.scene;
       scene.debugShowFramesPerSecond = debug;
+    }.bind(this));
+
+    this._atlasManagers.event.addEventHandler('extern', 'sleepMode', function(state) {
+      this._sleepMode = state;
+      Log.info('RenderManager setting sleep mode', state);
     }.bind(this));
 
     // TODO(aramk) Capture when the camera is moving instead of these?
