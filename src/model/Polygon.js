@@ -51,13 +51,6 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-    /**
-     * The style of the GeoEntity when before a change in style (e.g. during selection).
-     * @type {atlas.model.Style}
-     * @protected
-     */
-    _previousStyle: null,
-
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -170,7 +163,7 @@ define([
             faceForward: true
           });
         }
-        this._appearance.material.uniforms.color = Style.toCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color = Style.toCesiumColors(this.getStyle()).fill;
       }
       return this._appearance;
     },
@@ -246,7 +239,7 @@ define([
     onDeselect: function() {
       this._selected = false;
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Style.toCesiumColors(this._style).fill;
+        this._appearance.material.uniforms.color = Style.toCesiumColors(this.getStyle()).fill;
       }
       this.onDisableEditing();
     }
