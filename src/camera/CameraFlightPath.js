@@ -1,9 +1,8 @@
 define([
   'atlas-cesium/cesium/Source/Scene/CameraFlightPath',
-  'atlas-cesium/cesium/Source/Core/defaultValue',
   'atlas/camera/Camera',
   'atlas/util/Extends',
-  // Needed to override the animation logic.
+  // Needed to override Cesium default animation logic.
   'atlas-cesium/cesium/Source/Core/Cartesian2',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/clone',
@@ -20,17 +19,26 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerspectiveOffCenterFrustum',
   'atlas-cesium/cesium/Source/Scene/SceneMode',
   'atlas-cesium/cesium/Source/ThirdParty/Tween'
-], function(CameraFlightPathCore, defaultValue, Camera, extend, Cartesian2, Cartesian3, clone,
+], function(CameraFlightPathCore, Camera, extend, Cartesian2, Cartesian3, clone,
             defaultValue, defined, DeveloperError, HermiteSpline, CesiumMath, Matrix3, Matrix4,
             Quaternion, QuaternionSpline, PerspectiveFrustum, PerspectiveOffCenterFrustum,
             SceneMode, Tween) {
 
-//  var CameraFlightPath = function() {
-//    CameraFlightPath.base.constructor.call(this);
-//  };
-
+  /**
+   * An adapted implementation of {@link CameraFlightPath} from Cesium b27 to allow non-sinusoidal
+   * flight paths.
+   *
+   * @class atlas.model.CameraFlightPath
+   */
   var CameraFlightPath = {};
 
+  /**
+   * Delegates to the default Cesium implementation of
+   * {@link CameraFlightPath#createAnimationCartographic} if the given description.path is not
+   * {@link atlas.camera.Camera.PATH_TYPES.LINEAR}, otherwise delegates to
+   * {@link #createLinearAnimationExtent()}.
+   * @ignore
+   */
   CameraFlightPath.createAnimationCartographic = function(scene, description) {
     description = defaultValue(description, defaultValue.EMPTY_OBJECT);
     var path = description.path;
@@ -44,8 +52,6 @@ define([
           arguments);
     }
   };
-
-//  return extend(CameraFlightPathCore, CameraFlightPath);
 
   // The code below is adapted from Cesium's CameraFlightPath:
 
@@ -368,26 +374,6 @@ define([
     return update;
   }
 
-  /**
-   * Creates an animation to fly the camera from it's current position to a position given by a Cartesian. All arguments should
-   * be given in world coordinates.
-   *
-   * @param {Scene} scene The scene instance to use.
-   * @param {Cartesian3} description.destination The final position of the camera.
-   * @param {Cartesian3} [description.direction] The final direction of the camera. By default, the direction will point towards the center of the frame in 3D and in the negative z direction in Columbus view or 2D.
-   * @param {Cartesian3} [description.up] The final up direction. By default, the up direction will point towards local north in 3D and in the positive y direction in Columbus view or 2D.
-   * @param {Number} [description.duration=3000] The duration of the animation in milliseconds.
-   * @param {Function} [onComplete] The function to execute when the animation has completed.
-   * @param {Function} [onCancel] The function to execute if the animation is cancelled.
-   * @param {Matrix4} [endReferenceFrame] The reference frame the camera will be in when the flight is completed.
-   *
-   * @returns {Object} An Object that can be added to an {@link AnimationCollection} for animation.
-   *
-   * @exception {DeveloperError} frameState.mode cannot be SceneMode.MORPHING
-   * @exception {DeveloperError} If either direction or up is given, then both are required.
-   *
-   * @see Scene#animations
-   */
   var dirScratch = new Cartesian3();
   var rightScratch = new Cartesian3();
   var upScratch = new Cartesian3();
@@ -526,25 +512,6 @@ define([
     };
   };
 
-  /**
-   * Creates an animation to fly the camera from it's current position to a position given by a Cartographic. All arguments should
-   * be given in world coordinates.
-   *
-   * @param {Scene} scene The scene instance to use.
-   * @param {Cartographic} description.destination The final position of the camera.
-   * @param {Cartesian3} [description.direction] The final direction of the camera. By default, the direction will point towards the center of the frame in 3D and in the negative z direction in Columbus view or 2D.
-   * @param {Cartesian3} [description.up] The final up direction. By default, the up direction will point towards local north in 3D and in the positive y direction in Columbus view or 2D.
-   * @param {Number} [description.duration=3000] The duration of the animation in milliseconds.
-   * @param {Function} [onComplete] The function to execute when the animation has completed.
-   * @param {Function} [onCancel] The function to execute if the animation is cancelled.
-   * @param {Matrix4} [endReferenceFrame] The reference frame the camera will be in when the flight is completed.
-   *
-   * @returns {Object} An Object that can be added to an {@link AnimationCollection} for animation.
-   *
-   * @exception {DeveloperError} frameState.mode cannot be SceneMode.MORPHING
-   *
-   * @see Scene#animations
-   */
   CameraFlightPath.createLinearAnimationCartographic = function(scene, description) {
     description = defaultValue(description, defaultValue.EMPTY_OBJECT);
     var destination = description.destination;
@@ -574,23 +541,6 @@ define([
     return this.createAnimation(scene, createAnimationDescription);
   };
 
-  /**
-   * Creates an animation to fly the camera from it's current position to a position in which the entire extent will be visible. All arguments should
-   * be given in world coordinates.
-   *
-   * @param {Scene} scene The scene instance to use.
-   * @param {Extent} description.destination The final position of the camera.
-   * @param {Number} [description.duration=3000] The duration of the animation in milliseconds.
-   * @param {Function} [onComplete] The function to execute when the animation has completed.
-   * @param {Function} [onCancel] The function to execute if the animation is cancelled.
-   * @param {Matrix4} [endReferenceFrame] The reference frame the camera will be in when the flight is completed.
-   *
-   * @returns {Object} An Object that can be added to an {@link AnimationCollection} for animation.
-   *
-   * @exception {DeveloperError} frameState.mode cannot be SceneMode.MORPHING
-   *
-   * @see Scene#animations
-   */
   CameraFlightPath.createLinearAnimationExtent = function(scene, description) {
     description = defaultValue(description, defaultValue.EMPTY_OBJECT);
     var extent = description.destination;

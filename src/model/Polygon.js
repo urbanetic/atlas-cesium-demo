@@ -1,19 +1,21 @@
 define([
-  './Style',
+  // Base class
+  'atlas/model/Polygon',
+  'atlas/lib/utility/Log',
   'atlas-cesium/model/Handle',
+  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Core/Cartographic',
-//  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
-  // Base class
-  'atlas/model/Polygon',
-  'atlas/lib/utility/Log'
-], function(Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            /*EllipsoidSurfaceAppearance,*/ MaterialAppearance, PolygonCore, Log) {
+  'atlas-cesium/cesium/Source/Scene/MaterialAppearance'
+], function(PolygonCore, Log, Handle, Style, GeometryInstance, PolygonGeometry, Primitive,
+            Cartographic, MaterialAppearance) {
 
-  //var Polygon = function (id, vertices, args) {
+  /**
+   * @class atlas-cesium.model.Polygon
+   * @extends atlas.model.Polygon
+   */
   var Polygon = PolygonCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
@@ -244,30 +246,6 @@ define([
       this.onDisableEditing();
     }
   });
-
-  // -------------------------------------------
-  // STATICS
-  // -------------------------------------------
-
-  /**
-   * Function to covert an array of lat/long coordinates to
-   *     the Cartesian (x,y,z with respect to globe 3d ellipsoid) format
-   *     required for Cesium.[_coordArrayToCartesianArray description]
-   * @private
-   * @param {Ellipsoid} ellipsoid - The Cesium ellipsoid being rendered to.
-   * @param {atlas.model.Vertex} coords - The latlng coordinates to convert.
-   * @returns {Cartesian3} Array of Cartesian3 coordinates.
-   */
-  Polygon._coordArrayToCartesianArray = function(ellipsoid, coords) {
-    var cartographics = [];
-    for (var i = 0; i < coords.length; i++) {
-      cartographics.push(Cartographic.fromDegrees(
-              /*longitude*/ coords[i].y,
-              /*latitude*/  coords[i].x)
-      );
-    }
-    return ellipsoid.cartographicArrayToCartesianArray(cartographics);
-  };
 
   return Polygon;
 });

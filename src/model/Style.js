@@ -3,12 +3,17 @@ define([
   './Colour',
   'atlas/util/mixin'
 ], function(StyleCore, Colour, mixin) {
+  /**
+   * @typedef atlas-cesium.model.Style
+   * @ignore
+   */
+  var Style;
 
   /**
    * @class atlas-cesium.model.Style
    * @extends atlas.model.Style
    */
-  return mixin(StyleCore.extend(/** @lends atlas-cesium.model.Style# */ {
+  Style = mixin(StyleCore.extend(/** @lends atlas-cesium.model.Style# */ {
 
   }), {
 
@@ -29,4 +34,5 @@ define([
 
   });
 
+  return Style;
 });

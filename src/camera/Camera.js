@@ -1,19 +1,16 @@
 define([
-  'atlas/util/AtlasMath',
-  'atlas/util/DeveloperError',
-  'atlas/model/Vertex',
-  // Cesium imports
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   // Base class.
   'atlas/camera/Camera',
-  './CameraFlightPath',
+  'atlas/model/Vertex',
+  'atlas/lib/utility/Log',
+  'atlas/util/AtlasMath',
+  'atlas/util/DeveloperError',
   'atlas/util/mixin',
-  'atlas/lib/utility/Log'
-], function(AtlasMath, DeveloperError, Vertex, Cartographic, CameraCore, CameraFlightPath, mixin,
-            Log) {
+  'atlas-cesium/camera/CameraFlightPath',
+  'atlas-cesium/cesium/Source/Core/Cartographic',
+], function(CameraCore, Vertex, Log, AtlasMath, DeveloperError, mixin, CameraFlightPath,
+            Cartographic) {
   /**
-   * @author Brendan Studds
-   *
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
    */
@@ -50,32 +47,18 @@ define([
       return {bearing: bearing, rotation: 0, tilt: tilt}
     },
 
-    // TODO(aramk) move direction to atlas.
-
-    /**
-     * Equivalent to setting
-     * @param {atlas.model.Vertex} direction
-     */
     setDirection: function(direction) {
       var cesiumCamera = this._renderManager.getCesiumCamera().clone();
       cesiumCamera.direction = direction;
       this.setOrientation(this._getOrientationFromCesiumCamera(cesiumCamera));
     },
 
-    /**
-     * @returns {atlas.model.Vertex}
-     * @private
-     */
     getDirection: function() {
       var camera = this._renderManager.getCesiumCamera(),
           direction = camera.direction;
       return new Vertex(direction);
     },
 
-    /**
-     * @returns {atlas.model.Vertex}
-     * @private
-     */
     getUp: function() {
       var camera = this._renderManager.getCesiumCamera(),
           up = camera.up;
@@ -93,11 +76,14 @@ define([
     // TARGETED MOVEMENT
     // -------------------------------------------
 
+    /**
+     * Changes the direction of the camera to point at the given point.
+     * @param {atlas.model.GeoPoint} point
+     */
     pointAt: function(point) {
       point = point.toRadians();
       var cesiumCamera = this._renderManager.getCesiumCamera(),
           ellipsoid = this._renderManager.getEllipsoid();
-      // TODO(aramk) We need a utility method for converting GeoPoint to Cartographic and back.
       var targetCartographic = new Cartographic(point.longitude, point.latitude, point.elevation);
       var target = ellipsoid.cartographicToCartesian(targetCartographic);
       cesiumCamera.lookAt(cesiumCamera.position, target, cesiumCamera.up);
@@ -109,7 +95,6 @@ define([
 
     _animate: function(args) {
       args = mixin({}, args);
-      // TODO(bpstudds): Allow for a non-default orientation.
       var position = args.position,
           orientation = args.orientation,
           point = position.toRadians();

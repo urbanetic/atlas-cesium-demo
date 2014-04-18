@@ -4,10 +4,16 @@ define([
   'atlas/util/mixin'
 ], function(ColourCore, CesiumColor, mixin) {
   /**
+   * @typedef atlas-cesium.model.Line
+   * @ignore
+   */
+  var Colour;
+
+  /**
    * @class atlas-cesium.model.Colour
    * @extends atlas.model.Colour
    */
-  var Colour = mixin(ColourCore.extend(/** @lends atlas-cesium.model.Colour# */ {
+  Colour = mixin(ColourCore.extend(/** @lends atlas-cesium.model.Colour# */ {
 
   }), {
 
@@ -23,6 +29,8 @@ define([
      * Converts an Atlas Colour object to a Cesium Color object.
      * @param {atlas.model.Colour} color - The Colour to convert.
      * @returns {atlas-cesium.model.Colour} The converted Cesium Color object.
+     * @memberOf atlas-cesium.model.Colour
+     * @static
      */
     toCesiumColor: function(color) {
       return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);

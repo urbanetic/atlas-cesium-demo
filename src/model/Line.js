@@ -1,7 +1,6 @@
 define([
   'atlas/model/Line',
-  './Style',
-  './Colour',
+  'atlas-cesium/model/Colour',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
@@ -10,14 +9,19 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/model/Polygon',
   'atlas/lib/utility/Log'
-], function(Line, Style, Colour, GeometryInstance, CorridorGeometry, ColorGeometryInstanceAttribute,
+], function(LineCore, Colour, GeometryInstance, CorridorGeometry, ColorGeometryInstanceAttribute,
             CornerType, Primitive, PerInstanceColorAppearance, Polygon, Log) {
+  /**
+   * @typedef atlas-cesium.model.Line
+   * @ignore
+   */
+  var Line;
 
   /**
    * @class atlas-cesium.model.Line
    * @extends atlas.model.Line
    */
-  var Line = Line.extend(/** @lends atlas-cesium.model.Line# */{
+  Line = LineCore.extend(/** @lends atlas-cesium.model.Line# */{
 
     // TODO(aramk) Refactor this wth Polygon and Mesh, a lot of building logic is very similar.
     // TODO(aramk) See above - this will add support for elevation.
@@ -31,7 +35,7 @@ define([
 
     /**
      * The Cesium appearance data of the Polygon.
-     * @type {PolylineColorAppearance}
+     * @type {PerInstanceColorAppearance}
      * @private
      */
     _appearance: null,
@@ -90,12 +94,10 @@ define([
      * @private
      */
     _updateGeometry: function() {
-      var ellipsoid = this._renderManager.getEllipsoid();
-
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = Polygon._coordArrayToCartesianArray(ellipsoid, this._vertices);
+        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
 
@@ -127,13 +129,11 @@ define([
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-//          this._appearance = new PolylineColorAppearance();
           this._appearance = new PerInstanceColorAppearance({
             closed: true,
             translucent: false
           });
         }
-        // TODO(bpstudds): Uhhh, we might not be able to change the colour easily?
       }
       return this._appearance;
     },
@@ -156,7 +156,7 @@ define([
      * @returns {Boolean} - Whether the Polygon is visible.
      */
     isVisible: function() {
-      return !!(this._primitive && this._primitive.show);
+      return this._primitive && this._primitive.show === true;
     },
 
     /**
