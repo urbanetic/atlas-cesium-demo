@@ -76,49 +76,6 @@ define([
    * Registers event handlers with the EventManager for global events.
    */
   CesiumAtlas.prototype.bindEvents = function() {
-    var entityManager = this._managers.entity;
-    var handlerParams = [
-      { // Define an event handler for showing an entity.
-        source: 'extern',
-        name: 'entity/show',
-        callback: function(args) {
-          Log.time('entity/show');
-          var entity = entityManager.getById(args.id);
-          (!entity) && (entity = entityManager.createFeature(args.id, args));
-          entity.show();
-          Log.timeEnd('entity/show');
-        }.bind(this)
-      },
-      { // Define an event handler for hiding an entity.
-        source: 'extern',
-        name: 'entity/hide',
-        callback: function(args) {
-          Log.time('entity/hide');
-          var entity = entityManager.getById(args.id);
-          entity.hide();
-          Log.timeEnd('entity/hide');
-        }.bind(this)
-      }/*,
-       // TODO(bpstudds): Move Overlay testing code somewhere intelligent.
-       {
-       source: 'intern',
-       name: 'input/leftup',
-       callback: function (args) {
-       Log.debug('trying to show overlay');
-       if (this.overlay !== undefined) this.overlay.hide();
-       this.overlay = new Overlay(this._currentDomId,
-       {
-       top: args.y,
-       left: args.x
-       },
-       '<p>x:' + args.x + ' y:' + args.y + '</p>'
-       );
-       this.overlay.show();
-       }.bind(this._managers.dom)
-       }*/
-    ];
-    // Add the event handlers to the EventManager.
-    this._eventHandlers = this._managers.event.addEventHandlers(handlerParams);
   };
 
   return CesiumAtlas;
