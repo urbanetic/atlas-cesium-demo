@@ -361,23 +361,21 @@ define([
   };
 
   RenderManager.prototype.geoPointFromScreenCoords = function(screenCoords) {
-    var cartesian = this.getCameraController().pickEllipsoid(screenCoords),
+    var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords),
         cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
         toDegrees = function(x) {
           return AtlasMath.toDegrees(x);
         };
-    return new GeoPoint(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude),
-        cartographic.height);
+    return GeoPoint.fromRadians(cartographic);
   };
 
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
-    var cartesian = this.getCameraController().pickEllipsoid(screenCoords),
+    var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords),
         cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
         toDegrees = function(x) {
           return AtlasMath.toDegrees(x);
         };
-    return new Vertex(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude),
-        cartographic.height);
+    return GeoPoint.fromRadians(cartographic);
   };
 
   /**
@@ -396,13 +394,13 @@ define([
     return ellipsoid.cartographicToCartesian(cesiumCart);
   };
 
-  RenderManager.prototype.cartesianArrayFromVertexArray = function(vertexes) {
+  RenderManager.prototype.cartesianArrayFromVertexArray = function(vertices) {
     var cartographics = [],
         ellipsoid = this.getEllipsoid();
-    for (var i = 0; i < vertexes.length; i++) {
+    for (var i = 0; i < vertices.length; i++) {
       cartographics.push(Cartographic.fromDegrees(
-              /*longitude*/ vertexes[i].y,
-              /*latitude*/  vertexes[i].x)
+              /*longitude*/ vertices[i].x,
+              /*latitude*/  vertices[i].y)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
