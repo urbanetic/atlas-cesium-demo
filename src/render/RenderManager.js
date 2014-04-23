@@ -305,8 +305,7 @@ define([
   RenderManager.prototype.bindEvents = function() {
     // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
     this._atlasManagers.event.addEventHandler('extern', 'debugMode', function(debug) {
-      var scene = this._widget.scene;
-      scene.debugShowFramesPerSecond = debug;
+      this.getScene().debugShowFramesPerSecond = debug;
     }.bind(this));
 
     this._atlasManagers.event.addEventHandler('extern', 'sleepMode', function(state) {
@@ -339,8 +338,7 @@ define([
   RenderManager.prototype.getAt = function(screenCoords) {
     // Get the relative coordinates within the Atlas widget.
     screenCoords = this._atlasManagers.dom.translateEventCoords(screenCoords);
-
-    var pickedPrimitives = this._widget.scene.drillPick(screenCoords);
+    var pickedPrimitives = this.getScene().drillPick(screenCoords);
     var pickedIds = [];
     pickedPrimitives.forEach(function(p) {
       pickedIds.push(p.id);
@@ -363,17 +361,23 @@ define([
   };
 
   RenderManager.prototype.geoPointFromScreenCoords = function(screenCoords) {
-    var cartesian = this._widget.scene.getCamera().controller.pickEllipsoid(screenCoords),
+    var cartesian = this.getCameraController().pickEllipsoid(screenCoords),
         cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
-        toDegrees = function (x) { return AtlasMath.toDegrees(x); };
-    return new GeoPoint(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
+        toDegrees = function(x) {
+          return AtlasMath.toDegrees(x);
+        };
+    return new GeoPoint(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude),
+        cartographic.height);
   };
 
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
     var cartesian = this.getCameraController().pickEllipsoid(screenCoords),
         cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
-        toDegrees = function (x) { return AtlasMath.toDegrees(x); };
-    return new Vertex(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude), cartographic.height);
+        toDegrees = function(x) {
+          return AtlasMath.toDegrees(x);
+        };
+    return new Vertex(toDegrees(cartographic.latitude), toDegrees(cartographic.longitude),
+        cartographic.height);
   };
 
   /**
@@ -385,20 +389,20 @@ define([
    * @param {Number} cart.z - The elevation in metres.
    * @returns {Cartesian3}
    */
-  RenderManager.prototype.cartesianFromVertex = function (cart) {
-    var ellipsoid = this._widget.centralBody.getEllipsoid(),
+  RenderManager.prototype.cartesianFromVertex = function(cart) {
+    var ellipsoid = this.getEllipsoid(),
         cesiumCart = new Cartographic(cart.x, cart.y, cart.z);
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
   };
 
-  RenderManager.prototype.cartesianArrayFromVertexArray = function (vertexes) {
+  RenderManager.prototype.cartesianArrayFromVertexArray = function(vertexes) {
     var cartographics = [],
         ellipsoid = this.getEllipsoid();
     for (var i = 0; i < vertexes.length; i++) {
       cartographics.push(Cartographic.fromDegrees(
-          /*longitude*/ vertexes[i].y,
-          /*latitude*/  vertexes[i].x)
+              /*longitude*/ vertexes[i].y,
+              /*latitude*/  vertexes[i].x)
       );
     }
     return ellipsoid.cartographicArrayToCartesianArray(cartographics);
@@ -409,9 +413,9 @@ define([
    * @param {atlas.model.GeoPoint} cart - The geographic position.
    * @returns {Cartesian3}
    */
-  RenderManager.prototype.cartesianFromGeoPoint = function (cart) {
+  RenderManager.prototype.cartesianFromGeoPoint = function(cart) {
     var radCart = cart.toRadians(),
-        ellipsoid = this._widget.centralBody.getEllipsoid(),
+        ellipsoid = this.getEllipsoid(),
         cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
