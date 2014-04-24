@@ -53,36 +53,6 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-    // -------------------------------------------
-    // GETTERS AND SETTERS
-    // -------------------------------------------
-
-    /**
-     * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
-     * one on the Polygon itself.
-     */
-//    getEditingHandles: function() {
-//      // TODO(aramk) Share this implementation with Ellipse?
-//      if (this._editingHandles) {
-//        return this._editingHandles;
-//      }
-//
-//      var handles = this._editingHandles = [],
-//          elevation = this.getElevation();
-//
-//      // Add a Handle for the Polygon itself.
-//      handles.push(new Handle({linked: this}));
-//
-//      // Add Handles for each vertex.
-//      handles = handles.concat(this._vertices.map(function(vertex) {
-//        // TODO
-////        vertex.z = elevation;
-//        return new Handle({linked: vertex, target: this});
-//      }, this));
-//
-//      return handles;
-//    },
-
     createHandles: function () {
       var handles = [],
           elevation = this.getElevation();
@@ -100,6 +70,10 @@ define([
 
       return handles;
     },
+
+    // -------------------------------------------
+    // GETTERS AND SETTERS
+    // -------------------------------------------
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
