@@ -53,19 +53,7 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-    // -------------------------------------------
-    // GETTERS AND SETTERS
-    // -------------------------------------------
-
-    /**
-     * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
-     * one on the Polygon itself.
-     */
-    getEditingHandles: function() {
-      if (this._editingHandles) {
-        return this._editingHandles;
-      }
-
+    createHandles: function () {
       var handles = [],
           elevation = this.getElevation();
 
@@ -73,13 +61,19 @@ define([
       handles.push(new Handle({linked: this}));
 
       // Add Handles for each vertex.
-      handles = handles.concat(this._vertices.map(function(vertex) {
-        vertex.z = elevation;
-        return new Handle({linked: vertex, target: this});
-      }, this));
+      this._vertices.forEach(function (vertex) {
+        // TODO(aramk) This modifies the underlying vertices - it should create copies and
+        // respond to changes in the copies.
+//        vertex.z = elevation;
+        handles.push(new Handle({linked: vertex, target: this}));
+      }, this);
 
-      return (this._editingHandles = handles);
+      return handles;
     },
+
+    // -------------------------------------------
+    // GETTERS AND SETTERS
+    // -------------------------------------------
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
@@ -230,20 +224,18 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._selected = true;
+      this._super();
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Style.toCesiumColors(PolygonCore.getSelectedStyle()).fill;
       }
-      this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this._selected = false;
+      this._super();
       if (this.isVisible()) {
         this._appearance.material.uniforms.color = Style.toCesiumColors(this.getStyle()).fill;
       }
-      this.onDisableEditing();
     }
   });
 

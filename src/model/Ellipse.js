@@ -207,21 +207,19 @@ define([
     // -------------------------------------------
 
     onSelect: function() {
-      this._selected = true;
+      this._super();
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Ellipse._convertStyleToCesiumColors(EllipseCore.getSelectedStyle()).fill;
       }
-      this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this._selected = false;
+      this._super();
       if (this.isVisible()) {
         this._appearance.material.uniforms.color =
             Ellipse._convertStyleToCesiumColors(this._style).fill;
       }
-      this.onDisableEditing();
     }
   });
 

@@ -106,26 +106,24 @@ define([
     },
 
     onSelect: function() {
+      this._super();
       var attributes;
-      this._selected = true;
       if (this._primitive) {
         attributes =
             this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color =
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(MeshCore.getSelectedStyle()).fill);
       }
-      this.onEnableEditing();
     },
 
     onDeselect: function() {
-      this._selected = false;
+      this._super();
       if (this._primitive) {
         var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
             ''));
         attributes.color =
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
       }
-      this.onDisableEditing();
     },
 
     /**
