@@ -35,7 +35,7 @@ define([
   /**
    * Delegates to the default Cesium implementation of
    * {@link CameraFlightPath#createAnimationCartographic} if the given description.path is not
-   * {@link atlas.camera.Camera.PATH_TYPES.LINEAR}, otherwise delegates to
+   * {@link atlas.camera.Camera.PathType.LINEAR}, otherwise delegates to
    * {@link #createLinearAnimationExtent()}.
    * @ignore
    */
@@ -43,7 +43,7 @@ define([
     description = defaultValue(description, defaultValue.EMPTY_OBJECT);
     var path = description.path;
     // TODO(aramk) Add better support for other easing methods.
-    if (path === Camera.PATH_TYPES.LINEAR) {
+    if (path === Camera.PathType.LINEAR) {
       // Force linear interpolation during the flight path.
       return this.createLinearAnimationCartographic(scene, description);
     } else {

@@ -7,7 +7,7 @@ define([
   'atlas/util/DeveloperError',
   'atlas/util/mixin',
   'atlas-cesium/camera/CameraFlightPath',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
+  'atlas-cesium/cesium/Source/Core/Cartographic'
 ], function(CameraCore, Vertex, Log, AtlasMath, DeveloperError, mixin, CameraFlightPath,
             Cartographic) {
   /**
