@@ -21,6 +21,10 @@
     "load-grunt-tasks": "~0.2.1",
     "grunt-cli": "~0.1.12",
     "bower": "~1.2.8",
-    "grunt-contrib-copy": "~0.5.0"
+    "grunt-contrib-copy": "~0.5.0",
+    "karma": "~0.12.14",
+    "karma-jasmine": "~0.1.5",
+    "requirejs": "~2.1.11",
+    "karma-requirejs": "~0.2.1"
   }
 }
