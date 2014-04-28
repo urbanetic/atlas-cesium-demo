@@ -191,10 +191,10 @@ define([
     _build: function() {
       if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
         if (this._primitive) {
-          this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+          this._renderManager.getPrimitives().remove(this._primitive);
         }
         this._primitive = this._createPrimitive();
-        this._renderManager._widget.scene.getPrimitives().add(this._primitive);
+        this._renderManager.getPrimitives().add(this._primitive);
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
@@ -236,7 +236,7 @@ define([
      */
     remove: function() {
       this._super();
-      this._primitive && this._renderManager._widget.scene.getPrimitives().remove(this._primitive);
+      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
     },
 
     // -------------------------------------------
