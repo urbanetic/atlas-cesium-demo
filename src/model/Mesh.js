@@ -230,7 +230,7 @@ define([
         var modelMatrix = Matrix4.multiplyByScale(
             Matrix4.multiply(
                 Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-                    Cartographic.fromDegrees(this._geoLocation.y, this._geoLocation.x))),
+                    Cartographic.fromDegrees(this._geoLocation.x, this._geoLocation.y))),
                 rotationTranslation),
             this._scale);
       }
