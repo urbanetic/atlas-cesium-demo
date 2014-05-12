@@ -3,15 +3,34 @@
 <head>
   <meta charset="utf-8">
   <title>atlas-cesium demo</title>
-  <link rel="stylesheet" href="atlas-cesium/cesium/Source/Widgets/Viewer/Viewer.css">
-  <script src="./atlas-cesium/lib/require.js"></script>
+  <link rel="stylesheet" href="atlas-cesium/css/atlas.css">
+  <script src="./atlas-cesium/lib/Requirejs/require.js"></script>
   <script>
     "use strict";
     var cesiumAtlas;
     
     console.debug('Requiring CesiumAtlas');
-    require(['./atlas-cesium/core/CesiumAtlas',
-             './atlas/model/testWKT'
+
+    require.config({
+      baseUrl: '',
+      packages: [
+        { name: 'atlas/lib', location: 'atlas/lib'},
+        { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
+        { name: 'atlas', location: 'atlas/src'},
+        { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
+        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        { name: 'atlas-cesium', location: 'atlas-cesium/src'}
+      ]/*,
+       paths: [
+       { name: 'atlas/lib', location: 'atlas/lib'},
+       { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
+       { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
+       { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+       ] */
+    });
+
+    require(['atlas-cesium/core/CesiumAtlas',
+             'atlas/assets/testWKT'
     ], function (CesiumAtlas, testWKT) {
       console.debug('Creating atlas-cesium');
       cesiumAtlas = new CesiumAtlas();
@@ -32,16 +51,10 @@
       });
       cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
         position: {
-          x: -37.8,
-          y: 144.96,
-          z: 2000
-        },
-        orientation: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-        duration: 3000
+          lat: -37.8,
+          lng: 144.96,
+          elevation: 2000
+        }
       });
     });
   </script>
