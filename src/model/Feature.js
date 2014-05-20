@@ -17,7 +17,7 @@ define([
    * for rendering the Feature.
    * @param {atlas.events.EventManager} args.eventManager - The EventManager object responsible for
    * the event system.
-   * @param {String|Array.<atlas.model.Vertex>} [args.footprint=null] - Either a WKT string or array
+   * @param {String|Array.<atlas.model.Vertex>} [args.polygon=null] - Either a WKT string or array
    * of Vertices describing the footprint polygon.
    * @param {atlas.model.Mesh} [args.mesh=null] - The Mesh object for the Feature.
    * @param {Number} [args.height=0] - The extruded height when displaying as a extruded polygon.

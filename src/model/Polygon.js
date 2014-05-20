@@ -65,10 +65,14 @@ define([
         // TODO(aramk) This modifies the underlying vertices - it should create copies and
         // respond to changes in the copies.
 //        vertex.z = elevation;
-        handles.push(new Handle({linked: vertex, target: this}));
+        handles.push(this.createHandle(vertex));
       }, this);
 
       return handles;
+    },
+
+    createHandle: function (vertex) {
+      return new Handle({linked: vertex, target: this});
     },
 
     // -------------------------------------------
