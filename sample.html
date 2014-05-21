@@ -63,8 +63,12 @@
       });
 
       setTimeout(function() {
-        require(['./prototypes/CameraPrototype'], function(CameraPrototype) {
-          new CameraPrototype(cesiumAtlas);
+        require([
+          './prototypes/CameraPrototype',
+          './prototypes/DrawPrototype',
+        ], function(CameraPrototype, DrawPrototype) {
+//          new CameraPrototype(cesiumAtlas);
+          new DrawPrototype(cesiumAtlas);
         });
       }, 2000);
 
