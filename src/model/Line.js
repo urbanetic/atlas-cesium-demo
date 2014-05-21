@@ -4,15 +4,17 @@ define([
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
+  'atlas-cesium/cesium/Source/Core/PolylineGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/CornerType',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
-  'atlas-cesium/model/Polygon',
-  'atlas/lib/utility/Log'
-], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry,
+  'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
+  'atlas/lib/utility/Log',
+  'atlas/util/DeveloperError'
+], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
-            Polygon, Log) {
+            PolylineColorAppearance, Log, DeveloperError) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -97,20 +99,37 @@ define([
       // TODO(bpstudds): Add support for different colours per line segment.
 
       // Generate geometry data.
-      // NOTE: CorridorGeometry was used in place of PolylineGeometry to ensure line widths were
-      // in metres and resized with zooming the globe.
-      return new GeometryInstance({
-        id: this.getId().replace('line', ''),
-        geometry: new CorridorGeometry({
-          positions: this._cartesians,
-          width: this._width,
-          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-          cornerType: CornerType.ROUNDED
-        }),
-        attributes: {
+      var reWidth = /(\d+)(px)?/i;
+      var widthMatches = this._width.toString().match(reWidth);
+      if (!widthMatches) {
+        throw new DeveloperError('Invalid line width: ' + this._width);
+      }
+      var width = parseFloat(widthMatches[1]),
+          isPixels = !!widthMatches[2];
+      var instanceArgs = {
+        id: this.getId().replace('line', '')
+      };
+      var geometryArgs = {
+        positions: this._cartesians,
+        width: width
+      };
+      // CorridorGeometry has line widths in metres. PolylineGeometry has line widths in pixels.
+      if (isPixels) {
+        geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
+        geometryArgs.colors = this._cartesians.map(function() {
+          return this._style.getBorderColour();
+        }, this);
+        geometryArgs.colorsPerVertex = false;
+        instanceArgs.geometry = new PolylineGeometry(geometryArgs);
+      } else {
+        geometryArgs.vertexFormat = PerInstanceColorAppearance.VERTEX_FORMAT;
+        geometryArgs.cornerType = CornerType.ROUNDED;
+        instanceArgs.attributes = {
           color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(this._style.getBorderColour()))
-        }
-      });
+        };
+        instanceArgs.geometry = new CorridorGeometry(geometryArgs);
+      }
+      return new GeometryInstance(instanceArgs);
     },
 
     /**
@@ -121,10 +140,15 @@ define([
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-          this._appearance = new PerInstanceColorAppearance({
-            closed: true,
-            translucent: false
-          });
+          var isPolyline = this._geometry.geometry instanceof PolylineGeometry;
+          if (isPolyline) {
+            this._appearance = new PolylineColorAppearance();
+          } else {
+            this._appearance = new PerInstanceColorAppearance({
+              closed: true,
+              translucent: false
+            });
+          }
         }
       }
       return this._appearance;
