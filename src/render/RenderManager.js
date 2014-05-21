@@ -24,7 +24,7 @@ define([
    * @param {Object} atlasManagers - A map of manager types to Atlas manager objects.
    * @returns {atlas-cesium.render.RenderManager}
    *
-   * @extends {atlas.render.RenderManager}
+   * @extends atlas.render.RenderManager
    * @alias atlas-cesium.render.RenderManager
    * @constructor
    */

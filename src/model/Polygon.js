@@ -53,28 +53,6 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-    createHandles: function () {
-      var handles = [],
-          elevation = this.getElevation();
-
-      // Add a Handle for the Polygon itself.
-      handles.push(new Handle({linked: this}));
-
-      // Add Handles for each vertex.
-      this._vertices.forEach(function (vertex) {
-        // TODO(aramk) This modifies the underlying vertices - it should create copies and
-        // respond to changes in the copies.
-//        vertex.z = elevation;
-        handles.push(this.createHandle(vertex));
-      }, this);
-
-      return handles;
-    },
-
-    createHandle: function (vertex) {
-      return new Handle({linked: vertex, target: this});
-    },
-
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -89,7 +67,7 @@ define([
     },
 
     // -------------------------------------------
-    // MODIFIERS
+    // CONSTRUCTION
     // -------------------------------------------
 
     /**
@@ -106,6 +84,27 @@ define([
         appearance: this.getAppearance()
       });
     },
+
+    createHandles: function () {
+      var handles = [];
+      // Add a Handle for the Polygon itself.
+      handles.push(new Handle({linked: this}));
+      // Add Handles for each vertex.
+      this._vertices.forEach(function (vertex) {
+        // TODO(aramk) This modifies the underlying vertices - it should create copies and
+        // respond to changes in the copies.
+        handles.push(this.createHandle(vertex));
+      }, this);
+      return handles;
+    },
+
+    createHandle: function (vertex) {
+      return new Handle({linked: vertex, target: this});
+    },
+
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     /**
      * Updates the geometry data as required.

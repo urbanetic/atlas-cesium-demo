@@ -1,6 +1,7 @@
 define([
   'atlas/model/Line',
   'atlas-cesium/model/Colour',
+  'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
@@ -9,8 +10,9 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/model/Polygon',
   'atlas/lib/utility/Log'
-], function(LineCore, Colour, GeometryInstance, CorridorGeometry, ColorGeometryInstanceAttribute,
-            CornerType, Primitive, PerInstanceColorAppearance, Polygon, Log) {
+], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry,
+            ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
+            Polygon, Log) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -61,8 +63,9 @@ define([
      */
     _minTerrainElevation: 0.0,
 
-    // TODO(aramk) Not sure if this is working or not, but I can't see anything through manual
-    // testing so I'm leaving this for now. This needs a lot of refactoring with Polygon and Mesh.
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     _build: function() {
       if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
@@ -75,17 +78,6 @@ define([
         this._updateAppearance();
       }
       this.clean();
-    },
-
-    _createPrimitive: function() {
-      Log.debug('creating primitive for entity', this.getId());
-      // TODO(aramk) _geometry isn't actually set.
-      this._geometry = this._updateGeometry();
-      this._appearance = this._updateAppearance();
-      return new Primitive({
-        geometryInstances: this.getGeometry(),
-        appearance: this.getAppearance()
-      });
     },
 
     /**
@@ -177,6 +169,31 @@ define([
     remove: function() {
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
+    },
+
+    // -------------------------------------------
+    // CONSTRUCTION
+    // -------------------------------------------
+
+    _createPrimitive: function() {
+      Log.debug('creating primitive for entity', this.getId());
+      // TODO(aramk) _geometry isn't actually set.
+      this._geometry = this._updateGeometry();
+      this._appearance = this._updateAppearance();
+      return new Primitive({
+        geometryInstances: this.getGeometry(),
+        appearance: this.getAppearance()
+      });
+    },
+
+    createHandles: function() {
+      return this._vertices.forEach(function(vertex) {
+        return this.createHandle(vertex);
+      }, this);
+    },
+
+    createHandle: function(vertex) {
+      return new Handle({linked: vertex, target: this});
     }
 
   });
