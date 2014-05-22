@@ -335,9 +335,16 @@ define([
   // GETTERS AND SETTERS
   // -------------------------------------------
 
+  // TODO(aramk) A lot of these methods are only in atlas-cesium, but should also be abstract
+  // methods in atlas.
+
+  /**
+   * @param {Object} screenCoords - Containing "x" and "y" properties as positions relative to the
+   * Atlas widget.
+   * @returns {Array} IDs of the {@link atlas.model.GeoEntity} objects which exist at the given
+   * screen coordinates.
+   */
   RenderManager.prototype.getAt = function(screenCoords) {
-    // Get the relative coordinates within the Atlas widget.
-    screenCoords = this._atlasManagers.dom.translateEventCoords(screenCoords);
     var pickedPrimitives = this.getScene().drillPick(screenCoords);
     var pickedIds = [];
     pickedPrimitives.forEach(function(p) {
