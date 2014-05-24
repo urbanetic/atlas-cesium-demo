@@ -88,7 +88,7 @@ define([
     createHandles: function () {
       var handles = [];
       // Add a Handle for the Polygon itself.
-      handles.push(new Handle({linked: this}));
+      handles.push(new Handle(this._bindDependencies({owner: this})));
       // Add Handles for each vertex.
       this._vertices.forEach(function (vertex) {
         // TODO(aramk) This modifies the underlying vertices - it should create copies and
@@ -99,7 +99,7 @@ define([
     },
 
     createHandle: function (vertex) {
-      return new Handle({linked: vertex, target: this});
+      return new Handle(this._bindDependencies({target: vertex, owner: this}));
     },
 
     // -------------------------------------------
@@ -178,6 +178,7 @@ define([
         }
         this._primitive = this._createPrimitive();
         this._renderManager.getPrimitives().add(this._primitive);
+        this.getHandles().map('render');
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }

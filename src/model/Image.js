@@ -76,12 +76,12 @@ define([
         elevation = this.getElevation();
 
       // Add a Handle for the Polygon itself.
-      handles.push(new Handle({linked: this}));
+      handles.push(this._bindDependencies(new Handle({owner: this})));
 
       // Add Handles for each vertex.
       handles = handles.concat(this._vertices.map(function (vertex) {
         vertex.z = elevation;
-        return new Handle({linked: vertex, target: this});
+        return new Handle(this._bindDependencies({target: vertex, owner: this}));
       }, this));
 
       return (this._editingHandles = handles);
