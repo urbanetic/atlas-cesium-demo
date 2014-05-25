@@ -217,7 +217,7 @@ define([
     },
 
     createHandle: function(vertex) {
-      return new Handle({linked: vertex, target: this});
+      return new Handle(this._bindDependencies({target: vertex, owner: this}));
     }
 
   });
