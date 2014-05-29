@@ -75,7 +75,7 @@ define([
      * in Cesium.
      */
     _createPrimitive: function() {
-      Log.debug('creating primitive for entity', this.getId());
+      //Log.debug('creating primitive for entity', this.getId());
       // TODO(aramk) _geometry isn't actually set.
       this._geometry = this._updateGeometry();
       this._appearance = this._updateAppearance();
@@ -114,7 +114,7 @@ define([
     _updateGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        Log.debug('updating geometry for entity ' + this.getId());
+        //Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
@@ -152,7 +152,7 @@ define([
      */
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
-        Log.debug('updating appearance for entity ' + this.getId());
+        //Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
           // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
           //                 This may require sorting of vertices before rendering.
@@ -193,11 +193,11 @@ define([
       if (!this.isRenderable()) {
         this._build();
       } else if (this.isVisible()) {
-        Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
+        //Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
         return true;
       }
       this._selected && this.onSelect();
-      Log.debug('Showing entity ' + this.getId());
+      //Log.debug('Showing entity ' + this.getId());
       this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
@@ -208,7 +208,7 @@ define([
      */
     hide: function() {
       if (this.isVisible()) {
-        Log.debug('hiding entity ' + this.getId());
+        //Log.debug('hiding entity ' + this.getId());
         this._primitive.show = false;
       }
       return !this.isVisible();
