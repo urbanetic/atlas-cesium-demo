@@ -1,8 +1,8 @@
 define([
+  'atlas/lib/utility/Setter',
   'atlas/model/Style',
-  './Colour',
-  'atlas/util/mixin'
-], function(StyleCore, Colour, mixin) {
+  'atlas-cesium/model/Colour'
+], function(Setter, StyleCore, Colour) {
   /**
    * @typedef atlas-cesium.model.Style
    * @ignore
@@ -13,7 +13,7 @@ define([
    * @class atlas-cesium.model.Style
    * @extends atlas.model.Style
    */
-  Style = mixin(StyleCore.extend(/** @lends atlas-cesium.model.Style# */ {
+  Style = Setter.mixin(StyleCore.extend(/** @lends atlas-cesium.model.Style# */ {
 
   }), {
 

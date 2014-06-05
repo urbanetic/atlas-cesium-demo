@@ -3,12 +3,12 @@ define([
   'atlas/camera/Camera',
   'atlas/model/Vertex',
   'atlas/lib/utility/Log',
+  'atlas/lib/utility/Setter',
   'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
-  'atlas/util/mixin',
   'atlas-cesium/camera/CameraFlightPath',
   'atlas-cesium/cesium/Source/Core/Cartographic'
-], function(CameraCore, Vertex, Log, AtlasMath, DeveloperError, mixin, CameraFlightPath,
+], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, CameraFlightPath,
             Cartographic) {
   /**
    * @class atlas-cesium.camera.Camera
@@ -94,7 +94,7 @@ define([
     // -------------------------------------------
 
     _animate: function(args) {
-      args = mixin({}, args);
+      args = Setter.mixin({}, args);
       var position = args.position,
           orientation = args.orientation,
           point = position.toRadians();

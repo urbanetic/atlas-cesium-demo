@@ -2,7 +2,6 @@ define([
   'atlas/util/DeveloperError',
   'atlas/model/Style',
   'atlas/model/Vertex',
-  'atlas/model/Colour',
   'atlas/model/GeoEntity',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
@@ -23,14 +22,15 @@ define([
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
+  'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(DeveloperError, Style, Vertex, Colour, GeoEntity, BoundingSphere, Cartographic,
+], function(DeveloperError, Style, Vertex, GeoEntity, BoundingSphere, Cartographic,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
-            Primitive, MeshCore, Log) {
+            Primitive, Colour, MeshCore, Log) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.

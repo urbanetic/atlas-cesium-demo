@@ -1,8 +1,8 @@
 define([
+  'atlas/lib/utility/Setter',
   'atlas/model/Colour',
   'atlas-cesium/cesium/Source/Core/Color',
-  'atlas/util/mixin'
-], function(ColourCore, CesiumColor, mixin) {
+], function(Setter, ColourCore, CesiumColor) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -13,7 +13,7 @@ define([
    * @class atlas-cesium.model.Colour
    * @extends atlas.model.Colour
    */
-  Colour = mixin(ColourCore.extend(/** @lends atlas-cesium.model.Colour# */ {
+  Colour = Setter.mixin(ColourCore.extend(/** @lends atlas-cesium.model.Colour# */ {
 
   }), {
 
