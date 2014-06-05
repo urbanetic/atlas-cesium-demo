@@ -2,6 +2,7 @@ define([
   'atlas/model/Line',
   'atlas-cesium/model/Colour',
   'atlas-cesium/model/Handle',
+  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -12,7 +13,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError'
-], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry, PolylineGeometry,
+], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
             PolylineColorAppearance, Log, DeveloperError) {
   /**
@@ -113,11 +114,13 @@ define([
         positions: this._cartesians,
         width: width
       };
+      // Allow colour as fill or border, since it's just a line.
+      var colour = this._style.getFillColour() || this._style.getBorderColour();
       // CorridorGeometry has line widths in metres. PolylineGeometry has line widths in pixels.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
         geometryArgs.colors = this._cartesians.map(function() {
-          return this._style.getBorderColour();
+          return colour;
         }, this);
         geometryArgs.colorsPerVertex = false;
         instanceArgs.geometry = new PolylineGeometry(geometryArgs);
@@ -125,7 +128,7 @@ define([
         geometryArgs.vertexFormat = PerInstanceColorAppearance.VERTEX_FORMAT;
         geometryArgs.cornerType = CornerType.ROUNDED;
         instanceArgs.attributes = {
-          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(this._style.getBorderColour()))
+          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(colour))
         };
         instanceArgs.geometry = new CorridorGeometry(geometryArgs);
       }
@@ -140,8 +143,7 @@ define([
       if (this.isDirty('entity') || this.isDirty('style')) {
         Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-          var isPolyline = this._geometry.geometry instanceof PolylineGeometry;
-          if (isPolyline) {
+          if (this._isPolyline()) {
             this._appearance = new PolylineColorAppearance();
           } else {
             this._appearance = new PerInstanceColorAppearance({
@@ -152,6 +154,10 @@ define([
         }
       }
       return this._appearance;
+    },
+
+    _isPolyline: function() {
+      return this._geometry.geometry instanceof PolylineGeometry;
     },
 
     show: function() {
@@ -193,6 +199,21 @@ define([
     remove: function() {
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
+    },
+
+    setStyle: function(style) {
+      this._super(style);
+      // Force a redraw of the model to ensure color change takes affect, since the
+      // ColorGeometryInstanceAttribute is bound per instance.
+      this.setDirty('model');
+      this.isVisible() && this.show();
+    },
+
+    modifyStyle: function(newStyle) {
+      // Force a redraw of the model to ensure color change takes affect, since the
+      // ColorGeometryInstanceAttribute is bound per instance.
+      this.setDirty('model');
+      return this._super(newStyle);
     },
 
     // -------------------------------------------

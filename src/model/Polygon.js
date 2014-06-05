@@ -223,24 +223,13 @@ define([
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
     },
 
-    // -------------------------------------------
-    // BEHAVIOUR
-    // -------------------------------------------
-
-    onSelect: function() {
-      this._super();
+    setStyle: function(style) {
+      this._super(style);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-            Style.toCesiumColors(PolygonCore.getSelectedStyle()).fill;
-      }
-    },
-
-    onDeselect: function() {
-      this._super();
-      if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Style.toCesiumColors(this.getStyle()).fill;
+        this._appearance.material.uniforms.color = Style.toCesiumColors(style).fill;
       }
     }
+
   });
 
   return Polygon;

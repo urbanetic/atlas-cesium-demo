@@ -200,27 +200,8 @@ define([
       this._super();
       this.setDirty('model');
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-    },
-
-    // -------------------------------------------
-    // BEHAVIOUR
-    // -------------------------------------------
-
-    onSelect: function() {
-      this._super();
-      if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-            Ellipse._convertStyleToCesiumColors(EllipseCore.getSelectedStyle()).fill;
-      }
-    },
-
-    onDeselect: function() {
-      this._super();
-      if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-            Ellipse._convertStyleToCesiumColors(this._style).fill;
-      }
     }
+
   });
 
   // -------------------------------------------
