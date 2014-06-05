@@ -114,11 +114,13 @@ define([
         positions: this._cartesians,
         width: width
       };
+      // Allow colour as fill or border, since it's just a line.
+      var colour = this._style.getFillColour() || this._style.getBorderColour();
       // CorridorGeometry has line widths in metres. PolylineGeometry has line widths in pixels.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
         geometryArgs.colors = this._cartesians.map(function() {
-          return this._style.getBorderColour();
+          return colour;
         }, this);
         geometryArgs.colorsPerVertex = false;
         instanceArgs.geometry = new PolylineGeometry(geometryArgs);
@@ -126,7 +128,7 @@ define([
         geometryArgs.vertexFormat = PerInstanceColorAppearance.VERTEX_FORMAT;
         geometryArgs.cornerType = CornerType.ROUNDED;
         instanceArgs.attributes = {
-          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(this._style.getBorderColour()))
+          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(colour))
         };
         instanceArgs.geometry = new CorridorGeometry(geometryArgs);
       }
@@ -205,6 +207,13 @@ define([
       // ColorGeometryInstanceAttribute is bound per instance.
       this.setDirty('model');
       this.isVisible() && this.show();
+    },
+
+    modifyStyle: function(newStyle) {
+      // Force a redraw of the model to ensure color change takes affect, since the
+      // ColorGeometryInstanceAttribute is bound per instance.
+      this.setDirty('model');
+      return this._super(newStyle);
     },
 
     // -------------------------------------------
