@@ -2,7 +2,8 @@ define([
   'atlas/util/DeveloperError',
   'atlas/model/Style',
   'atlas/model/Vertex',
-  './Colour',
+  'atlas/model/Colour',
+  'atlas/model/GeoEntity',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
@@ -25,8 +26,8 @@ define([
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(DeveloperError, Style, Vertex, Colour, BoundingSphere, Cartographic, Cartesian3,
-            CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
+], function(DeveloperError, Style, Vertex, Colour, GeoEntity, BoundingSphere, Cartographic,
+            Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
             Primitive, MeshCore, Log) {
@@ -112,7 +113,7 @@ define([
         attributes =
             this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
         attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(MeshCore.getSelectedStyle()).fill);
+            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(GeoEntity.getSelectedStyle()).fill);
       }
     },
 

@@ -237,34 +237,15 @@ define([
     remove: function() {
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-    },
-
-    // -------------------------------------------
-    // BEHAVIOUR
-    // -------------------------------------------
-
-    onSelect: function() {
-      this._selected = true;
-      if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-          Image._convertStyleToCesiumColors(PolygonCore.getSelectedStyle()).fill;
-      }
-      this.onEnableEditing();
-    },
-
-    onDeselect: function() {
-      this._selected = false;
-      if (this.isVisible()) {
-        this._appearance.material.uniforms.color =
-          Image._convertStyleToCesiumColors(this._style).fill;
-      }
-      this.onDisableEditing();
     }
+
   });
 
   // -------------------------------------------
   // STATICS
   // -------------------------------------------
+
+  // TODO(aramk) Use newer code
 
   /**
    * Takes an atlas Style object and converts it to Cesium Color objects.
