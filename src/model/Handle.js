@@ -46,13 +46,19 @@ define([
       this._dot = new Ellipse(this.getId(), {centroid: centroid, semiMajor: this._dotRadius}, args);
     },
 
-    render: function() {
+    show: function () {
       this._dot.show();
     },
 
-    unrender: function() {
+    hide: function () {
       this._dot.hide();
+    },
+
+    remove: function () {
+      this._super();
+      this._dot.remove();
     }
+
   });
 
   return Handle;

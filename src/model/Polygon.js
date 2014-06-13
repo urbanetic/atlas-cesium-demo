@@ -178,7 +178,7 @@ define([
         }
         this._primitive = this._createPrimitive();
         this._renderManager.getPrimitives().add(this._primitive);
-        this.getHandles().map('render');
+        this.getHandles().map('show');
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
