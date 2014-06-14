@@ -1,7 +1,8 @@
 module.exports = function(grunt) {
   var path = require('path'),
       glob = require('glob'),
-      fs = require('fs');
+      fs = require('fs'),
+      shell = require('shelljs');
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
   // Time how long tasks take. Can help when optimizing build times
@@ -22,6 +23,8 @@ module.exports = function(grunt) {
       dist: 'dist'
     },
 
+    // TODO(aramk) Use shelljs for Windows support.
+
     shell: {
       installBowerDep: {
         options: {
@@ -33,23 +36,23 @@ module.exports = function(grunt) {
           'echo "----- Bower dependencies installed  -----"'
         ].join('&&')
       },
-      buildCesium: {
+      buildCesiumDev: {
         options: {
           stdout: true, stdin: true
         },
         command: [
-          'echo "----- Building Cesium               -----"',
+          'echo "----- Building Cesium development -----"',
               'cd ' + path.join('lib', 'cesium'),
           path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
               'cd ' + path.join('..', '..'),
-          'echo "----- Cesium built                  -----"'
+          'echo "----- Cesium development built -----"'
         ].join('&&')
       },
       jsdoc: {
         command: [
-          'echo "----- Building JSDoc                -----"',
+          'echo "----- Building JSDoc -----"',
           'jsdoc -c jsdoc.conf.json',
-          'echo "----- JSDoc built                   -----"'
+          'echo "----- JSDoc built -----"'
         ].join('&&')
       },
       build: {
@@ -143,9 +146,26 @@ module.exports = function(grunt) {
     console.log('Compilation complete');
   });
 
-  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesium']);
+  grunt.registerTask('build-cesium', 'Builds the Cesium release unless it has been built'
+      + ' already.', function() {
+    console.log('Building Cesium release');
+    var BUILD_DIR = 'CesiumRelease';
+    var BUILD_PATH = path.join('lib', 'cesium', 'Build', BUILD_DIR);
+    if (fs.existsSync(BUILD_PATH)) {
+      console.log('Cesium release already built. Phew!');
+    } else {
+      shell.cd('./lib/cesium');
+      shell.exec('./Tools/apache-ant-1.8.2/bin/ant build minifyRelease');
+      shell.cp('-R', './Build/Cesium', './Build/' + BUILD_DIR);
+      shell.cd(path.join('..', '..'));
+    }
+    shell.cp('-R', path.join(BUILD_PATH, 'Cesium.js'), distPath());
+  });
+
+  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('doc', ['shell:jsdoc']);
-  grunt.registerTask('build', [/*'copy:build',*/ 'compile-imports', 'shell:build']);
+  grunt.registerTask('build',
+      [/*'copy:build',*/ 'compile-imports', 'shell:build', 'build-cesium']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY

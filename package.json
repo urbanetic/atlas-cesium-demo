@@ -26,6 +26,7 @@
     "karma-jasmine": "~0.1.5",
     "karma-requirejs": "~0.2.1",
     "load-grunt-tasks": "~0.2.1",
-    "requirejs": "~2.1.11"
+    "requirejs": "~2.1.11",
+    "shelljs": "^0.3.0"
   }
 }
