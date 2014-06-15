@@ -6,7 +6,9 @@
     'atlas/lib': 'empty:',
     'atlas-cesium': '',
     'atlas-cesium/lib': '../lib',
-    'atlas-cesium/cesium': 'empty:'
+    // Build only the used Cesium modules.
+    'atlas-cesium/cesium': '../lib/cesium'
+//    'atlas-cesium/cesium': 'empty:'
   },
   name: 'main',
   out: 'dist/atlas-cesium.js',

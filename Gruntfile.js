@@ -14,6 +14,21 @@ module.exports = function(grunt) {
   var BUILD_FILE = 'build.js';
   var RE_AMD_MODULE = /\b(?:define|require)\s*\(/;
   var MODULE_NAME = 'atlas-cesium';
+  var CESIUM_SRC_DIR = path.join('lib', 'cesium', 'Source');
+  var BUILD_SRC_DIR = distPath('cesium', 'Source');
+
+  // Define config for copy:resources.
+  var resourceCopy = [];
+  ['Assets', 'Widgets', 'Workers'].forEach(function (dir) {
+    // TODO(aramk) Copying the source causes path issues - we should build them individually with
+    // r.js.
+    resourceCopy.push({
+      expand: true,
+      cwd: path.join(CESIUM_SRC_DIR, dir),
+      src: '**/*',
+      dest: path.join(BUILD_SRC_DIR, dir)
+    });
+  });
 
   // Define the configuration for all the tasks.
   grunt.initConfig({
@@ -60,7 +75,7 @@ module.exports = function(grunt) {
           stdout: true
         },
         command: [
-          'echo "----- Building -----"',
+          'echo "----- Building Atlas Cesium -----"',
               'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
         ].join('&&')
       }
@@ -78,17 +93,20 @@ module.exports = function(grunt) {
           }
         ]
       },
-      build: {
-        options: {
-          processContent: function(content) {
-            return content.replace(/(\bbaseUrl\s*:\s*['"])/, '$1../')
-                .replace(/(\bout\s*:\s*['"])/, '$1../');
-          }
-        },
-        files: [
-          {src: BUILD_FILE, dest: distPath(BUILD_FILE)}
-        ]
+      resources: {
+        files: resourceCopy
       }
+//      build: {
+//        options: {
+//          processContent: function(content) {
+//            return content.replace(/(\bbaseUrl\s*:\s*['"])/, '$1../')
+//                .replace(/(\bout\s*:\s*['"])/, '$1../');
+//          }
+//        },
+//        files: [
+//          {src: BUILD_FILE, dest: distPath(BUILD_FILE)}
+//        ]
+//      }
     }
   });
 
@@ -146,26 +164,25 @@ module.exports = function(grunt) {
     console.log('Compilation complete');
   });
 
-  grunt.registerTask('build-cesium', 'Builds the Cesium release unless it has been built'
-      + ' already.', function() {
-    console.log('Building Cesium release');
-    var BUILD_DIR = 'CesiumRelease';
-    var BUILD_PATH = path.join('lib', 'cesium', 'Build', BUILD_DIR);
-    if (fs.existsSync(BUILD_PATH)) {
-      console.log('Cesium release already built. Phew!');
-    } else {
-      shell.cd('./lib/cesium');
-      shell.exec('./Tools/apache-ant-1.8.2/bin/ant build minifyRelease');
-      shell.cp('-R', './Build/Cesium', './Build/' + BUILD_DIR);
-      shell.cd(path.join('..', '..'));
-    }
-    shell.cp('-R', path.join(BUILD_PATH, 'Cesium.js'), distPath());
-  });
+//  grunt.registerTask('build-cesium', 'Builds the Cesium release unless it has been built'
+//      + ' already.', function() {
+//    console.log('Building Cesium release');
+//    var BUILD_DIR = 'CesiumRelease';
+//    var BUILD_PATH = path.join('lib', 'cesium', 'Build', BUILD_DIR);
+//    if (fs.existsSync(BUILD_PATH)) {
+//      console.log('Cesium release already built. Phew!');
+//    } else {
+//      shell.cd('./lib/cesium');
+//      shell.exec('./Tools/apache-ant-1.8.2/bin/ant build minifyRelease');
+//      shell.cp('-R', './Build/Cesium', './Build/' + BUILD_DIR);
+//      shell.cd(path.join('..', '..'));
+//    }
+//    shell.cp('-R', path.join(BUILD_PATH, 'Cesium.js'), distPath());
+//  });
 
   grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('doc', ['shell:jsdoc']);
-  grunt.registerTask('build',
-      [/*'copy:build',*/ 'compile-imports', 'shell:build', 'build-cesium']);
+  grunt.registerTask('build', ['compile-imports', 'shell:build', 'copy:resources']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
