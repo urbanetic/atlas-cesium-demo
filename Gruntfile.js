@@ -14,14 +14,15 @@ module.exports = function(grunt) {
   var BUILD_FILE = 'build.js';
   var RE_AMD_MODULE = /\b(?:define|require)\s*\(/;
   var MODULE_NAME = 'atlas-cesium';
-  var CESIUM_SRC_DIR = path.join('lib', 'cesium', 'Source');
+  var CESIUM_DIR = path.join('lib', 'cesium');
+  var CESIUM_SRC_DIR = cesiumPath('Source');
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
+  var CESIUM_WORKERS_BUILD_DIR = 'CesiumWorkers';
+  var CESIUM_WORKERS_BUILD_PATH = cesiumPath('Build', CESIUM_WORKERS_BUILD_DIR);
 
   // Define config for copy:resources.
   var resourceCopy = [];
-  ['Assets', 'Widgets', 'Workers'].forEach(function (dir) {
-    // TODO(aramk) Copying the source causes path issues - we should build them individually with
-    // r.js.
+  ['Assets', 'Widgets'].forEach(function(dir) {
     resourceCopy.push({
       expand: true,
       cwd: path.join(CESIUM_SRC_DIR, dir),
@@ -57,7 +58,7 @@ module.exports = function(grunt) {
         },
         command: [
           'echo "----- Building Cesium development -----"',
-              'cd ' + path.join('lib', 'cesium'),
+              'cd ' + cesiumPath(),
           path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
               'cd ' + path.join('..', '..'),
           'echo "----- Cesium development built -----"'
@@ -78,6 +79,20 @@ module.exports = function(grunt) {
           'echo "----- Building Atlas Cesium -----"',
               'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
         ].join('&&')
+      },
+      buildWorkers: {
+        options: {
+          stdout: true
+        },
+        command: [
+          'echo "----- Building Cesium workers -----"',
+              'cd ' + cesiumPath(),
+          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin',
+                  'ant setNodePath combineJavaScript.combineCesiumWorkers -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
+                  path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR)),
+              'cd ' + path.join('..', '..'),
+          'echo "----- Cesium workers built -----"'
+        ].join('&&')
       }
     },
 
@@ -88,13 +103,23 @@ module.exports = function(grunt) {
             expand: true,
             cwd: path.join('src', 'cesium-overrides'),
             src: '**/*.js',
-            dest: path.join('.', 'lib', 'cesium'),
+            dest: cesiumPath(),
             ext: '.js'
           }
         ]
       },
       resources: {
         files: resourceCopy
+      },
+      workers: {
+        files: [
+          {
+            expand: true,
+            cwd: path.join(CESIUM_WORKERS_BUILD_PATH, 'Workers'),
+            src: '**/*',
+            dest: path.join(BUILD_SRC_DIR, 'Workers')
+          }
+        ]
       }
 //      build: {
 //        options: {
@@ -180,9 +205,19 @@ module.exports = function(grunt) {
 //    shell.cp('-R', path.join(BUILD_PATH, 'Cesium.js'), distPath());
 //  });
 
+  grunt.registerTask('build-workers', 'Builds the Cesium workers if necessary', function() {
+    var BUILD_PATH = path.join('lib', 'cesium', 'Build', CESIUM_WORKERS_BUILD_DIR);
+    if (fs.existsSync(BUILD_PATH)) {
+      console.log('Cesium workers already built. Phew!');
+    } else {
+      grunt.task.run('shell:buildWorkers');
+    }
+  });
+
   grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('doc', ['shell:jsdoc']);
-  grunt.registerTask('build', ['compile-imports', 'shell:build', 'copy:resources']);
+  grunt.registerTask('build',
+      ['compile-imports', 'shell:build', 'build-workers', 'copy:workers', 'copy:resources']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
@@ -249,6 +284,10 @@ module.exports = function(grunt) {
 
   function distPath() {
     return _prefixPath(DIST_DIR, arguments);
+  }
+
+  function cesiumPath() {
+    return _prefixPath(CESIUM_DIR, arguments);
   }
 
 };
