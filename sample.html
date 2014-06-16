@@ -9,7 +9,9 @@
       margin: 0;
     }
   </style>
-  <link rel="stylesheet" href="atlas-cesium/css/atlas.css">
+  <link rel="stylesheet/less" href="atlas/resources/atlas.less">
+  <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
+  <script src="lib/less/dist/less-1.7.1.min.js"></script>
   <script src="./atlas-cesium/lib/Requirejs/require.js"></script>
   <script>
     "use strict";
@@ -20,60 +22,73 @@
     require.config({
       baseUrl: '',
       packages: [
-        { name: 'atlas/lib', location: 'atlas/lib'},
+        { name: 'atlas', location: 'atlas/dist', main: 'atlas'},
+        // { name: 'atlas/lib', location: 'atlas/lib'},
         { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
-        { name: 'atlas', location: 'atlas/src'},
-        { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
-        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-        { name: 'atlas-cesium', location: 'atlas-cesium/src'},
+        { name: 'atlas-cesium', location: 'atlas-cesium/dist', main: 'atlas-cesium' },
         { name: 'utility', location: 'atlas-cesium/lib/utility'},
         { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'}
-      ]
+      ],
+      paths: {
+//        'atlas-cesium': 'atlas-cesium/dist/atlas-cesium'
+//        '../Core': 'atlas-cesium/cesium/Source/Core'
+      }
     });
 
-    require(['atlas-cesium/core/CesiumAtlas',
-      'atlas/assets/testWKT'
-    ], function(CesiumAtlas, testWKT) {
-      console.debug('Creating atlas-cesium');
-      var cesiumAtlas = new CesiumAtlas();
+    //    require(['Cesium'], function(Cesium) {
+    //      console.log(Cesium);
 
-      console.debug('Attaching atlas-cesium');
-      cesiumAtlas.attachTo('cesium');
+    require(['atlas'], function() {
 
-      cesiumAtlas.publish('debugMode', true);
+        require(['atlas-cesium'], function() {
 
-      var i = 0;
-      var args = {};
-      args.show = true;
-      args.displayMode = 'extrusion';
-      testWKT.forEach(function(wkt) {
-        args.id = i++;
-        args.polygon = {
-          vertices: wkt,
-          elevation: 0,
-          height: 50
-        };
-        cesiumAtlas.publish('entity/show', args);
-      });
-      cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
-        position: {
-          latitude: -37.8,
-          longitude: 144.96,
-          elevation: 2000
-        }
-      });
+          require(['atlas-cesium/core/CesiumAtlas',
+            'atlas/assets/testWKT'
+          ], function(CesiumAtlas, testWKT) {
+            console.debug('Creating atlas-cesium');
+            var cesiumAtlas = new CesiumAtlas();
 
-      setTimeout(function() {
-        require([
-          './prototypes/CameraPrototype',
-          './prototypes/DrawPrototype',
-        ], function(CameraPrototype, DrawPrototype) {
-//          new CameraPrototype(cesiumAtlas);
-          new DrawPrototype(cesiumAtlas);
+            console.debug('Attaching atlas-cesium');
+            cesiumAtlas.attachTo('cesium');
+
+            cesiumAtlas.publish('debugMode', true);
+
+            var i = 0;
+            var args = {};
+            args.show = true;
+            args.displayMode = 'extrusion';
+            testWKT.forEach(function(wkt) {
+              args.id = i++;
+              args.polygon = {
+                vertices: wkt,
+                elevation: 0,
+                height: 50
+              };
+              cesiumAtlas.publish('entity/show', args);
+            });
+            cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
+              position: {
+                latitude: -37.8,
+                longitude: 144.96,
+                elevation: 2000
+              }
+            });
+
+            setTimeout(function() {
+              require([
+                './prototypes/CameraPrototype',
+                './prototypes/DrawPrototype',
+              ], function(CameraPrototype, DrawPrototype) {
+                //          new CameraPrototype(cesiumAtlas);
+                new DrawPrototype(cesiumAtlas);
+              });
+            }, 2000);
+
+          });
+
         });
-      }, 2000);
-
     });
+
   </script>
 </head>
 <body>
