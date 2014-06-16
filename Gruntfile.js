@@ -19,6 +19,8 @@ module.exports = function(grunt) {
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
   var CESIUM_WORKERS_BUILD_DIR = 'CesiumWorkers';
   var CESIUM_WORKERS_BUILD_PATH = cesiumPath('Build', CESIUM_WORKERS_BUILD_DIR);
+  var STYLE_BUILD_FILE = 'atlas-cesium.css';
+  var STYLE_BUILD_FILE_PATH = distPath(STYLE_BUILD_FILE);
 
   // Define config for copy:resources.
   var resourceCopy = [];
@@ -121,17 +123,21 @@ module.exports = function(grunt) {
           }
         ]
       }
-//      build: {
-//        options: {
-//          processContent: function(content) {
-//            return content.replace(/(\bbaseUrl\s*:\s*['"])/, '$1../')
-//                .replace(/(\bout\s*:\s*['"])/, '$1../');
-//          }
-//        },
-//        files: [
-//          {src: BUILD_FILE, dest: distPath(BUILD_FILE)}
-//        ]
-//      }
+    },
+
+    less: {
+      dist: {
+        options: {
+          cleancss: true,
+          relativeUrls: true
+        },
+        files: [
+          {
+            src: path.join('resources', 'atlas-cesium.less'),
+            dest: STYLE_BUILD_FILE_PATH
+          }
+        ]
+      }
     }
   });
 
@@ -214,10 +220,17 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('fix-build-style', 'Fix the Cesium style import', function() {
+    replaceFile(STYLE_BUILD_FILE_PATH, function (data) {
+      return data.replace("@import '../lib/cesium", "@import 'cesium");
+    });
+  });
+
   grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('doc', ['shell:jsdoc']);
   grunt.registerTask('build',
-      ['compile-imports', 'shell:build', 'build-workers', 'copy:workers', 'copy:resources']);
+      ['compile-imports', 'shell:build', 'build-workers', 'copy:workers', 'copy:resources',
+        'less', 'fix-build-style']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
