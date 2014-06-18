@@ -18,11 +18,15 @@ Atlas-Cesium can be built into compressed JavaScript and CSS resources:
 ```
 grunt build
 ```
-`atlas-cesium.js` and `atlas-cesium.css` will appear in `dist/`.
+See `dist/` for the output.
 
 ## Docs
-Generate jsdocs in `docs/` with:
+Generate JSDocs in `docs/` with:
 
 ```
 grunt doc
 ```
+
+## Contact
+* Issues: <https://bitbucket.org/mutopia/atlas-cesium/issues>
+* Email: <support@urbanetic.net>

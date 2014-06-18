@@ -217,9 +217,10 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
-  grunt.registerTask('doc', ['shell:jsdoc']);
-  grunt.registerTask('build',
+  grunt.registerTask('install', 'Installs dependencies.',
+      ['shell:installBowerDep', 'shell:buildCesiumDev']);
+  grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
+  grunt.registerTask('build', 'Builds the app into a distributable package.',
       ['compile-imports', 'clean:dist', 'shell:build', 'build-workers', 'copy:workers',
         'copy:resources', 'less', 'fix-build-style']);
 
