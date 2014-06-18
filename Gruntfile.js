@@ -44,6 +44,7 @@ module.exports = function(grunt) {
     // TODO(aramk) Use shelljs for Windows support.
 
     shell: {
+      // Installs all Bower dependencies.
       installBowerDep: {
         options: {
           stdout: true
@@ -54,6 +55,8 @@ module.exports = function(grunt) {
           'echo "----- Bower dependencies installed  -----"'
         ].join('&&')
       },
+
+      // Builds the Cesium source code.
       buildCesiumDev: {
         options: {
           stdout: true, stdin: true
@@ -66,22 +69,8 @@ module.exports = function(grunt) {
           'echo "----- Cesium development built -----"'
         ].join('&&')
       },
-      jsdoc: {
-        command: [
-          'echo "----- Building JSDoc -----"',
-          'jsdoc -c jsdoc.conf.json',
-          'echo "----- JSDoc built -----"'
-        ].join('&&')
-      },
-      build: {
-        options: {
-          stdout: true
-        },
-        command: [
-          'echo "----- Building Atlas Cesium -----"',
-              'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
-        ].join('&&')
-      },
+
+      // Builds the Cesium workers.
       buildWorkers: {
         options: {
           stdout: true
@@ -89,11 +78,35 @@ module.exports = function(grunt) {
         command: [
           'echo "----- Building Cesium workers -----"',
               'cd ' + cesiumPath(),
-          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin',
-                  'ant setNodePath combineJavaScript.combineCesiumWorkers -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
-                  path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR)),
+          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
+                  ' setNodePath combineJavaScript.combineCesiumWorkers' +
+                  ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
+                  path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR),
               'cd ' + path.join('..', '..'),
           'echo "----- Cesium workers built -----"'
+        ].join('&&')
+      },
+
+      // Compiles JSDoc from JS source files.
+      jsdoc: {
+        options: {
+          stdout: true
+        },
+        command: [
+          'echo "----- Compiling JSDoc -----"',
+          'rm -rf docs',
+          path.join('node_modules', '.bin', 'jsdoc') + ' -c jsdoc.conf.json -l'
+        ].join('&&')
+      },
+
+      // Compile JS source files.
+      build: {
+        options: {
+          stdout: true
+        },
+        command: [
+          'echo "----- Building Atlas Cesium -----"',
+              'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
         ].join('&&')
       }
     },
