@@ -35,25 +35,38 @@ module.exports = function(grunt) {
 
   // Define the configuration for all the tasks.
   grunt.initConfig({
-    // What?
-    yeoman: {
-      app: require('./bower.json').appPath || 'app',
-      dist: 'dist'
-    },
-
-    // TODO(aramk) Use shelljs for Windows support.
 
     shell: {
+      // Installs all NodeJS dependencies.
+      installNpmDep: {
+        options: {
+          stdout: true
+        },
+        command: 'npm install'
+      },
+
       // Installs all Bower dependencies.
       installBowerDep: {
         options: {
           stdout: true
         },
-        command: [
-          'echo "----- Installing bower dependencies -----"',
-          'bower install',
-          'echo "----- Bower dependencies installed  -----"'
-        ].join('&&')
+        command: 'bower install'
+      },
+
+      // Updates all NodeJS dependencies.
+      updateNpmDep: {
+        options: {
+          stdout: true
+        },
+        command: 'npm update'
+      },
+
+      // Updates all Bower dependencies.
+      updateBowerDep: {
+        options: {
+          stdout: true
+        },
+        command: 'bower update'
       },
 
       // Builds the Cesium source code.
@@ -62,11 +75,9 @@ module.exports = function(grunt) {
           stdout: true, stdin: true
         },
         command: [
-          'echo "----- Building Cesium development -----"',
               'cd ' + cesiumPath(),
           path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
-              'cd ' + path.join('..', '..'),
-          'echo "----- Cesium development built -----"'
+              'cd ' + path.join('..', '..')
         ].join('&&')
       },
 
@@ -78,10 +89,10 @@ module.exports = function(grunt) {
         command: [
           'echo "----- Building Cesium workers -----"',
               'cd ' + cesiumPath(),
-          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
-                  ' setNodePath combineJavaScript.combineCesiumWorkers' +
-                  ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
-                  path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR),
+              path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
+              ' setNodePath combineJavaScript.combineCesiumWorkers' +
+              ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
+              path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR),
               'cd ' + path.join('..', '..'),
           'echo "----- Cesium workers built -----"'
         ].join('&&')
@@ -95,7 +106,7 @@ module.exports = function(grunt) {
         command: [
           'echo "----- Compiling JSDoc -----"',
           'rm -rf docs',
-          path.join('node_modules', '.bin', 'jsdoc') + ' -c jsdoc.conf.json -l'
+              path.join('node_modules', '.bin', 'jsdoc') + ' -c jsdoc.conf.json -l'
         ].join('&&')
       },
 
@@ -218,11 +229,13 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('install', 'Installs dependencies.',
-      ['shell:installBowerDep', 'shell:buildCesiumDev']);
-  grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
+      ['shell:installNpmDep', 'shell:installBowerDep', 'shell:buildCesiumDev']);
+  grunt.registerTask('update', 'Updates dependencies.',
+      ['shell:updateNpmDep', 'shell:updateBowerDep']);
   grunt.registerTask('build', 'Builds the app into a distributable package.',
       ['compile-imports', 'clean:dist', 'shell:build', 'build-workers', 'copy:workers',
         'copy:resources', 'less', 'fix-build-style']);
+  grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
