@@ -1,10 +1,28 @@
-# Atlas Cesium
+# Atlas-Cesium
 
-An implementation of [Atlas](https://bitbucket.org/mutopia/atlas) in [Cesium](http://cesiumjs.org/).
+** An implementation of [Atlas](https://bitbucket.org/mutopia/atlas) in [Cesium](http://cesiumjs.org/). **
 
-## Building
-Before you can run any code for Cesium, you must follow the guide [here](https://github.com/AnalyticalGraphicsInc/cesium/wiki/Contributor%27s-Guide#wiki-buildthecode). The main command is:
+## About
 
-	./Tools/apache-ant-1.8.2/bin/ant
-	
-This builds necessary files into `Cesium/Source`.
+[More Info](http://urbanetic.net/atlas/atlas-cesium/)
+
+## Install
+```
+npm install
+grunt install
+```
+
+## Build
+Atlas-Cesium can be built into compressed JavaScript and CSS resources:
+
+```
+grunt build
+```
+`atlas-cesium.js` and `atlas-cesium.css` will appear in `dist/`.
+
+## Docs
+Generate jsdocs in `docs/` with:
+
+```
+grunt doc
+```

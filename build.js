@@ -11,6 +11,6 @@
 //    'atlas-cesium/cesium': 'empty:'
   },
   name: 'main',
-  out: 'dist/atlas-cesium.js',
+  out: 'dist/atlas-cesium.min.js',
   excludeShallow: ['main']
 })

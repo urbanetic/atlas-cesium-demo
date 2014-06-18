@@ -19,7 +19,7 @@ module.exports = function(grunt) {
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
   var CESIUM_WORKERS_BUILD_DIR = 'CesiumWorkers';
   var CESIUM_WORKERS_BUILD_PATH = cesiumPath('Build', CESIUM_WORKERS_BUILD_DIR);
-  var STYLE_BUILD_FILE = 'atlas-cesium.css';
+  var STYLE_BUILD_FILE = 'atlas-cesium.min.css';
   var STYLE_BUILD_FILE_PATH = distPath(STYLE_BUILD_FILE);
 
   // Define config for copy:resources.
@@ -138,6 +138,19 @@ module.exports = function(grunt) {
           }
         ]
       }
+    },
+
+    clean: {
+      dist: {
+        files: [
+          {
+            dot: true,
+            src: [
+              distPath('**', '*')
+            ]
+          }
+        ]
+      }
     }
   });
 
@@ -173,43 +186,8 @@ module.exports = function(grunt) {
         "require(['" + moduleIds.join("', '") + "']);\n";
     console.log('Writing to', MAIN_FILE);
     fs.writeFileSync(MAIN_FILE, mainFile);
-
-    // Compile unused imports to ignore from the build.
-//    console.log('Compiling external imports...');
-//    var externalImports = [];
-//    modules.forEach(function(module) {
-//      findAmdImports(readFile(srcPath(module))).forEach(function(moduleId) {
-//        if (/(^atlas\/)|(^atlas-cesium\/cesium\/)/.test(moduleId)) {
-//          externalImports.push(moduleId);
-//        }
-//      });
-//    });
-//    console.log('Found', externalImports.length, 'external imports');
-//    var RE_EXCLUDE_SHALLOW = /\bexcludeShallow\s*:\s*\[([^\]]+)\]/;
-//    replaceFile(distPath(BUILD_FILE), function(data) {
-//      return data.replace(RE_EXCLUDE_SHALLOW, function(m) {
-//        return m.replace(/\]$/, ", '" + externalImports.join("', '") + "']");
-//      })
-//    });
-
     console.log('Compilation complete');
   });
-
-//  grunt.registerTask('build-cesium', 'Builds the Cesium release unless it has been built'
-//      + ' already.', function() {
-//    console.log('Building Cesium release');
-//    var BUILD_DIR = 'CesiumRelease';
-//    var BUILD_PATH = path.join('lib', 'cesium', 'Build', BUILD_DIR);
-//    if (fs.existsSync(BUILD_PATH)) {
-//      console.log('Cesium release already built. Phew!');
-//    } else {
-//      shell.cd('./lib/cesium');
-//      shell.exec('./Tools/apache-ant-1.8.2/bin/ant build minifyRelease');
-//      shell.cp('-R', './Build/Cesium', './Build/' + BUILD_DIR);
-//      shell.cd(path.join('..', '..'));
-//    }
-//    shell.cp('-R', path.join(BUILD_PATH, 'Cesium.js'), distPath());
-//  });
 
   grunt.registerTask('build-workers', 'Builds the Cesium workers if necessary', function() {
     var BUILD_PATH = path.join('lib', 'cesium', 'Build', CESIUM_WORKERS_BUILD_DIR);
@@ -221,7 +199,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('fix-build-style', 'Fix the Cesium style import', function() {
-    replaceFile(STYLE_BUILD_FILE_PATH, function (data) {
+    replaceFile(STYLE_BUILD_FILE_PATH, function(data) {
       return data.replace("@import '../lib/cesium", "@import 'cesium");
     });
   });
@@ -229,8 +207,8 @@ module.exports = function(grunt) {
   grunt.registerTask('install', ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('doc', ['shell:jsdoc']);
   grunt.registerTask('build',
-      ['compile-imports', 'shell:build', 'build-workers', 'copy:workers', 'copy:resources',
-        'less', 'fix-build-style']);
+      ['compile-imports', 'clean:dist', 'shell:build', 'build-workers', 'copy:workers',
+        'copy:resources', 'less', 'fix-build-style']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
