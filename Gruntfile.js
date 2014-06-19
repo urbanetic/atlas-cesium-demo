@@ -45,7 +45,7 @@ module.exports = function(grunt) {
         options: {
           stdout: true
         },
-        command: 'npm install'
+        command: 'npm install --cache-min 999999999'
       },
 
       // Installs all Bower dependencies.
