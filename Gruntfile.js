@@ -53,7 +53,7 @@ module.exports = function(grunt) {
         options: {
           stdout: true
         },
-        command: 'bower install --offline'
+        command: 'bower install'
       },
 
       // Updates all NodeJS dependencies.
