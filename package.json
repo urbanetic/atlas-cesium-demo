@@ -8,7 +8,8 @@
   "directories": {
     "doc": "docs",
     "example": "examples",
-    "test": "test"
+    "test": "test",
+    "lib": "src"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "karma-jasmine": "~0.1.5",
     "karma-requirejs": "~0.2.1",
     "load-grunt-tasks": "~0.2.1",
+    "logfile-grunt": "^0.1.5",
     "requirejs": "~2.1.11",
     "shelljs": "^0.3.0"
   }

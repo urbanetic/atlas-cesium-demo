@@ -9,12 +9,14 @@ module.exports = function(grunt) {
   //require('time-grunt')(grunt); // Not installed
 
   var SRC_DIR = 'src';
+  var LIB_DIR = 'lib';
   var DIST_DIR = 'dist';
+  var BUILD_DIR = 'build';
   var MAIN_FILE = srcPath('main.js');
-  var BUILD_FILE = 'build.js';
+  var BUILD_FILE = buildPath('build.js');
   var RE_AMD_MODULE = /\b(?:define|require)\s*\(/;
   var MODULE_NAME = 'atlas-cesium';
-  var CESIUM_DIR = path.join('lib', 'cesium');
+  var CESIUM_DIR = libPath('cesium');
   var CESIUM_SRC_DIR = cesiumPath('Source');
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
   var CESIUM_WORKERS_BUILD_DIR = 'CesiumWorkers';
@@ -33,6 +35,7 @@ module.exports = function(grunt) {
     });
   });
 
+  require('logfile-grunt')(grunt, {filePath: buildPath('./grunt.log'), clearLogFile: true});
   // Define the configuration for all the tasks.
   grunt.initConfig({
 
@@ -76,6 +79,8 @@ module.exports = function(grunt) {
         },
         command: [
               'cd ' + cesiumPath(),
+          // TODO(aramk) This can break on 32-bit systems. Maybe use
+          // https://www.npmjs.org/package/ant.
           path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
               'cd ' + path.join('..', '..')
         ].join('&&')
@@ -87,14 +92,12 @@ module.exports = function(grunt) {
           stdout: true
         },
         command: [
-          'echo "----- Building Cesium workers -----"',
               'cd ' + cesiumPath(),
               path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
               ' setNodePath combineJavaScript.combineCesiumWorkers' +
               ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
               path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR),
-              'cd ' + path.join('..', '..'),
-          'echo "----- Cesium workers built -----"'
+              'cd ' + path.join('..', '..')
         ].join('&&')
       },
 
@@ -104,7 +107,6 @@ module.exports = function(grunt) {
           stdout: true
         },
         command: [
-          'echo "----- Compiling JSDoc -----"',
           'rm -rf docs',
               path.join('node_modules', '.bin', 'jsdoc') + ' -c jsdoc.conf.json -l'
         ].join('&&')
@@ -116,24 +118,12 @@ module.exports = function(grunt) {
           stdout: true
         },
         command: [
-          'echo "----- Building Atlas Cesium -----"',
               'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
         ].join('&&')
       }
     },
 
     copy: {
-      overrideCesium: {
-        files: [
-          {
-            expand: true,
-            cwd: path.join('src', 'cesium-overrides'),
-            src: '**/*.js',
-            dest: cesiumPath(),
-            ext: '.js'
-          }
-        ]
-      },
       resources: {
         files: resourceCopy
       },
@@ -214,7 +204,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('build-workers', 'Builds the Cesium workers if necessary', function() {
-    var BUILD_PATH = path.join('lib', 'cesium', 'Build', CESIUM_WORKERS_BUILD_DIR);
+    var BUILD_PATH = libPath('cesium', 'Build', CESIUM_WORKERS_BUILD_DIR);
     if (fs.existsSync(BUILD_PATH)) {
       console.log('Cesium workers already built. Phew!');
     } else {
@@ -300,8 +290,16 @@ module.exports = function(grunt) {
     return _prefixPath(SRC_DIR, arguments);
   }
 
+  function libPath() {
+    return _prefixPath(LIB_DIR, arguments);
+  }
+
   function distPath() {
     return _prefixPath(DIST_DIR, arguments);
+  }
+
+  function buildPath() {
+    return _prefixPath(BUILD_DIR, arguments);
   }
 
   function cesiumPath() {
