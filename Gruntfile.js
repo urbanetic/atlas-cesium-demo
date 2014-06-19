@@ -88,7 +88,10 @@ module.exports = function(grunt) {
       // Builds the Cesium workers.
       buildWorkers: {
         options: {
-          stdout: false, stderr: true
+          // TODO(aramk) This task often fails before it is complete on the server, so even though
+          // default timeout should be zero, this is more explicit.
+          // See https://github.com/sindresorhus/grunt-shell
+          stdout: false, stderr: true, execOptions: {timeout: 0}
         },
         command: [
               'cd ' + cesiumPath(),
