@@ -8,12 +8,10 @@
   "license": "MIT",
   "private": true,
   "ignore": [
-    "**/.*",
-    "node_modules",
     "lib",
+    "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ],
   "dependencies": {
     "cesium": "https://github.com/AnalyticalGraphicsInc/cesium.git#b27",

@@ -81,8 +81,7 @@ module.exports = function(grunt) {
               'cd ' + cesiumPath(),
           // TODO(aramk) This can break on 32-bit systems. Maybe use
           // https://www.npmjs.org/package/ant.
-          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build'),
-              'cd ' + path.join('..', '..')
+          path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant build')
         ].join('&&')
       },
 
@@ -96,8 +95,7 @@ module.exports = function(grunt) {
               path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
               ' setNodePath combineJavaScript.combineCesiumWorkers' +
               ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
-              path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR),
-              'cd ' + path.join('..', '..')
+              path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR)
         ].join('&&')
       },
 
