@@ -75,7 +75,7 @@ module.exports = function(grunt) {
       // Builds the Cesium source code.
       buildCesiumDev: {
         options: {
-          stdout: true, stdin: true
+          stdout: false, stderr: true
         },
         command: [
               'cd ' + cesiumPath(),
@@ -88,7 +88,7 @@ module.exports = function(grunt) {
       // Builds the Cesium workers.
       buildWorkers: {
         options: {
-          stdout: true
+          stdout: false, stderr: true
         },
         command: [
               'cd ' + cesiumPath(),
@@ -113,7 +113,7 @@ module.exports = function(grunt) {
       // Compile JS source files.
       build: {
         options: {
-          stdout: true
+          stdout: false, stderr: true
         },
         command: [
               'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
