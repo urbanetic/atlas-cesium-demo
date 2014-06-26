@@ -13,10 +13,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
+  'atlas-cesium/cesium/Source/DynamicScene/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
 ], function(Log, GeoPoint, Vertex, AtlasMath, extend, Cartographic, requestAnimationFrame, Imagery,
-            ImageryState, Viewer, RenderManagerCore) {
+            ImageryState, Viewer, CzmlDataSource, RenderManagerCore) {
 
   /**
    * Responsible for global rendering control specific to Cesium.
@@ -436,6 +437,14 @@ define([
   RenderManager.prototype.geoPointFromCartesian = function(cartesian) {
     var cesiumCartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
     return GeoPoint.fromRadians(cesiumCartographic);
+  };
+
+  // TODO(aramk) This is used to encapsulate CzmlDataSource within atlas-cesium. Eventually we may
+  // want to add this to RenderManager in Atlas if we depend on czml outside Cesium.
+  RenderManager.prototype.createCzmlDataSource = function(czml) {
+    var dataSource = new CzmlDataSource();
+    dataSource.load(czml, 'Built-in CZML');
+    return dataSource;
   };
 
   RenderManager.prototype.getAnimations = function() {
