@@ -8,7 +8,7 @@ bower_components/
 /lib/
 /dist
 src/main.js
-.build/
+.build*
 
 # Misc #
 ########
