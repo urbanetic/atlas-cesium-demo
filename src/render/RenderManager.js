@@ -415,7 +415,7 @@ define([
   };
 
   /**
-   * Converts a GeoPoint  to a Cesium Cartestian3 object.
+   * Converts a GeoPoint to a Cesium Cartestian3 object.
    * @param {atlas.model.GeoPoint} cart - The geographic position.
    * @returns {Cartesian3}
    */
@@ -425,6 +425,15 @@ define([
         cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
 
     return ellipsoid.cartographicToCartesian(cesiumCart);
+  };
+
+  /**
+   * Converts an array of Atlas GeoPoints to Cesium Cartesian3 objects.
+   * @param {Array.<atlas.model.GeoPoint>} geopoints - Array of GeoPoints
+   * @returns {Array.<Cartesian3>} An array of Cesium Cartesian3 objects.
+   */
+  RenderManager.prototype.cartesianArrayFromGeoPointArray = function (geopoints) {
+    return this.cartesianArrayFromVertexArray(geopoints.map(GeoPoint.toVertex, GeoPoint));
   };
 
   /**
