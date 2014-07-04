@@ -2,7 +2,6 @@ define([
   'atlas/model/Line',
   'atlas-cesium/model/Colour',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -13,7 +12,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError'
-], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
+], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
             PolylineColorAppearance, Log, DeveloperError) {
   /**
@@ -56,7 +55,7 @@ define([
      * An array of Cesium cartesian coordinates describing the position of the Polygon
      * on the Cesium globe.
      * @see  {@link http://cesiumjs.org/Cesium/Build/Documentation/Cartesian3.html}
-     * @type {Cartesian3}
+     * @type {Array.<Cartesian3>}
      */
     _cartesians: null,
 
@@ -92,7 +91,7 @@ define([
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
 
@@ -116,7 +115,8 @@ define([
       };
       // Allow colour as fill or border, since it's just a line.
       var colour = this._style.getFillColour() || this._style.getBorderColour();
-      // CorridorGeometry has line widths in metres. PolylineGeometry has line widths in pixels.
+
+      // PolylineGeometry has line widths in pixels. CorridorGeometry has line widths in metres.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
         geometryArgs.colors = this._cartesians.map(function() {
