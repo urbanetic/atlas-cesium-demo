@@ -429,18 +429,11 @@ define([
 
   /**
    * Converts an array of Atlas GeoPoints to Cesium Cartesian3 objects.
-   * @param {atlas.model.GeoPoint} geopoints - Array of GeoPoints
+   * @param {Array.<atlas.model.GeoPoint>} geopoints - Array of GeoPoints
    * @returns {Array.<Cartesian3>} An array of Cesium Cartesian3 objects.
    */
   RenderManager.prototype.cartesianArrayFromGeoPointArray = function (geopoints) {
-    var ellipsoid = this.getEllipsoid();
-
-    var cesiumCartographics = geopoints.map(function (geopoint) {
-      var radianGeopoint = geopoint.toRadians();
-      return new Cartographic(radianGeopoint.longitude, radianGeopoint.latitude,
-          radianGeopoint.elevation);
-    });
-    return ellipsoid.cartographicArrayToCartesianArray(cesiumCartographics);
+    return this.cartesianArrayFromVertexArray(geopoints.map(GeoPoint.toVertex, GeoPoint));
   };
 
   /**
