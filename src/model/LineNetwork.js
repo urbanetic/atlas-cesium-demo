@@ -22,7 +22,7 @@ define([
      */
     _lines: null,
 
-    _createLine: function (id, lineData, args) {
+    _createLineObj: function (id, lineData, args) {
       return new Line(id, lineData, args);
     }
   });

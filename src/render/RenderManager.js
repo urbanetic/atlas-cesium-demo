@@ -433,7 +433,9 @@ define([
    * @returns {Array.<Cartesian3>} An array of Cesium Cartesian3 objects.
    */
   RenderManager.prototype.cartesianArrayFromGeoPointArray = function (geopoints) {
-    return this.cartesianArrayFromVertexArray(geopoints.map(GeoPoint.toVertex, GeoPoint));
+    return this.cartesianArrayFromVertexArray(geopoints.map(function (geoPoint) {
+      return geoPoint.toVertex();
+    }));
   };
 
   /**
