@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>atlas-cesium demo</title>
-  <link rel="stylesheet" href="atlas-cesium/lib/cesium/Source/Widgets/Viewer/Viewer.css">
+  <link rel="stylesheet" href="atlas-cesium/lib/cesium/Source/Widgets/widgets.css">
   <link rel="stylesheet" href="atlas/css/atlas.css">
   <script src="atlas/lib/require.js"></script>
   <script>
@@ -30,41 +30,68 @@
     });
     require(['atlas-cesium/core/CesiumAtlas',
              'atlas/model/Colour',
-             'atlas-cesium/model/Line',
              'atlas/assets/testWKT',
-             'atlas/assets/testMesh2'
-             //'atlas/assets/PrahranModel',
-             //'atlas/assets/LargePrahranModel'
-    ], function (CesiumAtlas, Colour, Line, testWKT, testMesh, prahranModel, largePrahranModel) {
+             'atlas/dom/PopupFaculty',
+             'atlas-cesium/cesium/Source/Core/Cartographic',
+             'atlas-cesium/cesium/Source/Core/loadImage',
+      'atlas-cesium/cesium/Source/Scene/BillboardCollection'
+    ], function (CesiumAtlas, Colour, testWKT, PopupFaculty,
+        Cartographic, loadImage, BillboardCollection) {
+      var args = {};
+
       console.debug('Creating atlas-cesium');
       cesiumAtlas = new CesiumAtlas();
 
       console.debug('Attaching atlas-cesium');
       cesiumAtlas.attachTo('cesium');
 
+      // -------------------------------------------
+      // Test individual rendering
+      // -------------------------------------------
       var i = 0;
-      var args = {};
       args.id = 0;
-      args.elevation = 0;
-      args.height = 50;
       args.show = true;
       // Show many polygons
       testWKT.forEach(function (wkt) {
         args.id = i++;
-        args.footprint = wkt;//testWKT[0];//
+        args.polygon = {
+          color: Colour.GREY,
+          elevation: 0,
+          height: 10*i,
+          vertices: wkt
+        };
         cesiumAtlas.publish('entity/show', args);
       });
+      args.id = i++;
+      args.parentId = '3';
+      args.polygon = {
+        vertices: testWKT[3],
+        height: 30,
+        elevation: 40
+      };
+      cesiumAtlas.publish('entity/show', args);
 
-      // Show the Prahran model
+      // Attempt to draw ellipse.
+//      args.id++;
+//      args.polygon = null;
+//      args.ellipse = {
+//        centroid: {x: 144, y: -30},
+//        semiMajor: 50000,
+//        semiMinor: 45000
+//      };
+//      cesiumAtlas.publish('entity/show', args);
+
+//      var entity = cesiumAtlas._managers.entity.getById(2),
+//          render = cesiumAtlas._managers.render,
+//          handle = new Handle({centroid: {latitude: -37, longitude: 144}, linked: entity,
+//            renderManager: render
+//          });
+
+      // -------------------------------------------
+      // Test bulk rendering
+      // -------------------------------------------
 //      args.features = largePrahranModel;
 //      cesiumAtlas.publish('entity/bulk/show', args);
-
-      // Test mesh
-      args.id = 100;
-      args.displayMode = 'mesh';
-      delete args.footprint;
-      args.mesh = testMesh;
-      cesiumAtlas.publish('entity/show', args);
 
       // Test zoomTo
       setTimeout( (function () {
@@ -73,13 +100,29 @@
         this._managers.render._widget.render();
         this.publish('camera/zoomTo', {
           position: {
-            lat: -37.8,
-            lng: 144.96,
-            elevation: 2000
+            lat: -37.7963,
+            lng: 144.9614,
+            elevation: 1000
           },
-          duration: 0
+          duration: 1000
         })
       }).bind(cesiumAtlas), 1000);
+
+      // -------------------------------------------
+      // Testing showing a popup.
+      // -------------------------------------------
+      cesiumAtlas.subscribe('entity/select', function (args) {
+        this.publish('entity/popup/show', {
+          title: args.ids[0],
+          entityId: args.ids[0],
+          position: {top: 300, left: 500},
+          content: '<p>Blah blah blah blah </p>'
+        });
+      }.bind(cesiumAtlas));
+
+      cesiumAtlas.subscribe('entity/deselect', function (args) {
+        this.publish('entity/popup/hide', {entityId: args.ids[0]});
+      }.bind(cesiumAtlas));
 
       // -------------------------------------------
       // Test static projection (hard coded).
@@ -100,20 +143,23 @@
       // -------------------------------------------
       // Test static projection (using publish).
       // -------------------------------------------
-//      setTimeout(function () {
-//        var ids = [0, 1, 2, 3, 4, 5, 6],
-//            config = {},
-//            values = [];
-//        ids.forEach(function (i) {
-//          values[i] = Math.random() * 100 + Math.random() * 1000;
-//        });
-//        config = {
-//          values: values,
-//          codomain: {startProj: Colour.BLUE, endProj: Colour.GREEN}
-//        };
-//        cesiumAtlas.publish('projection/add', {type: 'colour', ids: ids, config: config});
-//        //cesiumAtlas.publish('projection/render', 'colour');
-//      }.bind(cesiumAtlas), 6000);
+      setTimeout(function () {
+        var ids = [0, 1, 2, 3, 4, 5, 6, 7],
+            config = {},
+            values = [];
+        ids.forEach(function (i) {
+          values[i] = Math.random() * 100 + Math.random() * 1000;
+        });
+        values[4] = null;
+        config = {
+          title: 'The Awesome Projection',
+          caption: 'Awesome/awesome',
+          values: values,
+          codomain: {startProj: Colour.RED, endProj: Colour.BLUE}
+        };
+        cesiumAtlas.publish('projection/add',
+            {type: 'colour', ids: ids, config: config});
+      }.bind(cesiumAtlas), 3000);
 
       // -------------------------------------------
       // Test dynamic projection (using publish).
@@ -144,20 +190,44 @@
       // -------------------------------------------------
       // Test out the new Lines class
       // -------------------------------------------------
-      var args = {
-            id: '1000',
-            line: [
-              {x: -37, y: 143},
-              {x: -37, y: 144}
-            ],
-            eventManager: cesiumAtlas._managers.event,
-            renderManager: cesiumAtlas._managers.render
-          };
-      // Construct using WKT.
-      args.line = 'LINESTRING (-37 144, -37 143)';
-      cesiumAtlas.publish('entity/show', args);
-      //line.show();
-      console.error('Drawn line?');
+//      var args = {
+//            id: '1000',
+//            line: [
+//              {x: -37, y: 143},
+//              {x: -37, y: 144}
+//            ],
+//            eventManager: cesiumAtlas._managers.event,
+//            renderManager: cesiumAtlas._managers.render
+//          };
+//      // Construct using WKT.
+//      args.line = 'LINESTRING (-37 144, -37 143)';
+//      cesiumAtlas.publish('entity/show', args);
+//      //line.show();
+//      console.error('Drawn line?');
+
+      // -------------------------------------------
+      // Try drawing a bog standard billboard
+      // -------------------------------------------
+//      console.log('Trying to draw billboard');
+//      var scene = cesiumAtlas._managers.render._widget.scene,
+//          billboards = new BillboardCollection(),
+//          image = new Image();
+//
+//      image.onload = function() {
+//        console.log('loaded image');
+//        var atlas = scene._context.createTextureAtlas({image: image}),
+//            ellipsoid = cesiumAtlas._managers.render._widget.centralBody.ellipsoid;
+//
+//        billboards.textureAtlas = atlas;
+//        billboards.add({
+//          show: true,
+//          scale: 1,
+//          position: ellipsoid.cartographicToCartesian(Cartographic.fromDegrees(-37, 144)),
+//          imageIndex: 0
+//        });
+//      };
+//      scene.primitives.add(billboards);
+//      image.src = 'atlas/assets/atlas.jpg';
     });
   </script>
 </head>

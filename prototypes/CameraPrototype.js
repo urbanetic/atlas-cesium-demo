@@ -1,5 +1,5 @@
 define([
-  'utility/Class',
+  'atlas/lib/utility/Class',
   'atlas/model/Vertex',
   'atlas/model/GeoPoint',
   'atlas/util/AtlasMath',

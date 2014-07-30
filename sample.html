@@ -3,18 +3,16 @@
 <head>
   <meta charset="utf-8">
   <title>atlas-cesium demo</title>
-  <style>
-    html, body {
-      padding: 0;
-      margin: 0;
-    }
-  </style>
+  <script type="text/javascript">
+    less = {
+      relativeUrls: true
+    };
+  </script>
   <link rel="stylesheet/less" href="atlas/resources/atlas.less">
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
-  <script src="lib/less/dist/less-1.7.1.min.js"></script>
-  <script src="./atlas-cesium/lib/Requirejs/require.js"></script>
+  <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
+  <script src="atlas-cesium/lib/Requirejs/require.js"></script>
   <script>
-    "use strict";
     var cesiumAtlas;
 
     console.debug('Requiring CesiumAtlas');
@@ -22,71 +20,59 @@
     require.config({
       baseUrl: '',
       packages: [
-        { name: 'atlas', location: 'atlas/dist', main: 'atlas'},
-        // { name: 'atlas/lib', location: 'atlas/lib'},
+
+        { name: 'atlas', location: 'atlas/src'},
+        { name: 'atlas/lib', location: 'atlas/lib'},
         { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
-        { name: 'atlas-cesium', location: 'atlas-cesium/dist', main: 'atlas-cesium' },
-        { name: 'utility', location: 'atlas-cesium/lib/utility'},
+        { name: 'atlas-cesium', location: 'atlas-cesium/src'},
+        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
+        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
         { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'}
-      ],
-      paths: {
-//        'atlas-cesium': 'atlas-cesium/dist/atlas-cesium'
-//        '../Core': 'atlas-cesium/cesium/Source/Core'
-      }
+      ]
     });
 
-    //    require(['Cesium'], function(Cesium) {
-    //      console.log(Cesium);
+    require(['atlas-cesium/core/CesiumAtlas',
+      'atlas/assets/testWKT'
+    ], function(CesiumAtlas, testWKT) {
+      console.debug('Creating atlas-cesium');
+      cesiumAtlas = new CesiumAtlas();
+      cesiumAtlas.attachTo('cesium');
+      cesiumAtlas.publish('debugMode', true);
 
-    require(['atlas'], function() {
+      var i = 0;
+      var args = {};
+      args.show = true;
+      args.displayMode = 'extrusion';
+      testWKT.forEach(function(wkt) {
+        args.id = i++;
+        args.polygon = {
+          vertices: wkt,
+          elevation: 0,
+          height: 50
+        };
+        cesiumAtlas.publish('entity/show', args);
+      });
+      cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
+        position: {
+          latitude: -37.8,
+          longitude: 144.96,
+          elevation: 2000
+        }
+      });
 
-        require(['atlas-cesium'], function() {
+      // Prototypes for individual modules.
 
-          require(['atlas-cesium/core/CesiumAtlas',
-            'atlas/assets/testWKT'
-          ], function(CesiumAtlas, testWKT) {
-            console.debug('Creating atlas-cesium');
-            var cesiumAtlas = new CesiumAtlas();
-
-            console.debug('Attaching atlas-cesium');
-            cesiumAtlas.attachTo('cesium');
-
-            cesiumAtlas.publish('debugMode', true);
-
-            var i = 0;
-            var args = {};
-            args.show = true;
-            args.displayMode = 'extrusion';
-            testWKT.forEach(function(wkt) {
-              args.id = i++;
-              args.polygon = {
-                vertices: wkt,
-                elevation: 0,
-                height: 50
-              };
-              cesiumAtlas.publish('entity/show', args);
-            });
-            cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
-              position: {
-                latitude: -37.8,
-                longitude: 144.96,
-                elevation: 2000
-              }
-            });
-
-            setTimeout(function() {
-              require([
-                './prototypes/CameraPrototype',
-                './prototypes/DrawPrototype',
-              ], function(CameraPrototype, DrawPrototype) {
-                //          new CameraPrototype(cesiumAtlas);
-                new DrawPrototype(cesiumAtlas);
-              });
-            }, 2000);
-
-          });
-
+      setTimeout(function() {
+        require([
+          './prototypes/CameraPrototype',
+          './prototypes/DrawPrototype'
+        ], function(CameraPrototype, DrawPrototype) {
+//          new CameraPrototype(cesiumAtlas);
+//          new DrawPrototype(cesiumAtlas);
         });
+      }, 2000);
+
     });
 
   </script>
