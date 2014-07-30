@@ -12,6 +12,9 @@ define([
       geocoder.geocode({address: 'Melbourne, Australia'}).then(function(result) {
         console.log(result);
       });
+      geocoder.getInfo({address: 'Melbourne, Australia'}).then(function(result) {
+        console.log(result);
+      });
       geocoder.geocode({address: 'rhfuiehferferhuf'}).then(function(result) {
         console.log(result);
       }, function (err) {
