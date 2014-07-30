@@ -66,10 +66,12 @@
       setTimeout(function() {
         require([
           './prototypes/CameraPrototype',
-          './prototypes/DrawPrototype'
-        ], function(CameraPrototype, DrawPrototype) {
+          './prototypes/DrawPrototype',
+          './prototypes/GeocoderPrototype'
+        ], function(CameraPrototype, DrawPrototype, GeocoderPrototype) {
 //          new CameraPrototype(cesiumAtlas);
 //          new DrawPrototype(cesiumAtlas);
+          new GeocoderPrototype(cesiumAtlas);
         });
       }, 2000);
 
