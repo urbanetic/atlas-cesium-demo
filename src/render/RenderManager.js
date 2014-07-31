@@ -377,12 +377,18 @@ define([
     return GeoPoint.fromRadians(cartographic);
   };
 
+  /**
+   * Converts the given screen coords to a {@link atlas.model.GeoPoint GeoPoint}. This will only
+   * return a GeoPoint if the screen coords "intersect" with the ellipsoid representing the Earth,
+   * otherwise <code>null</code> is returned;
+   * @param screenCoords - The screen coords to convert.
+   * @returns {atlas.model.GeoPoint} The GeoPoint representing the screen coords, or null if it does
+   *     not exist.
+   */
   RenderManager.prototype.convertScreenCoordsToLatLng = function(screenCoords) {
-    var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords),
-        cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
-        toDegrees = function(x) {
-          return AtlasMath.toDegrees(x);
-        };
+    var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
+    if (!cartesian) { return null; }
+    var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
     return GeoPoint.fromRadians(cartographic);
   };
 
