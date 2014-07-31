@@ -43,8 +43,6 @@ define([
       // TODO(aramk) Use dependency injection eventually.
       args.renderManager = owner._renderManager;
       args.eventManager = owner._eventManager;
-      // The dot does not need the entity manager.
-      delete args.entityManager;
       this._dot = new Ellipse(this.getId(), {centroid: centroid, semiMajor: this._dotRadius}, args);
     },
 
