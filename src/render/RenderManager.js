@@ -65,7 +65,7 @@ define([
     if (this._widget !== null) {
       return;
     }
-    this._imageryShim();
+//    this._imageryShim();
     this._widget = new Viewer(elem, {
       animation: false,
       baseLayerPicker: true,
@@ -74,10 +74,10 @@ define([
       homeButton: false,
       sceneModePicker: false,
       timeline: false,
-      useDefaultRenderLoop: false
+//      useDefaultRenderLoop: false
     });
-    this._drawShim();
-    this._render();
+//    this._drawShim();
+//    this._render();
   };
 
   /**
@@ -107,7 +107,7 @@ define([
   };
 
   RenderManager.prototype._drawShim = function() {
-    var primitives = this._widget.scene.primitives;
+    var primitives = this.getPrimitives();
     var oldAdd = primitives.add,
         oldRemove = primitives.remove,
         delay = 1000;
@@ -458,10 +458,6 @@ define([
     return dataSource;
   };
 
-  RenderManager.prototype.getAnimations = function() {
-    return this._widget.scene.animations;
-  };
-
   RenderManager.prototype.getCesiumCamera = function() {
     return this._widget.scene.camera;
   };
@@ -475,7 +471,7 @@ define([
   };
 
   RenderManager.prototype.getEllipsoid = function() {
-    return this._widget.centralBody.ellipsoid;
+    return this.getScene().globe.ellipsoid;
   };
 
   RenderManager.prototype.getScene = function() {

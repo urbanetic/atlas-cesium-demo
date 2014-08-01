@@ -6,9 +6,9 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
-  'atlas-cesium/camera/CameraFlightPath',
+//  'atlas-cesium/camera/CameraFlightPath',
   'atlas-cesium/cesium/Source/Core/Cartographic'
-], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, CameraFlightPath,
+], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, //CameraFlightPath,
             Cartographic) {
   /**
    * @class atlas-cesium.camera.Camera
@@ -121,10 +121,9 @@ define([
         flightArgs.direction = args.direction;
         flightArgs.up = args.up;
       }
-      var flight = CameraFlightPath.createAnimationCartographic(this._renderManager.getScene(),
-          flightArgs);
+      var scene = this._renderManager.getScene();
       // TODO(aramk) This affects the global camera, not the current camera.
-      this._renderManager.getAnimations().add(flight);
+      scene.camera.flyTo(flightArgs);
       Log.debug('Animating camera to', position, orientation);
     }
   });
