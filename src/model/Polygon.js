@@ -1,16 +1,23 @@
 define([
   // Base class
   'atlas/model/Polygon',
+  'atlas/model/Colour',
   'atlas/lib/utility/Log',
   'atlas-cesium/model/Handle',
+  'atlas-cesium/model/Colour',
   'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
+  'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Core/Cartographic',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance'
-], function(PolygonCore, Log, Handle, Style, GeometryInstance, PolygonGeometry, Primitive,
-            Cartographic, MaterialAppearance) {
+  'atlas-cesium/cesium/Source/Scene/Material',
+  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
+  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
+  'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute'
+], function(PolygonCore, ColourCore, Log, Handle, Colour, Style, GeometryInstance, PolygonGeometry,
+            PolygonOutlineGeometry, Primitive, Cartographic, Material, MaterialAppearance,
+            PerInstanceColorAppearance, ColorGeometryInstanceAttribute) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -26,6 +33,13 @@ define([
     _geometry: null,
 
     /**
+     * The Cesium GeometryInstance of the Polygon outline.
+     * @type {GeometryInstance}
+     * @private
+     */
+    _outlineGeometry: null,
+
+    /**
      * The Cesium appearance data of the Polygon.
      * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
      * @private
@@ -33,11 +47,25 @@ define([
     _appearance: null,
 
     /**
-     * The Cesium Primitive instance of the Polygon, used to render the Polygon in Cesium.
+     * The Cesium appearance data of the Polygon outline.
+     * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
+     * @private
+     */
+    _outlineAppearance: null,
+
+    /**
+     * The Cesium Primitive instance of the Polygon.
      * @type {Primitive}
      * @private
      */
     _primitive: null,
+
+    /**
+     * The Cesium Primitive instance of the Polygon outline.
+     * @type {Primitive}
+     * @private
+     */
+    _outlinePrimitive: null,
 
     /**
      * An array of Cesium cartesian coordinates describing the position of the Polygon
@@ -75,22 +103,51 @@ define([
      * in Cesium.
      */
     _createPrimitive: function() {
-      //Log.debug('creating primitive for entity', this.getId());
-      // TODO(aramk) _geometry isn't actually set.
-      this._geometry = this._updateGeometry();
-      this._appearance = this._updateAppearance();
-      return new Primitive({
-        geometryInstances: this.getGeometry(),
-        appearance: this.getAppearance()
+      this._createGeometry();
+      this._updateAppearance();
+      this._primitive = new Primitive({
+        geometryInstances: this._geometry,
+        appearance: this._appearance
+      });
+      this._outlinePrimitive = new Primitive({
+        geometryInstances: this._outlineGeometry,
+//        appearance: this._outlineAppearance
+        appearance: new PerInstanceColorAppearance({
+          flat: true,
+          renderState: {
+            depthTest: {
+              enabled: true
+            },
+            lineWidth: 4//Math.min(4.0, scene.maximumAliasedLineWidth)
+          }
+        })
       });
     },
 
-    createHandles: function () {
+    /**
+     * Adds the primitive to the scene.
+     * @private
+     */
+    _addPrimitive: function() {
+      this._renderManager.getPrimitives().add(this._primitive);
+      this._renderManager.getPrimitives().add(this._outlinePrimitive);
+    },
+
+    /**
+     * Removes the primitive from the scene.
+     * @private
+     */
+    _removePrimitive: function() {
+      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
+      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
+    },
+
+    createHandles: function() {
       var handles = [];
       // Add a Handle for the Polygon itself.
       handles.push(new Handle(this._bindDependencies({owner: this})));
       // Add Handles for each vertex.
-      this._vertices.forEach(function (vertex) {
+      this._vertices.forEach(function(vertex) {
         // TODO(aramk) This modifies the underlying vertices - it should create copies and
         // respond to changes in the copies.
         handles.push(this.createHandle(vertex));
@@ -98,7 +155,7 @@ define([
       return handles;
     },
 
-    createHandle: function (vertex) {
+    createHandle: function(vertex) {
       return new Handle(this._bindDependencies({target: vertex, owner: this}));
     },
 
@@ -107,11 +164,10 @@ define([
     // -------------------------------------------
 
     /**
-     * Updates the geometry data as required.
-     * @returns {GeometryInstance}
+     * Creates the geometry data as required.
      * @private
      */
-    _updateGeometry: function() {
+    _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         //Log.debug('updating geometry for entity ' + this.getId());
@@ -136,13 +192,28 @@ define([
         positions: this._cartesians,
         holes: holes
       };
-      return new GeometryInstance({
+
+      this._geometry = new GeometryInstance({
         id: this.getId().replace('polygon', ''),
         geometry: new PolygonGeometry({
           polygonHierarchy: polygonHierarchy,
+//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
           height: elevation,
           extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
         })
+      });
+
+      this._outlineGeometry = new GeometryInstance({
+        id: this.getId().replace('polygon', '') + '-outline',
+        geometry: new PolygonOutlineGeometry({
+          polygonHierarchy: polygonHierarchy,
+          height: elevation,
+          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
+        }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(ColourCore.WHITE))
+        }
       });
     },
 
@@ -152,19 +223,49 @@ define([
      */
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
-        //Log.debug('updating appearance for entity ' + this.getId());
         if (!this._appearance) {
-          // TODO(bpstudds): Fix rendering so that 'closed' can be enabled.
-          //                 This may require sorting of vertices before rendering.
           this._appearance = new MaterialAppearance({
             closed: false,
             translucent: false,
             faceForward: true
           });
         }
-        this._appearance.material.uniforms.color = Style.toCesiumColors(this.getStyle()).fill;
+        if (!this._outlineAppearance) {
+          this._outlineAppearance = new MaterialAppearance({
+            flat: true,
+            closed: false,
+            translucent: false,
+            faceForward: true
+          });
+        }
+        var style = this.getStyle();
+        var cesiumColors = Style.toCesiumColors(style);
+        this._appearance.material.uniforms.color = cesiumColors.fill;
+        this._outlineAppearance.material.uniforms.color = cesiumColors.border;
+
+//        this._appearance.material = new Material({
+//          fabric : {
+//            type : 'Color',
+//            uniforms : {
+//              color: cesiumColors.fill,
+////              outlineColor: cesiumColors.border,
+////              outlineWidth: style.getBorderWidth()
+//            }
+//          }
+//        });
+
+//        this._appearance.material = new Material({
+//          fabric: {
+//            type: 'PolylineOutline',
+//            uniforms: {
+//              color: cesiumColors.fill,
+//              outlineColor: cesiumColors.border,
+//              outlineWidth: style.getBorderWidth()
+//            }
+//          }
+//        });
+//        this._appearance.material.uniforms.PolylineOutline = Style.toCesiumColors(this.getStyle()).fill;
       }
-      return this._appearance;
     },
 
     /**
@@ -173,11 +274,9 @@ define([
      */
     _build: function() {
       if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
-        if (this._primitive) {
-          this._renderManager.getPrimitives().remove(this._primitive);
-        }
-        this._primitive = this._createPrimitive();
-        this._renderManager.getPrimitives().add(this._primitive);
+        this._removePrimitive();
+        this._createPrimitive();
+        this._addPrimitive();
         this.getHandles().map('show');
       } else if (this.isDirty('style')) {
         this._updateAppearance();
