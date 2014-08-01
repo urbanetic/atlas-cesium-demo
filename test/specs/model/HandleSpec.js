@@ -9,6 +9,5 @@ define([
 
   describe('A Handle', function () {
 
-    it
   });
 });

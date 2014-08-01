@@ -33,13 +33,12 @@ define([
       this._super(args);
       var target = this.getTarget(),
           owner = this.getOwner(),
-          vertex;
+          centroid;
       if (target) {
-        vertex = target;
+        centroid = target;
       } else {
-        vertex = owner.getCentroid();
+        centroid = owner.getCentroid();
       }
-      var centroid = GeoPoint.fromVertex(vertex);
       // TODO(aramk) Use dependency injection eventually.
       args.renderManager = owner._renderManager;
       args.eventManager = owner._eventManager;
