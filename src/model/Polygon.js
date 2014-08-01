@@ -9,15 +9,19 @@ define([
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
-  'atlas-cesium/cesium/Source/Scene/Primitive',
+  'atlas-cesium/cesium/Source/Core/CorridorGeometry',
+  'atlas-cesium/cesium/Source/Core/CorridorOutlineGeometry',
+  'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
+  'atlas-cesium/cesium/Source/Core/CornerType',
   'atlas-cesium/cesium/Source/Core/Cartographic',
+  'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
-  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
-  'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute'
+  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance'
 ], function(PolygonCore, ColourCore, Log, Handle, Colour, Style, GeometryInstance, PolygonGeometry,
-            PolygonOutlineGeometry, Primitive, Cartographic, Material, MaterialAppearance,
-            PerInstanceColorAppearance, ColorGeometryInstanceAttribute) {
+            PolygonOutlineGeometry, CorridorGeometry, CorridorOutlineGeometry,
+            ColorGeometryInstanceAttribute, CornerType, Cartographic, Primitive, Material,
+            MaterialAppearance, PerInstanceColorAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -103,11 +107,15 @@ define([
      * in Cesium.
      */
     _createPrimitive: function() {
+      var scene = this._renderManager.getScene();
       this._createGeometry();
       this._updateAppearance();
       this._primitive = new Primitive({
         geometryInstances: this._geometry,
-        appearance: this._appearance
+//        appearance: this._appearance
+        appearance : new PerInstanceColorAppearance({
+          closed : true
+        })
       });
       this._outlinePrimitive = new Primitive({
         geometryInstances: this._outlineGeometry,
@@ -118,7 +126,7 @@ define([
             depthTest: {
               enabled: true
             },
-            lineWidth: 4//Math.min(4.0, scene.maximumAliasedLineWidth)
+            lineWidth: Math.min(1.0, scene.maximumAliasedLineWidth)
           }
         })
       });
@@ -178,6 +186,7 @@ define([
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
       var elevation = this._minTerrainElevation + this._elevation +
           this._zIndex * this._zIndexOffset;
+      var height = (this._showAsExtrusion ? this._height : 0);
 
       var holes = [];
       if (this._holes) {
@@ -193,23 +202,56 @@ define([
         holes: holes
       };
 
+      var geometryId = this.getId().replace('polygon', '');
       this._geometry = new GeometryInstance({
-        id: this.getId().replace('polygon', ''),
+        id: geometryId,
         geometry: new PolygonGeometry({
           polygonHierarchy: polygonHierarchy,
-//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
           height: elevation,
-          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
-        })
+          extrudedHeight: elevation + height
+        }),
+        attributes : {
+          color : ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(ColourCore.GREEN))
+        }
       });
 
+//      this._geometry = new Cesium.GeometryInstance({
+//        geometry : new PolygonGeometry({
+//          polygonHierarchy : polygonHierarchy,
+//          vertexFormat : PerInstanceColorAppearance.VERTEX_FORMAT,
+//          extrudedHeight : extrudedHeight
+//        }),
+//        attributes : {
+//          color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0.0, 1.0, 0.0, 0.5))
+//        }
+//      });
+
       this._outlineGeometry = new GeometryInstance({
-        id: this.getId().replace('polygon', '') + '-outline',
+        id: geometryId + '-outline',
+
+//        geometry: new CorridorGeometry({
+//          positions: this._cartesians,
+//          height: height, //elevation,
+//          width: 1,
+//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+////          extrudedHeight: elevation + height,
+//          cornerType: CornerType.MITERED
+//        }),
+
+//        geometry: new CorridorOutlineGeometry({
+//          positions: this._cartesians,
+//          height: elevation,
+//          width: 0,
+//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+//          extrudedHeight: elevation + height,
+//          cornerType: CornerType.MITERED
+//        }),
+
         geometry: new PolygonOutlineGeometry({
           polygonHierarchy: polygonHierarchy,
           height: elevation,
-          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-          extrudedHeight: elevation + (this._showAsExtrusion ? this._height : 0)
+          extrudedHeight: elevation + height
         }),
         attributes: {
           color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(ColourCore.WHITE))
