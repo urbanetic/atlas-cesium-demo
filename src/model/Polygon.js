@@ -1,27 +1,16 @@
 define([
   // Base class
   'atlas/model/Polygon',
-  'atlas/model/Colour',
-  'atlas/lib/utility/Log',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Colour',
   'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
-  'atlas-cesium/cesium/Source/Core/CorridorGeometry',
-  'atlas-cesium/cesium/Source/Core/CorridorOutlineGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
-  'atlas-cesium/cesium/Source/Core/CornerType',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/cesium/Source/Scene/Material',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance'
-], function(PolygonCore, ColourCore, Log, Handle, Colour, Style, GeometryInstance, PolygonGeometry,
-            PolygonOutlineGeometry, CorridorGeometry, CorridorOutlineGeometry,
-            ColorGeometryInstanceAttribute, CornerType, Cartographic, Primitive, Material,
-            MaterialAppearance, PerInstanceColorAppearance) {
+], function(PolygonCore, Handle, Style, GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
+            ColorGeometryInstanceAttribute, Primitive, PerInstanceColorAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -42,20 +31,6 @@ define([
      * @private
      */
     _outlineGeometry: null,
-
-    /**
-     * The Cesium appearance data of the Polygon.
-     * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
-     * @private
-     */
-    _appearance: null,
-
-    /**
-     * The Cesium appearance data of the Polygon outline.
-     * @type {EllipsoidSurfaceAppearance|MaterialAppearance}
-     * @private
-     */
-    _outlineAppearance: null,
 
     /**
      * The Cesium Primitive instance of the Polygon.
@@ -109,11 +84,9 @@ define([
     _createPrimitive: function() {
       var scene = this._renderManager.getScene();
       this._createGeometry();
-//      this._updateAppearance();
       if (this._geometry) {
         this._primitive = new Primitive({
           geometryInstances: this._geometry,
-//        appearance: this._appearance
           appearance: new PerInstanceColorAppearance({
             closed: true,
             translucent: false
@@ -125,7 +98,6 @@ define([
       if (this._outlineGeometry) {
         this._outlinePrimitive = new Primitive({
           geometryInstances: this._outlineGeometry,
-//        appearance: this._outlineAppearance
           appearance: new PerInstanceColorAppearance({
             flat: true,
             translucent: false,
@@ -257,50 +229,20 @@ define([
      * @private
      */
     _updateAppearance: function() {
-      throw new Error('Deprecated');
       if (this.isDirty('entity') || this.isDirty('style')) {
-        if (!this._appearance) {
-          this._appearance = new MaterialAppearance({
-            closed: false,
-            translucent: false,
-            faceForward: true
-          });
-        }
-        if (!this._outlineAppearance) {
-          this._outlineAppearance = new MaterialAppearance({
-            flat: true,
-            closed: false,
-            translucent: false,
-            faceForward: true
-          });
-        }
         var style = this.getStyle();
         var cesiumColors = Style.toCesiumColors(style);
-        this._appearance.material.uniforms.color = cesiumColors.fill;
-        this._outlineAppearance.material.uniforms.color = cesiumColors.border;
-
-//        this._appearance.material = new Material({
-//          fabric : {
-//            type : 'Color',
-//            uniforms : {
-//              color: cesiumColors.fill,
-////              outlineColor: cesiumColors.border,
-////              outlineWidth: style.getBorderWidth()
-//            }
-//          }
-//        });
-
-//        this._appearance.material = new Material({
-//          fabric: {
-//            type: 'PolylineOutline',
-//            uniforms: {
-//              color: cesiumColors.fill,
-//              outlineColor: cesiumColors.border,
-//              outlineWidth: style.getBorderWidth()
-//            }
-//          }
-//        });
-//        this._appearance.material.uniforms.PolylineOutline = Style.toCesiumColors(this.getStyle()).fill;
+        var fillColor = cesiumColors.fill;
+        var borderColor = cesiumColors.border;
+        if (this._geometry && fillColor) {
+          var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+          geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+        }
+        if (this._outlineGeometry && borderColor) {
+          var outlineGeometryAtts =
+              this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+          outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+        }
       }
     },
 
@@ -314,7 +256,6 @@ define([
         this._createPrimitive();
         this._addPrimitive();
         this.getHandles().map('show');
-        // TODO(aramk) Remove this?
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
@@ -361,20 +302,7 @@ define([
 
     setStyle: function(style) {
       this._super(style);
-      if (this.isVisible()) {
-        var cesiumColors = Style.toCesiumColors(style);
-        var fillColor = cesiumColors.fill;
-        var borderColor = cesiumColors.border;
-        if (this._geometry) {
-          var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
-          geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
-        }
-        if (this._outlineGeometry) {
-          var outlineGeometryAtts =
-              this._primitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-          outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-        }
-      }
+      this._updateAppearance();
     }
 
   });
