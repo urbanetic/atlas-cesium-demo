@@ -80,8 +80,8 @@ define([
       pos2.latitude += 1;
 //      // TODO(aramk) Save direction instead?
       var args = [
-        {position: defaultPosition, duration: 3000, orientation: {tilt: 90}, path: 'linear'},
-        {position: pos2, duration: 2000, orientation: {tilt: 45, bearing: 45}, path: 'sinusoidal'}
+        {position: defaultPosition, duration: 3, orientation: {tilt: 90}, path: 'linear'},
+        {position: pos2, duration: 2, orientation: {tilt: 45, bearing: 45}, path: 'sinusoidal'}
       ];
       setInterval(function() {
         posIndex = posIndex % args.length;
@@ -94,7 +94,7 @@ define([
       // Move the camera in a straight path.
 
 //      setInterval(function() {
-//        camera.zoomTo({position: pos2, duration: 5000, orientation: {tilt: 45, bearing: 45}});
+//        camera.zoomTo({position: pos2, duration: 5, orientation: {tilt: 45, bearing: 45}});
 //      }, 8000);
 
     }
