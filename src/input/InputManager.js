@@ -2,12 +2,10 @@ define([
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/ScreenSpaceEventHandler',
   'atlas-cesium/cesium/Source/Core/ScreenSpaceEventType',
-  'atlas-cesium/cesium/Source/Scene/CameraEventType',
   // Base class
   'atlas/input/InputManager',
   'atlas/lib/utility/Setter'
-], function(ScreenSpaceEventHandler, ScreenSpaceEventType, CameraEventType, InputManagerCore,
-            Setter) {
+], function(ScreenSpaceEventHandler, ScreenSpaceEventType, InputManagerCore, Setter) {
 
   /**
    * @classdesc The InputManager links render and implementation specific user input handling to
@@ -51,7 +49,7 @@ define([
               position: { value: movement }
             };
             this.handleInternalEvent('input/wheel', args);
-          }.bind(this._atlasManagers.event), CameraEventType.WHEEL);
+          }.bind(this._atlasManagers.event), ScreenSpaceEventType.WHEEL);
         },
 
         /**
