@@ -25,8 +25,9 @@ define([
     },
 
     setup: function (args) {
-      if (args.constructors) {
-        this.setGeoEntityTypes(args.constructors);
+      var constructors = args && args.constructors;
+      if (constructors) {
+        this.setGeoEntityTypes(constructors);
       }
       this.bindEvents();
     },

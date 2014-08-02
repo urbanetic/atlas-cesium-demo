@@ -65,7 +65,7 @@ define([
     if (this._widget !== null) {
       return;
     }
-//    this._imageryShim();
+    this._imageryShim();
     this._widget = new Viewer(elem, {
       animation: false,
       baseLayerPicker: true,
@@ -74,10 +74,10 @@ define([
       homeButton: false,
       sceneModePicker: false,
       timeline: false,
-//      useDefaultRenderLoop: false
+      useDefaultRenderLoop: false
     });
-//    this._drawShim();
-//    this._render();
+    this._drawShim();
+    this._render();
   };
 
   /**

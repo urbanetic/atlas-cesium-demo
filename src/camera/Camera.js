@@ -99,6 +99,7 @@ define([
           orientation = args.orientation,
           point = position.toRadians();
       var destination = new Cartographic(point.longitude, point.latitude, point.elevation);
+      destination = this._renderManager.getEllipsoid().cartographicToCartesian(destination);
       var flightArgs = {
         destination: destination,
         duration: args.duration || 0,
@@ -122,7 +123,6 @@ define([
         flightArgs.up = args.up;
       }
       var scene = this._renderManager.getScene();
-      // TODO(aramk) This affects the global camera, not the current camera.
       scene.camera.flyTo(flightArgs);
       Log.debug('Animating camera to', position, orientation);
     }
