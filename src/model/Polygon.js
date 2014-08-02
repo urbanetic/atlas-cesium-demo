@@ -109,27 +109,37 @@ define([
     _createPrimitive: function() {
       var scene = this._renderManager.getScene();
       this._createGeometry();
-      this._updateAppearance();
-      this._primitive = new Primitive({
-        geometryInstances: this._geometry,
+//      this._updateAppearance();
+      if (this._geometry) {
+        this._primitive = new Primitive({
+          geometryInstances: this._geometry,
 //        appearance: this._appearance
-        appearance : new PerInstanceColorAppearance({
-          closed : true
-        })
-      });
-      this._outlinePrimitive = new Primitive({
-        geometryInstances: this._outlineGeometry,
+          appearance: new PerInstanceColorAppearance({
+            closed: true,
+            translucent: false
+          })
+        });
+      } else {
+        this._primitive = null;
+      }
+      if (this._outlineGeometry) {
+        this._outlinePrimitive = new Primitive({
+          geometryInstances: this._outlineGeometry,
 //        appearance: this._outlineAppearance
-        appearance: new PerInstanceColorAppearance({
-          flat: true,
-          renderState: {
-            depthTest: {
-              enabled: true
-            },
-            lineWidth: Math.min(1.0, scene.maximumAliasedLineWidth)
-          }
-        })
-      });
+          appearance: new PerInstanceColorAppearance({
+            flat: true,
+            translucent: false,
+            renderState: {
+              depthTest: {
+                enabled: true
+              },
+              lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+            }
+          })
+        });
+      } else {
+        this._outlinePrimitive = null;
+      }
     },
 
     /**
@@ -137,8 +147,8 @@ define([
      * @private
      */
     _addPrimitive: function() {
-      this._renderManager.getPrimitives().add(this._primitive);
-      this._renderManager.getPrimitives().add(this._outlinePrimitive);
+      this._primitive && this._renderManager.getPrimitives().add(this._primitive);
+      this._outlinePrimitive && this._renderManager.getPrimitives().add(this._outlinePrimitive);
     },
 
     /**
@@ -202,61 +212,44 @@ define([
         holes: holes
       };
 
+      // TODO(aramk) style should be updated in appearance, not here.
+      var style = this.getStyle();
+      var cesiumColors = Style.toCesiumColors(style);
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
       var geometryId = this.getId().replace('polygon', '');
-      this._geometry = new GeometryInstance({
-        id: geometryId,
-        geometry: new PolygonGeometry({
-          polygonHierarchy: polygonHierarchy,
-          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-          height: elevation,
-          extrudedHeight: elevation + height
-        }),
-        attributes : {
-          color : ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(ColourCore.GREEN))
-        }
-      });
 
-//      this._geometry = new Cesium.GeometryInstance({
-//        geometry : new PolygonGeometry({
-//          polygonHierarchy : polygonHierarchy,
-//          vertexFormat : PerInstanceColorAppearance.VERTEX_FORMAT,
-//          extrudedHeight : extrudedHeight
-//        }),
-//        attributes : {
-//          color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0.0, 1.0, 0.0, 0.5))
-//        }
-//      });
+      if (fillColor) {
+        this._geometry = new GeometryInstance({
+          id: geometryId,
+          geometry: new PolygonGeometry({
+            polygonHierarchy: polygonHierarchy,
+            height: elevation,
+            extrudedHeight: elevation + height
+          }),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(fillColor)
+          }
+        });
+      } else {
+        this._geometry = null;
+      }
 
-      this._outlineGeometry = new GeometryInstance({
-        id: geometryId + '-outline',
-
-//        geometry: new CorridorGeometry({
-//          positions: this._cartesians,
-//          height: height, //elevation,
-//          width: 1,
-//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-////          extrudedHeight: elevation + height,
-//          cornerType: CornerType.MITERED
-//        }),
-
-//        geometry: new CorridorOutlineGeometry({
-//          positions: this._cartesians,
-//          height: elevation,
-//          width: 0,
-//          vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-//          extrudedHeight: elevation + height,
-//          cornerType: CornerType.MITERED
-//        }),
-
-        geometry: new PolygonOutlineGeometry({
-          polygonHierarchy: polygonHierarchy,
-          height: elevation,
-          extrudedHeight: elevation + height
-        }),
-        attributes: {
-          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(ColourCore.WHITE))
-        }
-      });
+      if (borderColor) {
+        this._outlineGeometry = new GeometryInstance({
+          id: geometryId + '-outline',
+          geometry: new PolygonOutlineGeometry({
+            polygonHierarchy: polygonHierarchy,
+            height: elevation,
+            extrudedHeight: elevation + height
+          }),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(borderColor)
+          }
+        });
+      } else {
+        this._outlineGeometry = null;
+      }
     },
 
     /**
@@ -264,6 +257,7 @@ define([
      * @private
      */
     _updateAppearance: function() {
+      throw new Error('Deprecated');
       if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._appearance) {
           this._appearance = new MaterialAppearance({
@@ -320,6 +314,7 @@ define([
         this._createPrimitive();
         this._addPrimitive();
         this.getHandles().map('show');
+        // TODO(aramk) Remove this?
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }

@@ -26,9 +26,11 @@ define([
      * @param style
      */
     toCesiumColors: function(style) {
+      var fill = style.getFillColour();
+      var border = style.getBorderColour();
       return {
-        fill: Colour.toCesiumColor(style.getFillColour()),
-        border: Colour.toCesiumColor(style.getBorderColour())
+        fill: fill ? Colour.toCesiumColor(fill) : null,
+        border: border ? Colour.toCesiumColor(border) : null
       }
     }
 
