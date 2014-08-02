@@ -362,7 +362,18 @@ define([
     setStyle: function(style) {
       this._super(style);
       if (this.isVisible()) {
-        this._appearance.material.uniforms.color = Style.toCesiumColors(style).fill;
+        var cesiumColors = Style.toCesiumColors(style);
+        var fillColor = cesiumColors.fill;
+        var borderColor = cesiumColors.border;
+        if (this._geometry) {
+          var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+          geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+        }
+        if (this._outlineGeometry) {
+          var outlineGeometryAtts =
+              this._primitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+          outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+        }
       }
     }
 
