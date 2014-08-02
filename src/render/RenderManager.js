@@ -74,6 +74,7 @@ define([
       homeButton: false,
       sceneModePicker: false,
       timeline: false,
+      navigationHelpButton: false,
       useDefaultRenderLoop: false
     });
     this._drawShim();
@@ -432,8 +433,8 @@ define([
    * @param {Array.<atlas.model.GeoPoint>} geopoints - Array of GeoPoints
    * @returns {Array.<Cartesian3>} An array of Cesium Cartesian3 objects.
    */
-  RenderManager.prototype.cartesianArrayFromGeoPointArray = function (geopoints) {
-    return this.cartesianArrayFromVertexArray(geopoints.map(function (geoPoint) {
+  RenderManager.prototype.cartesianArrayFromGeoPointArray = function(geopoints) {
+    return this.cartesianArrayFromVertexArray(geopoints.map(function(geoPoint) {
       return geoPoint.toVertex();
     }));
   };
