@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>atlas-cesium demo</title>
+  <script type="text/javascript">
+    less = {
+      relativeUrls: true
+    };
+  </script>
+  <link rel="stylesheet/less" href="atlas/resources/atlas.less">
+  <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
+  <style>
+    html, body {
+      margin: 0;
+    }
+  </style>
+  <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
+  <script src="atlas-cesium/lib/Requirejs/require.js"></script>
+  <script>
+    var cesiumAtlas;
+
+    console.debug('Requiring CesiumAtlas');
+
+    require.config({
+      baseUrl: '',
+      packages: [
+
+        { name: 'atlas', location: 'atlas/src'},
+        { name: 'atlas/lib', location: 'atlas/lib'},
+        { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
+        { name: 'atlas-cesium', location: 'atlas-cesium/src'},
+        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
+        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'}
+      ]
+    });
+
+    require([
+      'atlas/model/GeoPoint',
+      'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
+      'atlas-cesium/cesium/Source/Core/Cartographic'
+    ], function(GeoPoint, Viewer, Cartographic) {
+      console.debug('Creating atlas-cesium');
+      var viewer = new Viewer('cesium');
+      var scene = viewer.scene;
+      var ellipsoid = scene.globe.ellipsoid;
+      var geopoint = new GeoPoint(144.96, -37.8, 2000).toRadians();
+      var cartographic = new Cartographic(geopoint.longitude, geopoint.latitude,
+          geopoint.elevation);
+      var cartesian = ellipsoid.cartographicToCartesian(cartographic);
+      var flightArgs = {
+        destination: cartesian,
+        duration: 1
+      };
+      scene.camera.flyTo(flightArgs);
+      scene.debugShowFramesPerSecond = true;
+    });
+
+  </script>
+</head>
+<body>
+  <div id="cesium"></div>
+</body>
+</html>

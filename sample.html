@@ -10,6 +10,11 @@
   </script>
   <link rel="stylesheet/less" href="atlas/resources/atlas.less">
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
+  <style>
+    html, body {
+      margin: 0;
+    }
+  </style>
   <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
   <script src="atlas-cesium/lib/Requirejs/require.js"></script>
   <script>
@@ -42,6 +47,7 @@
       console.debug('Creating atlas-cesium');
       cesiumAtlas = new CesiumAtlas();
       cesiumAtlas.attachTo('cesium');
+
       cesiumAtlas.publish('debugMode', true);
 
       var i = 0;
@@ -60,9 +66,9 @@
 
       testWKT.forEach(function(wkt) {
         var styleArgs = {};
-        Setter.mixin(styleArgs, toAtlasStyleArgs('#f00', 1, 'fill'));
+        Setter.mixin(styleArgs, toAtlasStyleArgs('#ff0', 1, 'fill'));
         Setter.mixin(styleArgs, toAtlasStyleArgs('#000', 1, 'border'));
-        args.id = i++;
+        var id = args.id = i++;
         args.polygon = {
           vertices: wkt,
           elevation: 0,
@@ -71,7 +77,7 @@
         };
         cesiumAtlas.publish('entity/show', args);
       });
-      cesiumAtlas._managers.event.handleExternalEvent('camera/zoomTo', {
+      cesiumAtlas.publish('camera/zoomTo', {
         position: {
           latitude: -37.8,
           longitude: 144.96,
