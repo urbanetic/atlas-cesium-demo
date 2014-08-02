@@ -74,6 +74,7 @@ define([
       homeButton: false,
       sceneModePicker: false,
       timeline: false,
+      navigationHelpButton: false,
       useDefaultRenderLoop: false
     });
     this._drawShim();
@@ -107,7 +108,7 @@ define([
   };
 
   RenderManager.prototype._drawShim = function() {
-    var primitives = this._widget.scene.primitives;
+    var primitives = this.getPrimitives();
     var oldAdd = primitives.add,
         oldRemove = primitives.remove,
         delay = 1000;
@@ -432,8 +433,8 @@ define([
    * @param {Array.<atlas.model.GeoPoint>} geopoints - Array of GeoPoints
    * @returns {Array.<Cartesian3>} An array of Cesium Cartesian3 objects.
    */
-  RenderManager.prototype.cartesianArrayFromGeoPointArray = function (geopoints) {
-    return this.cartesianArrayFromVertexArray(geopoints.map(function (geoPoint) {
+  RenderManager.prototype.cartesianArrayFromGeoPointArray = function(geopoints) {
+    return this.cartesianArrayFromVertexArray(geopoints.map(function(geoPoint) {
       return geoPoint.toVertex();
     }));
   };
@@ -458,10 +459,6 @@ define([
     return dataSource;
   };
 
-  RenderManager.prototype.getAnimations = function() {
-    return this._widget.scene.animations;
-  };
-
   RenderManager.prototype.getCesiumCamera = function() {
     return this._widget.scene.camera;
   };
@@ -475,7 +472,7 @@ define([
   };
 
   RenderManager.prototype.getEllipsoid = function() {
-    return this._widget.centralBody.ellipsoid;
+    return this.getScene().globe.ellipsoid;
   };
 
   RenderManager.prototype.getScene = function() {
