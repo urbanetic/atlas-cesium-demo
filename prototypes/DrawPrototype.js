@@ -1,5 +1,5 @@
 define([
-  'atlas/util/Class',
+  'atlas/lib/utility/Class',
   'jquery'
 ], function(Class, $) {
   return Class.extend({
