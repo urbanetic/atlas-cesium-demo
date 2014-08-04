@@ -34,7 +34,7 @@ define([
      */
     getAt: function (point) {
       // Get the Entities at the given screen coordinates.
-      var ids = this._atlasManagers.render.getAt(point);
+      var ids = this._managers.render.getAt(point);
       // Translate entity IDs to entity objects.
       var entities = [];
       ids.forEach(function (id) {

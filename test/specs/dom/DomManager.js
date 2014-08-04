@@ -6,7 +6,7 @@ define([
 ], function (doh, TestCase, DomManager) {
 
   /* Test globals go here */
-  var atlasManagers;
+  var managers;
   var domManager;
 
   /* Begin test case definitions */
@@ -16,22 +16,22 @@ define([
 
     setUp: function () {
       // summary:
-      atlasManagers = {
+      managers = {
         dom: {},
         event: {},
         render: {}
       };
-      domManager = new DomManager(atlasManagers);
+      domManager = new DomManager(managers);
     },
 
     tearDown: function () {
       domManager = null;
-      atlasManagers.dom = {};
+      managers.dom = {};
     },
 
     testCreate: function () {
       doh.assertTrue(domManager instanceof DomManager, 'DomManager not created properly');
-      doh.assertTrue(atlasManagers.dom instanceof DomManager, 'atlasManagers reference not created properly');
+      doh.assertTrue(managers.dom instanceof DomManager, 'managers reference not created properly');
     }
   }).register(doh);
 });
