@@ -8,6 +8,12 @@ define([
 ], function(ScreenSpaceEventHandler, ScreenSpaceEventType, InputManagerCore, Setter) {
 
   /**
+   * @typedef atlas-cesium.input.InputManager
+   * @ignore
+   */
+  var InputManager;
+
+  /**
    * @classdesc The InputManager links render and implementation specific user input handling to
    * the format expected by atlas.
    * @param {Object} managers - The map of all atlas manager objects.
@@ -15,8 +21,8 @@ define([
    * @class atlas-cesium.input.InputManager
    * @extends atlas.input.InputManager
    */
-  var InputManager = Setter.mixin(InputManagerCore.extend(
-      /** @lends atlas-cesium.input.InputManager# */{
+  InputManager = Setter.mixin(
+      InputManagerCore.extend(/** @lends atlas-cesium.input.InputManager# */{
 
         /**
          * The Cesium event handlers that are defined.
@@ -108,11 +114,11 @@ define([
         }
       }), {
 
-    // -------------------------------------------
-    // STATICS
-    // -------------------------------------------
+        // -------------------------------------------
+        // STATICS
+        // -------------------------------------------
 
-  });
+      });
 
   return InputManager;
 });

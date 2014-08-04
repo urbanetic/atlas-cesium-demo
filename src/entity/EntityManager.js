@@ -10,7 +10,13 @@ define([
   'atlas/entity/EntityManager'
 ], function (GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh, EntityManagerCore) {
 
-  var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
+  /**
+   * @typedef atlas-cesium.entity.EntityManager
+   * @ignore
+   */
+  var EntityManager;
+
+  EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
     /**
      * Contains a mapping of GeoEntity subclass names to the constructor object
@@ -69,5 +75,6 @@ define([
       throw 'EntityManager.getInRect not yet implemented.'
     }
   });
+
   return EntityManager;
 });

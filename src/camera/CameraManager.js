@@ -1,12 +1,18 @@
 define([
   'atlas/camera/CameraManager',
   'atlas-cesium/camera/Camera'
-], function(CameraManager, Camera) {
+], function(CameraManagerCore, Camera) {
 
   /**
-   * @class atlas-cesium.manager.CameraManager
+   * @typedef atlas-cesium.camera.CameraManager
+   * @ignore
    */
-  return CameraManager.extend(/** @lends atlas-cesium.manager.CameraManager# */{
+  var CameraManager;
+
+  /**
+   * @class atlas-cesium.camera.CameraManager
+   */
+  CameraManager = CameraManagerCore.extend(/** @lends atlas-cesium.camera.CameraManager# */{
 
     setup: function() {
       this._super();
@@ -36,5 +42,6 @@ define([
 
   });
 
+  return CameraManager;
 });
 

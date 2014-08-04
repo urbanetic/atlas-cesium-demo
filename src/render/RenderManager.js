@@ -14,6 +14,10 @@ define([
 ], function(Log, GeoPoint, AtlasMath, Cartographic, requestAnimationFrame, Imagery, ImageryState,
             Viewer, CzmlDataSource, RenderManagerCore) {
 
+  /**
+   * @typedef atlas-cesium.render.RenderManager
+   * @ignore
+   */
   var RenderManager;
 
   /**

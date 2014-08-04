@@ -1,7 +1,17 @@
 define([
   'atlas/dom/DomManager'
-], function(DomManager) {
-  return DomManager.extend({
+], function(DomManagerCore) {
+
+  /**
+   * @typedef atlas-cesium.dom.DomManager
+   * @ignore
+   */
+  var DomManager;
+
+  /**
+   * @class atlas-cesium.dom.DomManager
+   */
+  DomManager = DomManagerCore.extend(/** @lends atlas-cesium.dom.DomManager# */{
 
     populateDom: function(elem) {
       this._managers.render.createWidget(elem);
@@ -10,4 +20,6 @@ define([
     }
 
   });
+
+  return DomManager;
 });
