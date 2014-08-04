@@ -139,7 +139,8 @@ define([
       // Add Handles for each vertex.
       this._vertices.forEach(function(vertex) {
         // TODO(aramk) This modifies the underlying vertices - it should create copies and
-        // respond to changes in the copies.
+        // respond to changes in the copies. Also move this method and createHandle() to
+        // VertexedEntity.
         handles.push(this.createHandle(vertex));
       }, this);
       return handles;
@@ -160,7 +161,6 @@ define([
     _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        //Log.debug('updating geometry for entity ' + this.getId());
         this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
@@ -184,13 +184,12 @@ define([
         holes: holes
       };
 
-      // TODO(aramk) style should be updated in appearance, not here.
-      var style = this.getStyle();
-      var cesiumColors = Style.toCesiumColors(style);
+      var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
       var geometryId = this.getId().replace('polygon', '');
 
+      this._geometry = null;
       if (fillColor) {
         this._geometry = new GeometryInstance({
           id: geometryId,
@@ -203,10 +202,9 @@ define([
             color: ColorGeometryInstanceAttribute.fromColor(fillColor)
           }
         });
-      } else {
-        this._geometry = null;
       }
 
+      this._outlineGeometry = null;
       if (borderColor) {
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
@@ -219,8 +217,6 @@ define([
             color: ColorGeometryInstanceAttribute.fromColor(borderColor)
           }
         });
-      } else {
-        this._outlineGeometry = null;
       }
     },
 
@@ -230,8 +226,7 @@ define([
      */
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
-        var style = this.getStyle();
-        var cesiumColors = Style.toCesiumColors(style);
+        var cesiumColors = this._getCesiumColors();
         var fillColor = cesiumColors.fill;
         var borderColor = cesiumColors.border;
         if (this._geometry && fillColor) {
@@ -255,7 +250,6 @@ define([
         this._removePrimitive();
         this._createPrimitive();
         this._addPrimitive();
-        this.getHandles().map('show');
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
@@ -271,11 +265,9 @@ define([
       if (!this.isRenderable()) {
         this._build();
       } else if (this.isVisible()) {
-        //Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
         return true;
       }
       this._selected && this.onSelect();
-      //Log.debug('Showing entity ' + this.getId());
       this._primitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
@@ -286,7 +278,6 @@ define([
      */
     hide: function() {
       if (this.isVisible()) {
-        //Log.debug('hiding entity ' + this.getId());
         this._primitive.show = false;
       }
       return !this.isVisible();
@@ -303,6 +294,11 @@ define([
     setStyle: function(style) {
       this._super(style);
       this._updateAppearance();
+    },
+
+    _getCesiumColors: function() {
+      var style = this.getStyle();
+      return Style.toCesiumColors(style);
     }
 
   });
