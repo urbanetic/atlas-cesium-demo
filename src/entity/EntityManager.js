@@ -2,12 +2,13 @@ define([
   'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
+  'atlas-cesium/model/Image',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function (GeoEntity, Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
+], function (GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh, EntityManagerCore) {
 
   var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
@@ -18,18 +19,12 @@ define([
      * @type {Object.<String, Function>}
      */
     _entityTypes: {
-      'Feature': Feature,
-      'Line': Line,
-      'Polygon': Polygon,
-      'Mesh': Mesh
-    },
-
-    setup: function (args) {
-      var constructors = args && args.constructors;
-      if (constructors) {
-        this.setGeoEntityTypes(constructors);
-      }
-      this.bindEvents();
+      Ellipse: Ellipse,
+      Feature: Feature,
+      Image: Image,
+      Line: Line,
+      Mesh: Mesh,
+      Polygon: Polygon
     },
 
     /**

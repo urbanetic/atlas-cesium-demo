@@ -6,10 +6,8 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
-//  'atlas-cesium/camera/CameraFlightPath',
   'atlas-cesium/cesium/Source/Core/Cartographic'
-], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, //CameraFlightPath,
-            Cartographic) {
+], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, Cartographic) {
   /**
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
@@ -123,6 +121,7 @@ define([
         flightArgs.up = args.up;
       }
       var scene = this._renderManager.getScene();
+      // TODO(aramk) Add support for atlas.camera.PathType back in.
       scene.camera.flyTo(flightArgs);
       Log.debug('Animating camera to', position, orientation);
     }
