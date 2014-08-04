@@ -70,7 +70,8 @@ define([
      * @returns {Boolean} - Whether the Polygon is visible.
      */
     isVisible: function() {
-      return this._primitive && this._primitive.show === true;
+      return (this._primitive && this._primitive.show === true) ||
+          (this._outlinePrimitive && this._outlinePrimitive.show === true);
     },
 
     // -------------------------------------------
@@ -84,6 +85,7 @@ define([
     _createPrimitive: function() {
       var scene = this._renderManager.getScene();
       this._createGeometry();
+      this._primitive = null;
       if (this._geometry) {
         this._primitive = new Primitive({
           geometryInstances: this._geometry,
@@ -92,9 +94,8 @@ define([
             translucent: false
           })
         });
-      } else {
-        this._primitive = null;
       }
+      this._outlinePrimitive = null;
       if (this._outlineGeometry) {
         this._outlinePrimitive = new Primitive({
           geometryInstances: this._outlineGeometry,
@@ -109,8 +110,6 @@ define([
             }
           })
         });
-      } else {
-        this._outlinePrimitive = null;
       }
     },
 
@@ -246,7 +245,7 @@ define([
      * Cesium.
      */
     _build: function() {
-      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
+      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         this._removePrimitive();
         this._createPrimitive();
         this._addPrimitive();
@@ -268,7 +267,8 @@ define([
         return true;
       }
       this._selected && this.onSelect();
-      this._primitive.show = true;
+      if (this._primitive) this._primitive.show = true;
+      if (this._outlinePrimitive) this._outlinePrimitive.show = true;
       return this.isRenderable() && this.isVisible();
     },
 
@@ -277,9 +277,8 @@ define([
      * @returns {Boolean} Whether the polygon is hidden.
      */
     hide: function() {
-      if (this.isVisible()) {
-        this._primitive.show = false;
-      }
+      if (this._primitive) this._primitive.show = false;
+      if (this._outlinePrimitive) this._outlinePrimitive.show = false;
       return !this.isVisible();
     },
 
@@ -289,6 +288,7 @@ define([
     remove: function() {
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
+      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
     },
 
     setStyle: function(style) {
