@@ -82,8 +82,8 @@ define([
   };
 
   /**
-   * Adds a shim to allow monitoring when Imagery (image tiles) are being loaded to prevent
-   * sleep and avoid slowing down this process.
+   * Monitors when Imagery (image tiles) is being loaded to prevent sleep and avoid slowing down
+   * this process.
    * @private
    */
   RenderManager.prototype._imageryShim = function() {
@@ -107,6 +107,11 @@ define([
     });
   };
 
+  /**
+   * Monitors when primitives are being added/removed to prevent sleep and avoid slowing down this
+   * process.
+   * @private
+   */
   RenderManager.prototype._drawShim = function() {
     var primitives = this.getPrimitives();
     var oldAdd = primitives.add,
