@@ -223,6 +223,9 @@ define([
    * @private
    */
   Ellipse._convertAtlasToCesiumColor = function(color) {
+    if (!color) {
+      return;
+    }
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
