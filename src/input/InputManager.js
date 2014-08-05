@@ -2,23 +2,27 @@ define([
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/ScreenSpaceEventHandler',
   'atlas-cesium/cesium/Source/Core/ScreenSpaceEventType',
-  'atlas-cesium/cesium/Source/Scene/CameraEventType',
   // Base class
   'atlas/input/InputManager',
   'atlas/lib/utility/Setter'
-], function(ScreenSpaceEventHandler, ScreenSpaceEventType, CameraEventType, InputManagerCore,
-            Setter) {
+], function(ScreenSpaceEventHandler, ScreenSpaceEventType, InputManagerCore, Setter) {
+
+  /**
+   * @typedef atlas-cesium.input.InputManager
+   * @ignore
+   */
+  var InputManager;
 
   /**
    * @classdesc The InputManager links render and implementation specific user input handling to
    * the format expected by atlas.
-   * @param {Object} atlasManagers - The map of all atlas manager objects.
+   * @param {Object} managers - The map of all atlas manager objects.
    *
    * @class atlas-cesium.input.InputManager
    * @extends atlas.input.InputManager
    */
-  var InputManager = Setter.mixin(InputManagerCore.extend(
-      /** @lends atlas-cesium.input.InputManager# */{
+  InputManager = Setter.mixin(
+      InputManagerCore.extend(/** @lends atlas-cesium.input.InputManager# */{
 
         /**
          * The Cesium event handlers that are defined.
@@ -51,7 +55,7 @@ define([
               position: { value: movement }
             };
             this.handleInternalEvent('input/wheel', args);
-          }.bind(this._atlasManagers.event), CameraEventType.WHEEL);
+          }.bind(this._managers.event), ScreenSpaceEventType.WHEEL);
         },
 
         /**
@@ -64,57 +68,57 @@ define([
               position: { x: movement.endPosition.x, y: movement.endPosition.y }
             };
             this.handleInternalEvent('input/mousemove', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.MOUSE_MOVE);
+          }.bind(this._managers.event), ScreenSpaceEventType.MOUSE_MOVE);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/leftdown', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_DOWN);
+          }.bind(this._managers.event), ScreenSpaceEventType.LEFT_DOWN);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/leftup', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_UP);
+          }.bind(this._managers.event), ScreenSpaceEventType.LEFT_UP);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/leftclick', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.LEFT_CLICK);
+          }.bind(this._managers.event), ScreenSpaceEventType.LEFT_CLICK);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/rightdown', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_DOWN);
+          }.bind(this._managers.event), ScreenSpaceEventType.RIGHT_DOWN);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/rightup', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_UP);
+          }.bind(this._managers.event), ScreenSpaceEventType.RIGHT_UP);
 
           this._screenSpaceEventHandler.setInputAction(function(movement) {
             var args = {
               position: { x: movement.position.x, y: movement.position.y }
             };
             this.handleInternalEvent('input/rightclick', args);
-          }.bind(this._atlasManagers.event), ScreenSpaceEventType.RIGHT_CLICK);
+          }.bind(this._managers.event), ScreenSpaceEventType.RIGHT_CLICK);
         }
       }), {
 
-    // -------------------------------------------
-    // STATICS
-    // -------------------------------------------
+        // -------------------------------------------
+        // STATICS
+        // -------------------------------------------
 
-  });
+      });
 
   return InputManager;
 });

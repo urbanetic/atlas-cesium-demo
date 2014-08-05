@@ -8,7 +8,7 @@ define([
 ], function (doh, TestCase, EventManager, Feature, RenderManager) {
 
   /* Test globals go here */
-  var atlasManagers, renderManager;
+  var managers, renderManager;
 
   /* Begin test case definitions */
   new TestCase({
@@ -17,18 +17,18 @@ define([
 
     setUp: function () {
       // summary:
-      atlasManagers = {
+      managers = {
         dom: {},
         event: {},
         render: {}
       };
-      //eventManager = new EventManager(atlasManagers);
-      renderManager = new RenderManager(atlasManagers);
+      //eventManager = new EventManager(managers);
+      renderManager = new RenderManager(managers);
     },
 
     tearDown: function () {
       renderManager = null;
-      atlasManagers = {
+      managers = {
         dom: {},
         event: {},
         render: {}
@@ -37,7 +37,7 @@ define([
 
     testCreate: function () {
       doh.assertTrue(renderManager instanceof RenderManager);
-      doh.assertTrue(atlasManagers.render == renderManager);
+      doh.assertTrue(managers.render == renderManager);
     },
 
     testAddFeature: function () {

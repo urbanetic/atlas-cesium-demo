@@ -2,14 +2,21 @@ define([
   'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
+  'atlas-cesium/model/Image',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function (GeoEntity, Ellipse, Feature, Line, Polygon, Mesh, EntityManagerCore) {
+], function (GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh, EntityManagerCore) {
 
-  var EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
+  /**
+   * @typedef atlas-cesium.entity.EntityManager
+   * @ignore
+   */
+  var EntityManager;
+
+  EntityManager = EntityManagerCore.extend( /** @lends atlas-cesium.entity.EntityManager# */ {
 
     /**
      * Contains a mapping of GeoEntity subclass names to the constructor object
@@ -18,17 +25,12 @@ define([
      * @type {Object.<String, Function>}
      */
     _entityTypes: {
-      'Feature': Feature,
-      'Line': Line,
-      'Polygon': Polygon,
-      'Mesh': Mesh
-    },
-
-    setup: function (args) {
-      if (args.constructors) {
-        this.setGeoEntityTypes(args.constructors);
-      }
-      this.bindEvents();
+      Ellipse: Ellipse,
+      Feature: Feature,
+      Image: Image,
+      Line: Line,
+      Mesh: Mesh,
+      Polygon: Polygon
     },
 
     /**
@@ -38,7 +40,7 @@ define([
      */
     getAt: function (point) {
       // Get the Entities at the given screen coordinates.
-      var ids = this._atlasManagers.render.getAt(point);
+      var ids = this._managers.render.getAt(point);
       // Translate entity IDs to entity objects.
       var entities = [];
       ids.forEach(function (id) {
@@ -73,5 +75,6 @@ define([
       throw 'EntityManager.getInRect not yet implemented.'
     }
   });
+
   return EntityManager;
 });

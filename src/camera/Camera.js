@@ -6,10 +6,8 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
-  'atlas-cesium/camera/CameraFlightPath',
   'atlas-cesium/cesium/Source/Core/Cartographic'
-], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, CameraFlightPath,
-            Cartographic) {
+], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, Cartographic) {
   /**
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
@@ -99,6 +97,7 @@ define([
           orientation = args.orientation,
           point = position.toRadians();
       var destination = new Cartographic(point.longitude, point.latitude, point.elevation);
+      destination = this._renderManager.getEllipsoid().cartographicToCartesian(destination);
       var flightArgs = {
         destination: destination,
         duration: args.duration || 0,
@@ -121,10 +120,9 @@ define([
         flightArgs.direction = args.direction;
         flightArgs.up = args.up;
       }
-      var flight = CameraFlightPath.createAnimationCartographic(this._renderManager.getScene(),
-          flightArgs);
-      // TODO(aramk) This affects the global camera, not the current camera.
-      this._renderManager.getAnimations().add(flight);
+      var scene = this._renderManager.getScene();
+      // TODO(aramk) Add support for atlas.camera.PathType back in.
+      scene.camera.flyTo(flightArgs);
       Log.debug('Animating camera to', position, orientation);
     }
   });

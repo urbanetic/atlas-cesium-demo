@@ -24,6 +24,9 @@ define([
             Quaternion, QuaternionSpline, PerspectiveFrustum, PerspectiveOffCenterFrustum,
             SceneMode, Tween) {
 
+  // TODO(aramk) This file is outdated and needs to be updated for b30.
+  throw new Error('CameraFlightPath is outdated');
+
   /**
    * An adapted implementation of {@link CameraFlightPath} from Cesium b27 to allow non-sinusoidal
    * flight paths.
