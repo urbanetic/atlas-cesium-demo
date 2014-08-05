@@ -96,7 +96,7 @@ module.exports = function(grunt) {
         command: [
               'cd ' + cesiumPath(),
               path.join('.', 'Tools', 'apache-ant-1.8.2', 'bin', 'ant') +
-              ' setNodePath combineJavaScript.combineCesiumWorkers' +
+              ' combineJavaScript.combineCesiumWorkers' +
               ' -Doptimize=uglify2 -DrelativeCombineOutputDirectory=' +
               path.join('..', 'Build', CESIUM_WORKERS_BUILD_DIR)
         ].join('&&')
