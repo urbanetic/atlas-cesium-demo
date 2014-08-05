@@ -1,46 +1,46 @@
 define([
-  'atlas/util/DeveloperError',
-  'atlas/util/default',
-  'atlas/util/Extends',
-  'atlas-cesium/camera/Camera',
-  // Base class
-  'atlas/camera/CameraManager'
-], function (DeveloperError, defaultValue, extend, Camera, CameraManagerCore) {
+  'atlas/camera/CameraManager',
+  'atlas-cesium/camera/Camera'
+], function(CameraManagerCore, Camera) {
 
-  var CameraManager = function (atlasManagers) {
-    CameraManager.base.constructor.call(this, atlasManagers);
-
-    this._atlasManagers = atlasManagers;
-    this._atlasManagers.camera = this;
-
-    this._camera = new Camera({renderManager: this._atlasManagers.render});
-  };
-  extend(CameraManagerCore, CameraManager);
-
-  /*
-   * Inherited functions
-   *    initialise()
-   *    _bindEvents()
-   *    createBookmark()
-   *    removeBookmark()
-   *    gotoBookmark()
+  /**
+   * @typedef atlas-cesium.camera.CameraManager
+   * @ignore
    */
+  var CameraManager;
 
-  CameraManager.prototype.lockCamera = function () {
-    this._atlasManagers.render.getCameraController().enableRotate = false;
-    this._atlasManagers.render.getCameraController().enableTranslate = false;
-    this._atlasManagers.render.getCameraController().enableZoom = false;
-    this._atlasManagers.render.getCameraController().enableTilt = false;
-    this._atlasManagers.render.getCameraController().enableLook = false;
-  };
+  /**
+   * @class atlas-cesium.camera.CameraManager
+   */
+  CameraManager = CameraManagerCore.extend(/** @lends atlas-cesium.camera.CameraManager# */{
 
-  CameraManager.prototype.unlockCamera = function () {
-    this._atlasManagers.render.getCameraController().enableRotate = true;
-    this._atlasManagers.render.getCameraController().enableTranslate = true;
-    this._atlasManagers.render.getCameraController().enableZoom = true;
-    this._atlasManagers.render.getCameraController().enableTilt = true;
-    this._atlasManagers.render.getCameraController().enableLook = true;
-  };
+    setup: function() {
+      this._super();
+      // TODO(aramk) Use factory.
+      this._current = new Camera({renderManager: this._managers.render});
+    },
+
+    lockCamera: function() {
+      var renderManager = this._managers.render;
+      var controller = renderManager.getCameraController();
+      controller.enableRotate = false;
+      controller.enableTranslate = false;
+      controller.enableZoom = false;
+      controller.enableTilt = false;
+      controller.enableLook = false;
+    },
+
+    unlockCamera: function() {
+      var renderManager = this._managers.render;
+      var controller = renderManager.getCameraController();
+      controller.enableRotate = true;
+      controller.enableTranslate = true;
+      controller.enableZoom = true;
+      controller.enableTilt = true;
+      controller.enableLook = true;
+    }
+
+  });
 
   return CameraManager;
 });

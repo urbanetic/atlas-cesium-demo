@@ -1,25 +1,25 @@
 define([
-  'atlas/util/Extends',
   'atlas/dom/DomManager'
-], function (extend, DomManagerCore) {
+], function(DomManagerCore) {
 
-  var DomManager = function(atlasManagers) {
-    DomManager.base.constructor.call(this, atlasManagers);
-    /*
-    Inherits from DomManagerCore
-    this._atlasManagers
-    this._currentNode
-    this._rendered
-    this._visible
-    */
-  };
-  extend(DomManagerCore, DomManager);
+  /**
+   * @typedef atlas-cesium.dom.DomManager
+   * @ignore
+   */
+  var DomManager;
 
-  DomManager.prototype.populateDom = function (elem) {
-    this._atlasManagers.render.createWidget(elem);
-    this._rendered = true;
-    this._visible = true;
-  };
+  /**
+   * @class atlas-cesium.dom.DomManager
+   */
+  DomManager = DomManagerCore.extend(/** @lends atlas-cesium.dom.DomManager# */{
+
+    populateDom: function(elem) {
+      this._managers.render.createWidget(elem);
+      this._rendered = true;
+      this._visible = true;
+    }
+
+  });
 
   return DomManager;
 });
