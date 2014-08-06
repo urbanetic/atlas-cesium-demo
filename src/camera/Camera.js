@@ -100,7 +100,8 @@ define([
       destination = this._renderManager.getEllipsoid().cartographicToCartesian(destination);
       var flightArgs = {
         destination: destination,
-        duration: args.duration || 0,
+        // Cesium uses duration in seconds.
+        duration: args.duration / 1000 || 0,
         path: args.path
       };
       if (!args.direction && orientation) {
