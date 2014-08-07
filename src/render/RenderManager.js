@@ -374,20 +374,21 @@ define([
     },
 
     geoPointFromScreenCoords: function(screenCoords) {
-      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords),
-          cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
-          toDegrees = function(x) {
-            return AtlasMath.toDegrees(x);
-          };
+      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
+      if (!cartesian) {
+        return null;
+      }
+      var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
       return GeoPoint.fromRadians(cartographic);
     },
 
     convertScreenCoordsToLatLng: function(screenCoords) {
-      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords),
-          cartographic = this.getEllipsoid().cartesianToCartographic(cartesian),
-          toDegrees = function(x) {
-            return AtlasMath.toDegrees(x);
-          };
+      // TODO(bpstudds): Delete this function as it duplicates geoPointFromScreenCoords.
+      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
+      if (!cartesian) {
+        return null;
+      }
+      var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
       return GeoPoint.fromRadians(cartographic);
     },
 

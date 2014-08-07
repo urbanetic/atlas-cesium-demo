@@ -20,8 +20,6 @@ define([
    */
   Handle = HandleCore.extend(/** @lends atlas.model.Handle# */ {
 
-    // TODO(bpstudds): Using an Ellipse isn't going to work. I'll have to switch it for
-    // a billboard or similar.
     /**
      * The Ellipse representing the handle.
      * @type {atlas-cesium.model.Ellipse}
@@ -29,32 +27,26 @@ define([
      */
     _dot: null,
 
-    _init: function(args) {
-      this._super(args);
-      var target = this.getTarget(),
-          owner = this.getOwner(),
-          vertex;
-      if (target) {
-        vertex = target;
-      } else {
-        vertex = owner.getCentroid();
-      }
-      var centroid = GeoPoint.fromVertex(vertex);
-      // TODO(aramk) Use dependency injection eventually.
-      args.renderManager = owner._renderManager;
-      args.eventManager = owner._eventManager;
-      this._dot = new Ellipse(this.getId(), {centroid: centroid, semiMajor: this._dotRadius}, args);
+    /**
+     * Creates a new dot instance
+     * @param args
+     * @returns {Ellipse}
+     * @private
+     */
+    _createDot: function(args) {
+      return new Ellipse(this.getId(),
+          {centroid: this._centroid, semiMajor: this._dotRadius}, args);
     },
 
-    show: function () {
+    show: function() {
       this._dot.show();
     },
 
-    hide: function () {
+    hide: function() {
       this._dot.hide();
     },
 
-    remove: function () {
+    remove: function() {
       this._super();
       this._dot.remove();
     }

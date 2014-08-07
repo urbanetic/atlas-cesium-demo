@@ -9,6 +9,6 @@ define([
 
   describe('A Handle', function () {
 
-    it
+   it('should be tested');
   });
 });
