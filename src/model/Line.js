@@ -232,13 +232,14 @@ define([
     },
 
     createHandles: function() {
-      return this._vertices.forEach(function(vertex) {
-        return this.createHandle(vertex);
+      return this._vertices.map(function(vertex, i) {
+        return this.createHandle(vertex, i);
       }, this);
     },
 
-    createHandle: function(vertex) {
-      return new Handle(this._bindDependencies({target: vertex, owner: this}));
+    createHandle: function(vertex, index) {
+      // TODO(aramk) Use a factory to use the right handle class.
+      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     }
 
   });
