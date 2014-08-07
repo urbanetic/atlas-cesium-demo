@@ -1,10 +1,6 @@
 define([
   'atlas/lib/utility/Log',
-  'atlas/model/Style',
-  'atlas/model/Colour',
   'atlas/util/AtlasMath',
-  'atlas/util/DeveloperError',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/EllipseGeometry',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
@@ -12,8 +8,8 @@ define([
   'atlas-cesium/cesium/Source/Core/Color',
   // Base class
   'atlas/model/Ellipse'
-], function(Log, Style, Colour, AtlasMath, DeveloperError, Cartographic, EllipseGeometry,
-            GeometryInstance, Primitive, MaterialAppearance, CesiumColour, EllipseCore) {
+], function(Log, AtlasMath, EllipseGeometry, GeometryInstance, Primitive, MaterialAppearance,
+            CesiumColour, EllipseCore) {
 
   var Ellipse = EllipseCore.extend(/** @lends atlas-cesium.model.Ellipse# */ {
 
@@ -227,6 +223,9 @@ define([
    * @private
    */
   Ellipse._convertAtlasToCesiumColor = function(color) {
+    if (!color) {
+      return;
+    }
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
     return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
