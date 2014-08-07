@@ -33,12 +33,7 @@ define([
       this._super(args);
       var target = this.getTarget(),
           owner = this.getOwner(),
-          centroid;
-      if (target) {
-        centroid = target;
-      } else {
-        centroid = owner.getCentroid();
-      }
+          centroid = target || owner.getCentroid();
       // TODO(aramk) Use dependency injection eventually.
       args.renderManager = owner._renderManager;
       args.eventManager = owner._eventManager;
@@ -47,11 +42,11 @@ define([
     },
 
     show: function () {
-      this._dot.show();
+      return this._dot.show();
     },
 
     hide: function () {
-      this._dot.hide();
+      return this._dot.hide();
     },
 
     remove: function () {

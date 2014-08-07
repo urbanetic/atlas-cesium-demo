@@ -88,7 +88,7 @@ define([
       }
       this._selected && this.onSelect();
       Log.debug('Showing entity', this.getId());
-      this._primitive.show = true;
+      this._primitive && (this._primitive.show = true);
       return this.isRenderable() && this.isVisible();
     },
 

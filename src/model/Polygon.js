@@ -131,6 +131,9 @@ define([
       this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
     },
 
+    // TODO(aramk) Use factory pattern to construct atlas-cesium Handle and move this to
+    // VertexedEntity.
+
     createHandles: function() {
       var handles = [];
       // Add a Handle for the Polygon itself.
@@ -161,7 +164,7 @@ define([
     _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        this._cartesians = this._renderManager.cartesianArrayFromVertexArray(this._vertices);
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
 
@@ -174,7 +177,7 @@ define([
       if (this._holes) {
         for (var i in this._holes) {
           var hole = this._holes[i];
-          var cartesians = this._renderManager.cartesianArrayFromVertexArray(hole.coordinates);
+          var cartesians = this._renderManager.cartesianArrayFromGeoPointArray(hole.coordinates);
           holes.push({positions: cartesians});
         }
       }
