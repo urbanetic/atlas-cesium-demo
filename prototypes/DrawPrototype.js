@@ -28,9 +28,15 @@ define([
 //              count = 0;
 //            }
           },
-          create: function() {
+          create: function(args) {
             console.error('create', arguments);
-            setTimeout(drawMode, 3000);
+            var feature = args.feature;
+            var id = feature.getId();
+            setTimeout(function() {
+              console.log('edit/enable');
+              atlas.publish('edit/enable', {ids: [id]});
+            }, 1000);
+//            setTimeout(drawMode, 3000);
           },
           cancel: function(args) {
             console.error('cancel', arguments);
