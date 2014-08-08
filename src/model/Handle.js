@@ -32,15 +32,12 @@ define([
       var renderManager = this._renderManager;
       var primitives = renderManager.getPrimitives();
       var billboards = primitives.add(new BillboardCollection());
-      var position = renderManager.cartesianFromGeoPoint(this._target);
-      var image = new Image(10, 10);
-      image.src = 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png';
+      var target = this._target.clone();
+      target.elevation = 0;
+      var position = renderManager.cartesianFromGeoPoint(target);
       billboards.add({
-        image: image,
-        height: 10,
-        width: 10,
-        show: true,
-        pixelOffset: new Cartesian2(0.0, 1.0),
+        // TODO(aramk) Give relative URL or base64.
+        image: 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png',
         eyeOffset: new Cartesian3(0, 0, 100),
         position: position
       });

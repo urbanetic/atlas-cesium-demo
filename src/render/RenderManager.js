@@ -1,18 +1,19 @@
 define([
   'atlas/lib/utility/Log',
   'atlas/model/GeoPoint',
-  'atlas/util/AtlasMath',
+  'atlas/model/Vertex',
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
+  'atlas-cesium/cesium/Source/Scene/SceneTransforms',
   'atlas-cesium/cesium/Source/Widgets/Viewer/Viewer',
-  'atlas-cesium/cesium/Source/DynamicScene/CzmlDataSource',
+  'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, AtlasMath, Cartographic, requestAnimationFrame, Imagery, ImageryState,
-            Viewer, CzmlDataSource, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, Cartographic, requestAnimationFrame, Imagery, ImageryState,
+            SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
 
   /**
    * @typedef atlas-cesium.render.RenderManager
@@ -46,7 +47,7 @@ define([
       this._maxDelta = 100;
       this._fps = this._maxFps;
       this._fpsStats = {};
-          this._fpsDelay = 3000;
+      this._fpsDelay = 3000;
       this._preventFpsDelay = false;
       this._fpsDelayHandler = null;
       this._loadingImageryCount = 0;
@@ -373,17 +374,23 @@ define([
       return 0;
     },
 
-    geoPointFromScreenCoords: function(screenCoords) {
-      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
-      if (!cartesian) {
-        return null;
-      }
-      var cartographic = this.getEllipsoid().cartesianToCartographic(cartesian);
-      return GeoPoint.fromRadians(cartographic);
+    /**
+     * @param {atlas.model.GeoPoint} point - The world coordinates in cartographic degrees.
+     * @returns {atlas.model.Vertex} The given coordinates in screen pixels.
+     */
+    geoPointToScreenCoords: function (point) {
+      var position = this.cartesianFromGeoPoint(point);
+      var cartesian = SceneTransforms.wgs84ToDrawingBufferCoordinates(this.getScene(), position);
+      return new Vertex(cartesian);
     },
 
-    convertScreenCoordsToLatLng: function(screenCoords) {
-      // TODO(bpstudds): Delete this function as it duplicates geoPointFromScreenCoords.
+    /**
+     * @param {atlas.model.Vertex} screenCoords - The screen coordinates in pixels relative to the
+     * origin (top-left) of the Cesium container.
+     * @returns {atlas.model.GeoPoint} The given screen coordinates in cartographic degrees on the
+     * globe.
+     */
+    geoPointFromScreenCoords: function(screenCoords) {
       var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
       if (!cartesian) {
         return null;
