@@ -116,7 +116,7 @@ module.exports = function(grunt) {
       // Compile JS source files.
       build: {
         options: {
-          stdout: false, stderr: true
+          stdout: false, stderr: true, failOnError: true
         },
         command: [
               'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
