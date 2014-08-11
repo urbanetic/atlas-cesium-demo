@@ -5,8 +5,6 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartesian3'
 ], function(HandleCore, Paths, BillboardCollection, Cartesian3) {
 
-  console.debug('image', Paths.getInstance().getResourceDirectory() + 'images/handle.png');
-
   /**
    * @typedef atlas-cesium.model.Handle
    * @ignore
@@ -40,10 +38,7 @@ define([
       var screenCoords = renderManager.geoPointToScreenCoords(target);
       this._billboard = billboards.add({
         id: this.getId(),
-        // TODO(aramk) Give relative URL or base64.
         image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
-//        image: 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png',
-        // Position the handle above the ground so it doesn't intersect the owner's visualisation.
         eyeOffset: new Cartesian3(0, 1, 0),
         position: position
       });
