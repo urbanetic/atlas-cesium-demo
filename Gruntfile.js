@@ -12,6 +12,8 @@ module.exports = function(grunt) {
   var LIB_DIR = 'lib';
   var DIST_DIR = 'dist';
   var BUILD_DIR = 'build';
+  var RESOURCES_DIR = 'resources';
+  var RESOURCES_BUILD_PATH = distPath(RESOURCES_DIR);
   var MAIN_FILE = srcPath('main.js');
   var BUILD_FILE = buildPath('build.js');
   var RE_AMD_MODULE = /\b(?:define|require)\s*\(/;
@@ -21,8 +23,9 @@ module.exports = function(grunt) {
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
   var CESIUM_WORKERS_BUILD_DIR = 'CesiumWorkers';
   var CESIUM_WORKERS_BUILD_PATH = cesiumPath('Build', CESIUM_WORKERS_BUILD_DIR);
-  var STYLE_BUILD_FILE = 'atlas-cesium.min.css';
-  var STYLE_BUILD_FILE_PATH = distPath(STYLE_BUILD_FILE);
+  var STYLE_FILE = MODULE_NAME + '.less';
+  var STYLE_BUILD_FILE = MODULE_NAME + '.min.css';
+  var STYLE_BUILD_FILE_PATH = path.join(RESOURCES_BUILD_PATH, STYLE_BUILD_FILE);
 
   // Define config for copy:resources.
   var resourceCopy = [];
@@ -33,6 +36,12 @@ module.exports = function(grunt) {
       src: '**/*',
       dest: path.join(BUILD_SRC_DIR, dir)
     });
+  });
+  resourceCopy.push({
+    expand: true,
+    cwd: RESOURCES_DIR,
+    src: '**/*',
+    dest: RESOURCES_BUILD_PATH
   });
 
   require('logfile-grunt')(grunt, {filePath: buildPath('./grunt.log'), clearLogFile: true});
@@ -148,7 +157,7 @@ module.exports = function(grunt) {
         },
         files: [
           {
-            src: path.join('resources', 'atlas-cesium.less'),
+            src: path.join(RESOURCES_DIR, STYLE_FILE),
             dest: STYLE_BUILD_FILE_PATH
           }
         ]
@@ -164,6 +173,16 @@ module.exports = function(grunt) {
             src: [
               distPath('**', '*')
             ]
+          }
+        ]
+      },
+      resourcesLess: {
+        // Remove the .less source file from the copied resources, leaving everything else.
+        files: [
+          {
+            expand: true,
+            cwd: RESOURCES_BUILD_PATH,
+            src: STYLE_FILE
           }
         ]
       }
@@ -216,7 +235,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('fix-build-style', 'Fix the Cesium style import', function() {
     replaceFile(STYLE_BUILD_FILE_PATH, function(data) {
-      return data.replace("@import '../lib/cesium", "@import 'cesium");
+      return data.replace("@import '../lib/cesium", "@import '../cesium");
     });
   });
 
@@ -226,7 +245,7 @@ module.exports = function(grunt) {
       ['shell:updateNpmDep', 'shell:updateBowerDep']);
   grunt.registerTask('build', 'Builds the app into a distributable package.',
       ['compile-imports', 'clean:dist', 'shell:build', 'build-workers', 'copy:workers',
-        'copy:resources', 'less', 'fix-build-style']);
+        'copy:resources', 'clean:resourcesLess', 'less', 'fix-build-style']);
   grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////

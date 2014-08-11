@@ -1,12 +1,11 @@
 define([
-  'atlas/model/GeoPoint',
-  'atlas-cesium/model/Ellipse',
+  'atlas/model/Handle',
+  'atlas/util/Paths',
   'atlas-cesium/cesium/Source/Scene/BillboardCollection',
-  'atlas-cesium/cesium/Source/Core/Cartesian2',
-  'atlas-cesium/cesium/Source/Core/Cartesian3',
-  // Base class.
-  'atlas/model/Handle'
-], function(GeoPoint, Ellipse, BillboardCollection, Cartesian2, Cartesian3, HandleCore) {
+  'atlas-cesium/cesium/Source/Core/Cartesian3'
+], function(HandleCore, Paths, BillboardCollection, Cartesian3) {
+
+  console.debug('image', Paths.getInstance().getResourceDirectory() + 'images/handle.png');
 
   /**
    * @typedef atlas-cesium.model.Handle
@@ -42,7 +41,8 @@ define([
       this._billboard = billboards.add({
         id: this.getId(),
         // TODO(aramk) Give relative URL or base64.
-        image: 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png',
+        image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
+//        image: 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png',
         // Position the handle above the ground so it doesn't intersect the owner's visualisation.
         eyeOffset: new Cartesian3(0, 1, 0),
         position: position
