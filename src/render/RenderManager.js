@@ -391,7 +391,8 @@ define([
      * globe.
      */
     geoPointFromScreenCoords: function(screenCoords) {
-      var cartesian = this.getCesiumCamera().pickEllipsoid(screenCoords);
+      var ray = this.getCesiumCamera().getPickRay(screenCoords);
+      var cartesian = this.getGlobe().pick(ray, this.getScene());
       if (!cartesian) {
         return null;
       }
@@ -483,12 +484,16 @@ define([
       return this._widget.scene.primitives;
     },
 
-    getEllipsoid: function() {
-      return this.getScene().globe.ellipsoid;
-    },
-
     getScene: function() {
       return this._widget.scene;
+    },
+
+    getGlobe: function () {
+      return this.getScene().globe;
+    },
+
+    getEllipsoid: function() {
+      return this.getGlobe().ellipsoid;
     }
 
   });
