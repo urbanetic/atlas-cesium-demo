@@ -92,11 +92,13 @@
         require([
           './prototypes/CameraPrototype',
           './prototypes/DrawPrototype',
-          './prototypes/GeocoderPrototype'
-        ], function(CameraPrototype, DrawPrototype, GeocoderPrototype) {
+          './prototypes/GeocoderPrototype',
+          './prototypes/InputPrototype'
+        ], function(CameraPrototype, DrawPrototype, GeocoderPrototype, InputPrototype) {
 //          new CameraPrototype(cesiumAtlas);
           new DrawPrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
+//          new InputPrototype(cesiumAtlas);
         });
       }, 2000);
 
