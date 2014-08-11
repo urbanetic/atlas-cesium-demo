@@ -38,10 +38,12 @@ define([
       var target = this._target.clone();
       target.elevation = 0;
       var position = renderManager.cartesianFromGeoPoint(target);
+      var screenCoords = renderManager.geoPointToScreenCoords(target);
       this._billboard = billboards.add({
+        id: this.getId(),
         // TODO(aramk) Give relative URL or base64.
         image: 'http://localhost/urbanetic/atlas-cesium-demo/atlas/resources/images/handle.png',
-        // Position the handle above the ground so it doesn't intersect the drawn target.
+        // Position the handle above the ground so it doesn't intersect the owner's visualisation.
         eyeOffset: new Cartesian3(0, 1, 0),
         position: position
       });

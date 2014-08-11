@@ -231,15 +231,14 @@ define([
       });
     },
 
-    createHandles: function() {
-      return this._vertices.map(function(vertex, i) {
-        return this.createHandle(vertex, i);
-      }, this);
-    },
-
     createHandle: function(vertex, index) {
       // TODO(aramk) Use a factory to use the right handle class.
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
+    },
+
+    _createEntityHandle: function () {
+      // Line doesn't need a handle on itself.
+      return false;
     }
 
   });

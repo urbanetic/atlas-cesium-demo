@@ -134,20 +134,6 @@ define([
     // TODO(aramk) Use factory pattern to construct atlas-cesium Handle and move this to
     // VertexedEntity.
 
-    createHandles: function() {
-      var handles = [];
-      // Add a Handle for the Polygon itself.
-      handles.push(new Handle(this._bindDependencies({owner: this})));
-      // Add Handles for each vertex.
-      this._vertices.forEach(function(vertex, i) {
-        // TODO(aramk) This modifies the underlying vertices - it should create copies and
-        // respond to changes in the copies. Also move this method and createHandle() to
-        // VertexedEntity.
-        handles.push(this.createHandle(vertex, i));
-      }, this);
-      return handles;
-    },
-
     createHandle: function(vertex, index) {
       // TODO(aramk) Use a factory to use the right handle class.
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));

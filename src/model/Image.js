@@ -67,25 +67,26 @@ define([
 
     /**
      * @returns {Array.<atlas.model.Handle>} A handle for each of the vertices in the Polygon, as well as
-     * one on the Polygon itself.
+     * one on the entity itself.
      */
-    getEditingHandles: function () {
-      if (this._editingHandles) { return this._editingHandles; }
-
-      var handles = [],
-        elevation = this.getElevation();
-
-      // Add a Handle for the Polygon itself.
-      handles.push(this._bindDependencies(new Handle({owner: this})));
-
-      // Add Handles for each vertex.
-      handles = handles.concat(this._vertices.map(function (vertex) {
-        vertex.z = elevation;
-        return new Handle(this._bindDependencies({target: vertex, owner: this}));
-      }, this));
-
-      return (this._editingHandles = handles);
-    },
+    // TODO(aramk) No longer used - safe to remove?
+//    getEditingHandles: function () {
+//      if (this._editingHandles) { return this._editingHandles; }
+//
+//      var handles = [],
+//        elevation = this.getElevation();
+//
+//      // Add a Handle for the entity itself.
+//      handles.push(this._bindDependencies(new Handle({owner: this})));
+//
+//      // Add Handles for each vertex.
+//      handles = handles.concat(this._vertices.map(function (vertex) {
+//        vertex.z = elevation;
+//        return new Handle(this._bindDependencies({target: vertex, owner: this}));
+//      }, this));
+//
+//      return (this._editingHandles = handles);
+//    },
 
     /**
      * Returns whether this Polygon is visible. Overrides the default Atlas implementation
