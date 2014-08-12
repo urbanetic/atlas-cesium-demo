@@ -263,9 +263,7 @@ define([
       var borderColor = cesiumColors.border;
       if (this._appearance && fillColor) {
         this._appearance.material.uniforms.color = fillColor;
-      } else {
       }
-      this._primitive.appearance = this._appearance;
       // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
 //      if (this._outlineGeometry && borderColor) {
 //        this._outlineGeometry.material.uniforms.color = borderColor;
