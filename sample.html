@@ -93,12 +93,15 @@
           './prototypes/CameraPrototype',
           './prototypes/DrawPrototype',
           './prototypes/GeocoderPrototype',
-          './prototypes/InputPrototype'
-        ], function(CameraPrototype, DrawPrototype, GeocoderPrototype, InputPrototype) {
+          './prototypes/InputPrototype',
+          './prototypes/RenderPrototype'
+        ], function(CameraPrototype, DrawPrototype, GeocoderPrototype, InputPrototype,
+                    RenderPrototype) {
 //          new CameraPrototype(cesiumAtlas);
-          new DrawPrototype(cesiumAtlas);
+//          new DrawPrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
 //          new InputPrototype(cesiumAtlas);
+          new RenderPrototype(cesiumAtlas);
         });
       }, 2000);
 
