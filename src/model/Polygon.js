@@ -7,10 +7,14 @@ define([
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
+  'atlas-cesium/cesium/Source/Core/VertexFormat',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance'
+  'atlas-cesium/cesium/Source/Scene/Material',
+  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
+  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
 ], function(PolygonCore, Handle, Style, GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
-            ColorGeometryInstanceAttribute, Primitive, PerInstanceColorAppearance) {
+            ColorGeometryInstanceAttribute, VertexFormat, Primitive, Material,
+            PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -86,19 +90,18 @@ define([
       var scene = this._renderManager.getScene();
       this._createGeometry();
       this._primitive = null;
-      if (this._geometry) {
+      if (this._geometry && this._appearance) {
         this._primitive = new Primitive({
           geometryInstances: this._geometry,
-          appearance: new PerInstanceColorAppearance({
-            closed: true,
-            translucent: false
-          })
+          appearance: this._appearance
         });
       }
       this._outlinePrimitive = null;
-      if (this._outlineGeometry) {
+      if (this._outlineGeometry && this._outlineAppearance) {
         this._outlinePrimitive = new Primitive({
           geometryInstances: this._outlineGeometry,
+          // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+//          appearance: this._outlineAppearance
           appearance: new PerInstanceColorAppearance({
             flat: true,
             translucent: false,
@@ -185,11 +188,9 @@ define([
           geometry: new PolygonGeometry({
             polygonHierarchy: polygonHierarchy,
             height: elevation,
-            extrudedHeight: elevation + height
-          }),
-          attributes: {
-            color: ColorGeometryInstanceAttribute.fromColor(fillColor)
-          }
+            extrudedHeight: elevation + height,
+            vertexFormat: VertexFormat.POSITION_AND_ST
+          })
         });
       }
 
@@ -200,11 +201,52 @@ define([
           geometry: new PolygonOutlineGeometry({
             polygonHierarchy: polygonHierarchy,
             height: elevation,
-            extrudedHeight: elevation + height
+            extrudedHeight: elevation + height,
+            vertexFormat: VertexFormat.POSITION_AND_ST
           }),
+          // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
           attributes: {
             color: ColorGeometryInstanceAttribute.fromColor(borderColor)
           }
+        });
+      }
+    },
+
+    /**
+     * Creates the appearance data.
+     * @private
+     */
+    _createAppearance: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      this._appearance = null;
+      if (fillColor) {
+        this._appearance = new EllipsoidSurfaceAppearance({
+          material: new Material({
+            fabric: {
+              type: 'Color',
+              uniforms: {
+                color: fillColor
+              }
+            },
+            translucent: false
+          })
+        });
+      }
+      this._outlineAppearance = null;
+      if (borderColor) {
+        // TODO(aramk) Add docs up top.
+        this._outlineAppearance = new EllipsoidSurfaceAppearance({
+          material: new Material({
+            fabric: {
+              type: 'Color',
+              uniforms: {
+                color: borderColor
+              }
+            },
+            translucent: false
+          })
         });
       }
     },
@@ -214,20 +256,20 @@ define([
      * @private
      */
     _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style')) {
-        var cesiumColors = this._getCesiumColors();
-        var fillColor = cesiumColors.fill;
-        var borderColor = cesiumColors.border;
-        if (this._geometry && fillColor) {
-          var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
-          geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
-        }
-        if (this._outlineGeometry && borderColor) {
-          var outlineGeometryAtts =
-              this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-          outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-        }
+      // Appearance object may not exist if we didn't have a colors initially.
+      this._createAppearance();
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      if (this._appearance && fillColor) {
+        this._appearance.material.uniforms.color = fillColor;
+      } else {
       }
+      this._primitive.appearance = this._appearance;
+      // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+//      if (this._outlineGeometry && borderColor) {
+//        this._outlineGeometry.material.uniforms.color = borderColor;
+//      }
     },
 
     /**
@@ -237,6 +279,7 @@ define([
     _build: function() {
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         this._removePrimitive();
+        this._createAppearance();
         this._createPrimitive();
         this._addPrimitive();
       } else if (this.isDirty('style')) {
