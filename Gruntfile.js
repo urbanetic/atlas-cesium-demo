@@ -127,9 +127,14 @@ module.exports = function(grunt) {
         options: {
           stdout: false, stderr: true, failOnError: true
         },
-        command: [
-              'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
-        ].join('&&')
+        command: 'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE + ' optimize=none'
+      },
+
+      buildMinify: {
+        options: {
+          stdout: false, stderr: true, failOnError: true
+        },
+        command: 'node node_modules/requirejs/bin/r.js -o ' + BUILD_FILE
       }
     },
 
@@ -243,9 +248,29 @@ module.exports = function(grunt) {
       ['shell:installNpmDep', 'shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('update', 'Updates dependencies.',
       ['shell:updateNpmDep', 'shell:updateBowerDep']);
-  grunt.registerTask('build', 'Builds the app into a distributable package.',
-      ['compile-imports', 'clean:dist', 'shell:build', 'build-workers', 'copy:workers',
-        'copy:resources', 'clean:resourcesLess', 'less', 'fix-build-style']);
+  grunt.registerTask('build', 'Builds the app into a distributable package.', function() {
+    var args = arguments,
+        tasks = [],
+        addTasks = function() {
+          Array.prototype.slice.apply(arguments).forEach(function(task) {
+            tasks.push(task);
+          });
+        },
+        hasArgs = function(arg) {
+          return Object.keys(args).some(function(argIndex) {
+            var value = args[argIndex];
+            return value === arg;
+          });
+        };
+    addTasks('compile-imports', 'clean:dist');
+    hasArgs('no-minify') ? addTasks('shell:build') : addTasks('shell:buildMinify');
+    addTasks('build-workers', 'copy:workers', 'copy:resources', 'clean:resourcesLess', 'less',
+        'fix-build-style');
+    console.log('Running tasks', tasks);
+    tasks.forEach(function(task) {
+      grunt.task.run(task);
+    })
+  });
   grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
