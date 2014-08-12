@@ -277,7 +277,16 @@ define([
      * Cesium.
      */
     _build: function() {
+      // Create the primitives, geometries and appearances depending on the fill and border colours.
+      // If they are absent, all components for that colour are not created. This must be maintained
+      // during runtime changes.
+
+
+
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
+        // Recreate geometries and primitives.
+
+
         this._removePrimitive();
         this._createAppearance();
         this._createPrimitive();
