@@ -96,7 +96,7 @@ define([
       var primitives = this._renderManager.getPrimitives();
       var scene = this._renderManager.getScene();
       if (fillColor) {
-        if (isModelDirty) {
+        if (isModelDirty || !this._primitive) {
           this._primitive && primitives.remove(this._primitive);
           if (isStyleDirty) {
             this._appearance = new EllipsoidSurfaceAppearance({
@@ -121,7 +121,7 @@ define([
         }
       }
       if (borderColor) {
-        if (isModelDirty) {
+        if (isModelDirty || !this._outlinePrimitive) {
           this._outlinePrimitive && primitives.remove(this._outlinePrimitive);
           // TODO(aramk) Cannot use materials yet for outline geometries.
           this._createGeometry();
