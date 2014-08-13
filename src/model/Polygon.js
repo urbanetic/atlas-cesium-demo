@@ -157,12 +157,12 @@ define([
             if (duration >= timeout) {
               clearInterval(handle);
             }
-          }, freq);
+          }.bind(this), freq);
         }
       }
-      this.clean();
       this._addPrimitives();
       this._doShow();
+      this._super();
     },
 
     /**
@@ -270,10 +270,10 @@ define([
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
       if (this._primitive) {
-        this._primitive.show = fillColor;
+        this._primitive.show = !!fillColor;
       }
       if (this._outlinePrimitive) {
-        this._outlinePrimitive.show = borderColor;
+        this._outlinePrimitive.show = !!borderColor;
       }
     },
 
