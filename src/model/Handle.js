@@ -32,15 +32,20 @@ define([
     _build: function() {
       var renderManager = this._renderManager;
       var billboards = this._getBillboards();
-      var target = this._target.clone();
-      var position = renderManager.cartesianFromGeoPoint(target);
-      var screenCoords = renderManager.screenCoordsFromGeoPoint(target);
-      this._billboard = billboards.add({
-        id: this.getId(),
-        image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
-        eyeOffset: new Cartesian3(0, 1, 0),
-        position: position
-      });
+      var position = renderManager.cartesianFromGeoPoint(this.getTarget());
+      if (this.isDirty('model')) {
+        if (this._billboard) {
+          this._billboard.position = renderManager.cartesianFromGeoPoint(this.getTarget());
+        } else {
+          this._billboard = billboards.add({
+            id: this.getId(),
+            image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
+            eyeOffset: new Cartesian3(0, 1, 0),
+            position: position
+          });
+        }
+      }
+      this._super();
     },
 
     remove: function() {
@@ -60,17 +65,14 @@ define([
     },
 
     show: function() {
+      if (!this.isRenderable()) {
+        this._build();
+      }
       return this._billboard.show = true;
     },
 
     hide: function() {
       return this._billboard.show = false;
-    },
-
-    translate: function(translation) {
-      this._super.apply(this, arguments);
-      var renderManager = this._renderManager;
-      this._billboard.position = renderManager.cartesianFromGeoPoint(this.getTarget());
     }
 
   });
