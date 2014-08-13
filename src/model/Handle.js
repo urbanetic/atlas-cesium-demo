@@ -12,10 +12,10 @@ define([
   var Handle;
 
   /**
-   * A global {@link BillboardCollection} for all handles.
+   * A global {@link BillboardCollection} for all {@link atlas.model.Handle} objects.
    * @type {BillboardCollection}
    */
-  // TODO(aramk) Store handle collection per entity? See cesium docs for pros/cons.
+  // TODO(aramk) Store handle collection per entity? See http://cesiumjs.org/Cesium/Build/Documentation/BillboardCollection.html?classFilter=billbo
   var billboards;
 
   /**
@@ -31,9 +31,8 @@ define([
 
     _build: function() {
       var renderManager = this._renderManager;
-      var billboards = this._getBillboardCollection();
+      var billboards = this._getBillboards();
       var target = this._target.clone();
-      target.elevation = 0;
       var position = renderManager.cartesianFromGeoPoint(target);
       var screenCoords = renderManager.screenCoordsFromGeoPoint(target);
       this._billboard = billboards.add({
@@ -46,11 +45,11 @@ define([
 
     remove: function() {
       this._super();
-      var billboards = this._getBillboardCollection();
+      var billboards = this._getBillboards();
       billboards.remove(this._billboard);
     },
 
-    _getBillboardCollection: function() {
+    _getBillboards: function() {
       if (!billboards) {
         var renderManager = this._renderManager;
         var primitives = renderManager.getPrimitives();

@@ -8,6 +8,7 @@ module.exports = function(grunt) {
   // Time how long tasks take. Can help when optimizing build times
   //require('time-grunt')(grunt); // Not installed
 
+  var MODULE_NAME = 'atlas-cesium';
   var SRC_DIR = 'src';
   var LIB_DIR = 'lib';
   var DIST_DIR = 'dist';
@@ -17,7 +18,6 @@ module.exports = function(grunt) {
   var MAIN_FILE = srcPath('main.js');
   var BUILD_FILE = buildPath('build.js');
   var RE_AMD_MODULE = /\b(?:define|require)\s*\(/;
-  var MODULE_NAME = 'atlas-cesium';
   var CESIUM_DIR = libPath('cesium');
   var CESIUM_SRC_DIR = cesiumPath('Source');
   var BUILD_SRC_DIR = distPath('cesium', 'Source');
