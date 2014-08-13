@@ -83,68 +83,96 @@ define([
     // -------------------------------------------
 
     /**
-     * Generates the data structures required to render a Polygon
-     * in Cesium.
+     * Builds the geometry and appearance data required to render the Polygon in
+     * Cesium.
      */
-    _createPrimitive: function() {
+    _build: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
+      var isStyleDirty = this.isDirty('style');
+      var primitives = this._renderManager.getPrimitives();
       var scene = this._renderManager.getScene();
-      this._createGeometry();
-      this._primitive = null;
-      if (this._geometry && this._appearance) {
-        this._primitive = new Primitive({
-          geometryInstances: this._geometry,
-          appearance: this._appearance
-        });
+      if (fillColor) {
+        if (isModelDirty) {
+          this._primitive && primitives.remove(this._primitive);
+          if (isStyleDirty) {
+            this._appearance = new EllipsoidSurfaceAppearance({
+              material: new Material({
+                fabric: {
+                  type: 'Color',
+                  uniforms: {
+                    color: fillColor
+                  }
+                },
+                translucent: false
+              })
+            });
+          }
+          this._createGeometry();
+          this._primitive = new Primitive({
+            geometryInstances: this._geometry,
+            appearance: this._appearance
+          });
+        } else if (isStyleDirty) {
+          this._appearance.material.uniforms.color = fillColor;
+        }
       }
-      this._outlinePrimitive = null;
-      if (this._outlineGeometry && this._outlineAppearance) {
-        this._outlinePrimitive = new Primitive({
-          geometryInstances: this._outlineGeometry,
-          // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+      if (borderColor) {
+        if (isModelDirty) {
+          this._outlinePrimitive && primitives.remove(this._outlinePrimitive);
+          // TODO(aramk) Cannot use materials yet for outline geometries.
+          this._createGeometry();
+          this._outlinePrimitive = new Primitive({
+            geometryInstances: this._outlineGeometry,
+            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
 //          appearance: this._outlineAppearance
-          appearance: new PerInstanceColorAppearance({
-            flat: true,
-            translucent: false,
-            renderState: {
-              depthTest: {
-                enabled: true
-              },
-              lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+            appearance: new PerInstanceColorAppearance({
+              flat: true,
+              translucent: false,
+              renderState: {
+                depthTest: {
+                  enabled: true
+                },
+                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+              }
+            })
+          });
+        } else if (isStyleDirty) {
+          var timeout = 3000;
+          var duration = 0;
+          var freq = 100;
+          // TODO(aramk) Store this on the instance and cancel the existing one if we make another
+          // request before it is complete.
+          var handle = setInterval(function() {
+            if (this._outlinePrimitive.ready) {
+              var outlineGeometryAtts =
+                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+              clearInterval(handle);
             }
-          })
-        });
+            duration += freq;
+            if (duration >= timeout) {
+              clearInterval(handle);
+            }
+          }, freq);
+        }
       }
+      this.clean();
+      this._addPrimitives();
+      this._doShow();
     },
 
     /**
      * Adds the primitive to the scene.
      * @private
      */
-    _addPrimitive: function() {
+    _addPrimitives: function() {
       this._primitive && this._renderManager.getPrimitives().add(this._primitive);
       this._outlinePrimitive && this._renderManager.getPrimitives().add(this._outlinePrimitive);
     },
-
-    /**
-     * Removes the primitive from the scene.
-     * @private
-     */
-    _removePrimitive: function() {
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
-    },
-
-    // TODO(aramk) Use factory pattern to construct atlas-cesium Handle and move this to
-    // VertexedEntity.
-
-    createHandle: function(vertex, index) {
-      // TODO(aramk) Use a factory to use the right handle class.
-      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
-    },
-
-    // -------------------------------------------
-    // MODIFIERS
-    // -------------------------------------------
 
     /**
      * Creates the geometry data as required.
@@ -212,88 +240,14 @@ define([
       }
     },
 
-    /**
-     * Creates the appearance data.
-     * @private
-     */
-    _createAppearance: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      this._appearance = null;
-      if (fillColor) {
-        this._appearance = new EllipsoidSurfaceAppearance({
-          material: new Material({
-            fabric: {
-              type: 'Color',
-              uniforms: {
-                color: fillColor
-              }
-            },
-            translucent: false
-          })
-        });
-      }
-      this._outlineAppearance = null;
-      if (borderColor) {
-        // TODO(aramk) Add docs up top.
-        this._outlineAppearance = new EllipsoidSurfaceAppearance({
-          material: new Material({
-            fabric: {
-              type: 'Color',
-              uniforms: {
-                color: borderColor
-              }
-            },
-            translucent: false
-          })
-        });
-      }
+    createHandle: function(vertex, index) {
+      // TODO(aramk) Use a factory to use the right handle class.
+      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-    /**
-     * Updates the appearance data.
-     * @private
-     */
-    _updateAppearance: function() {
-      // Appearance object may not exist if we didn't have a colors initially.
-      this._createAppearance();
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      if (this._appearance && fillColor) {
-        this._appearance.material.uniforms.color = fillColor;
-      }
-      // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
-//      if (this._outlineGeometry && borderColor) {
-//        this._outlineGeometry.material.uniforms.color = borderColor;
-//      }
-    },
-
-    /**
-     * Builds the geometry and appearance data required to render the Polygon in
-     * Cesium.
-     */
-    _build: function() {
-      // Create the primitives, geometries and appearances depending on the fill and border colours.
-      // If they are absent, all components for that colour are not created. This must be maintained
-      // during runtime changes.
-
-
-
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        // Recreate geometries and primitives.
-
-
-        this._removePrimitive();
-        this._createAppearance();
-        this._createPrimitive();
-        this._addPrimitive();
-      } else if (this.isDirty('style')) {
-        this._updateAppearance();
-      }
-      this.clean();
-    },
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     /**
      * Shows the Polygon. If the current rendering data is out of data, the polygon is
@@ -307,9 +261,20 @@ define([
         return true;
       }
       this._selected && this.onSelect();
-      if (this._primitive) this._primitive.show = true;
-      if (this._outlinePrimitive) this._outlinePrimitive.show = true;
+      this._doShow();
       return this.isRenderable() && this.isVisible();
+    },
+
+    _doShow: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      if (this._primitive) {
+        this._primitive.show = fillColor;
+      }
+      if (this._outlinePrimitive) {
+        this._outlinePrimitive.show = borderColor;
+      }
     },
 
     /**
@@ -329,11 +294,6 @@ define([
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
       this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
-    },
-
-    setStyle: function(style) {
-      this._super(style);
-      this._updateAppearance();
     },
 
     _getCesiumColors: function() {
