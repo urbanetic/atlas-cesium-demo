@@ -79,7 +79,7 @@ define([
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
-      this.clean();
+      this._super();
     },
 
     /**

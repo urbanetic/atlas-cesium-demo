@@ -35,7 +35,7 @@ define([
       var target = this._target.clone();
       target.elevation = 0;
       var position = renderManager.cartesianFromGeoPoint(target);
-      var screenCoords = renderManager.geoPointToScreenCoords(target);
+      var screenCoords = renderManager.screenCoordsFromGeoPoint(target);
       this._billboard = billboards.add({
         id: this.getId(),
         image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
@@ -71,9 +71,7 @@ define([
     translate: function(translation) {
       this._super.apply(this, arguments);
       var renderManager = this._renderManager;
-      var startPoint = renderManager.geoPointFromCartesian(this._billboard.position);
-      var endPoint = startPoint.translate(translation);
-      this._billboard.position = renderManager.cartesianFromGeoPoint(endPoint);
+      this._billboard.position = renderManager.cartesianFromGeoPoint(this.getTarget());
     }
 
   });

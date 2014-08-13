@@ -378,7 +378,7 @@ define([
      * @param {atlas.model.GeoPoint} point - The world coordinates in cartographic degrees.
      * @returns {atlas.model.Vertex} The given coordinates in screen pixels.
      */
-    geoPointToScreenCoords: function (point) {
+    screenCoordsFromGeoPoint: function (point) {
       var position = this.cartesianFromGeoPoint(point);
       var cartesian = SceneTransforms.wgs84ToDrawingBufferCoordinates(this.getScene(), position);
       return new Vertex(cartesian);
