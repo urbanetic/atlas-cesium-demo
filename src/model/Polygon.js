@@ -107,8 +107,8 @@ define([
       var scene = this._renderManager.getScene();
       if (isModelDirty) {
         this._removePrimitives();
-        this._createGeometry();
       }
+      this._createGeometry();
       if (isModelDirty || isStyleDirty) {
         // Cancel any existing handler for updating to avoid race conditions.
         cancelStyleUpdate();
@@ -160,7 +160,7 @@ define([
           var setHandle = function() {
             this._updateStyleHandle = setInterval(updateStyle, freq);
           }.bind(this);
-          var isReady = function () {
+          var isReady = function() {
             return this._outlinePrimitive.ready;
           }.bind(this);
           var updateStyle = function() {
@@ -208,11 +208,13 @@ define([
         this._primitive.show = false;
 //        primitives.remove(this._primitive);
         this._primitive = null;
+        this._geometry = null;
       }
       if (this._outlinePrimitive) {
         this._outlinePrimitive.show = false;
 //        primitives.remove(this._outlinePrimitive);
         this._outlinePrimitive = null;
+        this._outlineGeometry = null;
       }
     },
 
@@ -221,9 +223,19 @@ define([
      * @private
      */
     _createGeometry: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      var geometryId = this.getId().replace('polygon', '');
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
+      var isStyleDirty = this.isDirty('style');
+
       // Generate new cartesians if the vertices have changed.
-      this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
-      this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
+      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
+        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
+      }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
       var elevation = this._minTerrainElevation + this._elevation +
@@ -244,13 +256,7 @@ define([
         holes: holes
       };
 
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      var geometryId = this.getId().replace('polygon', '');
-
-      this._geometry = null;
-      if (fillColor) {
+      if (fillColor && (isModelDirty || !this._geometry)) {
         this._geometry = new GeometryInstance({
           id: geometryId,
           geometry: new PolygonGeometry({
@@ -262,8 +268,7 @@ define([
         });
       }
 
-      this._outlineGeometry = null;
-      if (borderColor) {
+      if (borderColor && (isModelDirty || !this._outlineGeometry)) {
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
           geometry: new PolygonOutlineGeometry({
@@ -300,13 +305,11 @@ define([
       } else if (this.isVisible()) {
         return true;
       }
-//      this._selected && this.onSelect();
       this._doShow();
       return this.isRenderable() && this.isVisible();
     },
 
     _doShow: function() {
-      return;
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
