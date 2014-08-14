@@ -1,7 +1,8 @@
 define([
   'atlas/lib/utility/Class',
+  'atlas/model/GeoEntity',
   'jquery'
-], function(Class, $) {
+], function(Class, GeoEntity, $) {
   return Class.extend({
 
     atlas: null,
@@ -9,23 +10,60 @@ define([
     _init: function(atlas) {
       this.atlas = atlas;
       var entityManager = atlas._managers.entity;
-      var entities = entityManager.getEntities();
-      var entity = entities[0];
+      var features = entityManager.getFeatures();
+      var feature = features[0];
+      var entity = feature.getForm();
       setTimeout(function() {
+        console.log('starting test');
+
+        entity._build();
+
+//        setTimeout(function() {
+          entity.setDirty('model');
+//        entity.setDirty('style');
+          entity._build();
+//        }, 1000);
+
+//      entity.setStyle(GeoEntity.getSelectedStyle());
+
+//      feature.onSelect();
+//        entity.onSelect();
+//      entity.setDirty('model');
+
+//      entity.setDirty('style');
+//      entity.setDirty('model');
+//      feature.setDirty('model');
+//      feature.setDirty('style');
+
+//      entity.enableExtrusion();
+
+//      entity._build();
+//      entity.show();
+//      feature.show();
+//      feature.show();
+        return;
         entity.show();
-        entity.show();
+
+//        var id = entity.getId();
+//        var entity2 = entityManager.getById(id);
+//        console.log('entity2', entity2, id);
+
+//        atlas.publish('entity/show', {id: id});
+
+//        return;
         setTimeout(function() {
           entity.onSelect();
 //          entity.onSelect();
           setTimeout(function() {
             // TODO(aramk) FAILS
             entity.show();
-//              setTimeout(function() {
-//                entity.onSelect();
-//                setTimeout(function() {
-//                  entity.show();
-//                }, 100);
-//              }, 100);
+            return;
+            setTimeout(function() {
+              entity.onSelect();
+              setTimeout(function() {
+                entity.show();
+              }, 100);
+            }, 100);
           }, 100);
         }, 100);
 
@@ -33,7 +71,7 @@ define([
 //          console.debug('show', entity);
 //          entity.show();
 //        }, 4000);
-      }, 100);
+      }, 2000);
     }
 
   });
