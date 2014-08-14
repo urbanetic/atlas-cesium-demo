@@ -94,7 +94,6 @@ define([
      * Cesium.
      */
     _build: function() {
-      console.debug('build');
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
@@ -114,6 +113,7 @@ define([
         // Cancel any existing handler for updating to avoid race conditions.
         cancelStyleUpdate();
       }
+      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
       if (fillColor) {
         if (isModelDirty || !this._primitive) {
           if (isStyleDirty || !this._appearance) {
@@ -201,13 +201,17 @@ define([
      * @private
      */
     _removePrimitives: function() {
+      // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
+      // them for now.
       var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
-        primitives.remove(this._primitive);
+        this._primitive.show = false;
+//        primitives.remove(this._primitive);
         this._primitive = null;
       }
       if (this._outlinePrimitive) {
-        primitives.remove(this._outlinePrimitive);
+        this._outlinePrimitive.show = false;
+//        primitives.remove(this._outlinePrimitive);
         this._outlinePrimitive = null;
       }
     },
