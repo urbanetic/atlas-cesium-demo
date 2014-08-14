@@ -64,6 +64,13 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The ID of the handler used for updating styles. Only one handler should be running. Any
+     * existing handler should be cancelled.
+     * @type {Number}
+     */
+    _updateStyleHandle: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -87,18 +94,29 @@ define([
      * Cesium.
      */
     _build: function() {
+      console.debug('build');
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
-      var primitives = this._renderManager.getPrimitives();
+      var cancelStyleUpdate = function() {
+        clearInterval(this._updateStyleHandle);
+        this._updateStyleHandle = null;
+      }.bind(this);
       var scene = this._renderManager.getScene();
+      if (isModelDirty) {
+        this._removePrimitives();
+        this._createGeometry();
+      }
+      if (isModelDirty || isStyleDirty) {
+        // Cancel any existing handler for updating to avoid race conditions.
+        cancelStyleUpdate();
+      }
       if (fillColor) {
         if (isModelDirty || !this._primitive) {
-          this._primitive && primitives.remove(this._primitive);
-          if (isStyleDirty) {
+          if (isStyleDirty || !this._appearance) {
             this._appearance = new EllipsoidSurfaceAppearance({
               material: new Material({
                 fabric: {
@@ -111,7 +129,6 @@ define([
               })
             });
           }
-          this._createGeometry();
           this._primitive = new Primitive({
             geometryInstances: this._geometry,
             appearance: this._appearance
@@ -120,58 +137,79 @@ define([
           this._appearance.material.uniforms.color = fillColor;
         }
       }
-      if (borderColor) {
-        if (isModelDirty || !this._outlinePrimitive) {
-          this._outlinePrimitive && primitives.remove(this._outlinePrimitive);
-          // TODO(aramk) Cannot use materials yet for outline geometries.
-          this._createGeometry();
-          this._outlinePrimitive = new Primitive({
-            geometryInstances: this._outlineGeometry,
-            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
-//          appearance: this._outlineAppearance
-            appearance: new PerInstanceColorAppearance({
-              flat: true,
-              translucent: false,
-              renderState: {
-                depthTest: {
-                  enabled: true
-                },
-                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
-              }
-            })
-          });
-        } else if (isStyleDirty) {
-          var timeout = 3000;
-          var duration = 0;
-          var freq = 100;
-          // TODO(aramk) Store this on the instance and cancel the existing one if we make another
-          // request before it is complete.
-          var handle = setInterval(function() {
-            if (this._outlinePrimitive.ready) {
-              var outlineGeometryAtts =
-                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-              clearInterval(handle);
-            }
-            duration += freq;
-            if (duration >= timeout) {
-              clearInterval(handle);
-            }
-          }.bind(this), freq);
-        }
-      }
+//      if (borderColor) {
+//        if (isModelDirty || !this._outlinePrimitive) {
+//          this._outlinePrimitive = new Primitive({
+//            geometryInstances: this._outlineGeometry,
+//            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+//            appearance: new PerInstanceColorAppearance({
+//              flat: true,
+//              translucent: false,
+//              renderState: {
+//                depthTest: {
+//                  enabled: true
+//                },
+//                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+//              }
+//            })
+//          });
+//        } else if (isStyleDirty) {
+//          var timeout = 3000;
+//          var duration = 0;
+//          var freq = 100;
+//          var setHandle = function() {
+//            this._updateStyleHandle = setInterval(updateStyle, freq);
+//          }.bind(this);
+//          var isReady = function () {
+//            return this._outlinePrimitive.ready;
+//          }.bind(this);
+//          var updateStyle = function() {
+//            if (isReady()) {
+//              var outlineGeometryAtts =
+//                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+//              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+//              cancelStyleUpdate();
+//            }
+//            duration += freq;
+//            duration >= timeout && cancelStyleUpdate();
+//          }.bind(this);
+//          // Only delay the update if necessary.
+//          if (isReady()) {
+//            updateStyle();
+//          } else {
+//            setHandle()
+//          }
+//        }
+//      }
       this._addPrimitives();
       this._doShow();
       this._super();
     },
 
     /**
-     * Adds the primitive to the scene.
+     * Adds the primitives to the scene.
      * @private
      */
     _addPrimitives: function() {
-      this._primitive && this._renderManager.getPrimitives().add(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().add(this._outlinePrimitive);
+      var primitives = this._renderManager.getPrimitives();
+      this._primitive && primitives.add(this._primitive);
+      this._outlinePrimitive && primitives.add(this._outlinePrimitive);
+    },
+
+    /**
+     * Removes the primitives from the scene.
+     * @private
+     */
+    _removePrimitives: function() {
+      var primitives = this._renderManager.getPrimitives();
+      if (this._primitive) {
+        primitives.remove(this._primitive);
+        this._primitive = null;
+      }
+      if (this._outlinePrimitive) {
+        primitives.remove(this._outlinePrimitive);
+        this._outlinePrimitive = null;
+      }
     },
 
     /**
@@ -180,10 +218,8 @@ define([
      */
     _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
-        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-      }
+      this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
+      this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
       var elevation = this._minTerrainElevation + this._elevation +
@@ -260,12 +296,13 @@ define([
       } else if (this.isVisible()) {
         return true;
       }
-      this._selected && this.onSelect();
+//      this._selected && this.onSelect();
       this._doShow();
       return this.isRenderable() && this.isVisible();
     },
 
     _doShow: function() {
+      return;
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
@@ -292,8 +329,7 @@ define([
      */
     remove: function() {
       this._super();
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
+      this._removePrimitives();
     },
 
     _getCesiumColors: function() {
