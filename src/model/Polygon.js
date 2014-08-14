@@ -113,7 +113,7 @@ define([
         // Cancel any existing handler for updating to avoid race conditions.
         cancelStyleUpdate();
       }
-      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
+//      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
       if (fillColor) {
         if (isModelDirty || !this._primitive) {
           if (isStyleDirty || !this._appearance) {
@@ -137,50 +137,50 @@ define([
           this._appearance.material.uniforms.color = fillColor;
         }
       }
-//      if (borderColor) {
-//        if (isModelDirty || !this._outlinePrimitive) {
-//          this._outlinePrimitive = new Primitive({
-//            geometryInstances: this._outlineGeometry,
-//            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
-//            appearance: new PerInstanceColorAppearance({
-//              flat: true,
-//              translucent: false,
-//              renderState: {
-//                depthTest: {
-//                  enabled: true
-//                },
-//                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
-//              }
-//            })
-//          });
-//        } else if (isStyleDirty) {
-//          var timeout = 3000;
-//          var duration = 0;
-//          var freq = 100;
-//          var setHandle = function() {
-//            this._updateStyleHandle = setInterval(updateStyle, freq);
-//          }.bind(this);
-//          var isReady = function () {
-//            return this._outlinePrimitive.ready;
-//          }.bind(this);
-//          var updateStyle = function() {
-//            if (isReady()) {
-//              var outlineGeometryAtts =
-//                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-//              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-//              cancelStyleUpdate();
-//            }
-//            duration += freq;
-//            duration >= timeout && cancelStyleUpdate();
-//          }.bind(this);
-//          // Only delay the update if necessary.
-//          if (isReady()) {
-//            updateStyle();
-//          } else {
-//            setHandle()
-//          }
-//        }
-//      }
+      if (borderColor) {
+        if (isModelDirty || !this._outlinePrimitive) {
+          this._outlinePrimitive = new Primitive({
+            geometryInstances: this._outlineGeometry,
+            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+            appearance: new PerInstanceColorAppearance({
+              flat: true,
+              translucent: false,
+              renderState: {
+                depthTest: {
+                  enabled: true
+                },
+                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+              }
+            })
+          });
+        } else if (isStyleDirty) {
+          var timeout = 3000;
+          var duration = 0;
+          var freq = 100;
+          var setHandle = function() {
+            this._updateStyleHandle = setInterval(updateStyle, freq);
+          }.bind(this);
+          var isReady = function () {
+            return this._outlinePrimitive.ready;
+          }.bind(this);
+          var updateStyle = function() {
+            if (isReady()) {
+              var outlineGeometryAtts =
+                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+              cancelStyleUpdate();
+            }
+            duration += freq;
+            duration >= timeout && cancelStyleUpdate();
+          }.bind(this);
+          // Only delay the update if necessary.
+          if (isReady()) {
+            updateStyle();
+          } else {
+            setHandle()
+          }
+        }
+      }
       this._addPrimitives();
       this._doShow();
       this._super();
