@@ -7,10 +7,14 @@ define([
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
+  'atlas-cesium/cesium/Source/Core/VertexFormat',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance'
+  'atlas-cesium/cesium/Source/Scene/Material',
+  'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
+  'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
 ], function(PolygonCore, Handle, Style, GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
-            ColorGeometryInstanceAttribute, Primitive, PerInstanceColorAppearance) {
+            ColorGeometryInstanceAttribute, VertexFormat, Primitive, Material,
+            PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -60,6 +64,13 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The ID of the handler used for updating styles. Only one handler should be running. Any
+     * existing handler should be cancelled.
+     * @type {Number}
+     */
+    _updateStyleHandle: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -79,77 +90,149 @@ define([
     // -------------------------------------------
 
     /**
-     * Generates the data structures required to render a Polygon
-     * in Cesium.
+     * Builds the geometry and appearance data required to render the Polygon in
+     * Cesium.
      */
-    _createPrimitive: function() {
+    _build: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
+      var isStyleDirty = this.isDirty('style');
+      var cancelStyleUpdate = function() {
+        clearInterval(this._updateStyleHandle);
+        this._updateStyleHandle = null;
+      }.bind(this);
       var scene = this._renderManager.getScene();
+      if (isModelDirty) {
+        this._removePrimitives();
+      }
       this._createGeometry();
-      this._primitive = null;
-      if (this._geometry) {
-        this._primitive = new Primitive({
-          geometryInstances: this._geometry,
-          appearance: new PerInstanceColorAppearance({
-            closed: true,
-            translucent: false
-          })
-        });
+      if (isModelDirty || isStyleDirty) {
+        // Cancel any existing handler for updating to avoid race conditions.
+        cancelStyleUpdate();
       }
-      this._outlinePrimitive = null;
-      if (this._outlineGeometry) {
-        this._outlinePrimitive = new Primitive({
-          geometryInstances: this._outlineGeometry,
-          appearance: new PerInstanceColorAppearance({
-            flat: true,
-            translucent: false,
-            renderState: {
-              depthTest: {
-                enabled: true
-              },
-              lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+//      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
+      if (fillColor) {
+        if (isModelDirty || !this._primitive) {
+          if (isStyleDirty || !this._appearance) {
+            this._appearance = new EllipsoidSurfaceAppearance({
+              material: new Material({
+                fabric: {
+                  type: 'Color',
+                  uniforms: {
+                    color: fillColor
+                  }
+                },
+                translucent: false
+              })
+            });
+          }
+          this._primitive = new Primitive({
+            geometryInstances: this._geometry,
+            appearance: this._appearance
+          });
+        } else if (isStyleDirty) {
+          this._appearance.material.uniforms.color = fillColor;
+        }
+      }
+      if (borderColor) {
+        if (isModelDirty || !this._outlinePrimitive) {
+          this._outlinePrimitive = new Primitive({
+            geometryInstances: this._outlineGeometry,
+            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+            appearance: new PerInstanceColorAppearance({
+              flat: true,
+              translucent: false,
+              renderState: {
+                depthTest: {
+                  enabled: true
+                },
+                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+              }
+            })
+          });
+        } else if (isStyleDirty) {
+          var timeout = 3000;
+          var duration = 0;
+          var freq = 100;
+          var setHandle = function() {
+            this._updateStyleHandle = setInterval(updateStyle, freq);
+          }.bind(this);
+          var isReady = function() {
+            return this._outlinePrimitive.ready;
+          }.bind(this);
+          var updateStyle = function() {
+            if (isReady()) {
+              var outlineGeometryAtts =
+                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+              cancelStyleUpdate();
             }
-          })
-        });
+            duration += freq;
+            duration >= timeout && cancelStyleUpdate();
+          }.bind(this);
+          // Only delay the update if necessary.
+          if (isReady()) {
+            updateStyle();
+          } else {
+            setHandle()
+          }
+        }
+      }
+      this._addPrimitives();
+      this._doShow();
+      this._super();
+    },
+
+    /**
+     * Adds the primitives to the scene.
+     * @private
+     */
+    _addPrimitives: function() {
+      var primitives = this._renderManager.getPrimitives();
+      this._primitive && primitives.add(this._primitive);
+      this._outlinePrimitive && primitives.add(this._outlinePrimitive);
+    },
+
+    /**
+     * Removes the primitives from the scene.
+     * @private
+     */
+    _removePrimitives: function() {
+      // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
+      // them for now.
+      var primitives = this._renderManager.getPrimitives();
+      if (this._primitive) {
+        this._primitive.show = false;
+//        primitives.remove(this._primitive);
+        this._primitive = null;
+        this._geometry = null;
+      }
+      if (this._outlinePrimitive) {
+        this._outlinePrimitive.show = false;
+//        primitives.remove(this._outlinePrimitive);
+        this._outlinePrimitive = null;
+        this._outlineGeometry = null;
       }
     },
-
-    /**
-     * Adds the primitive to the scene.
-     * @private
-     */
-    _addPrimitive: function() {
-      this._primitive && this._renderManager.getPrimitives().add(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().add(this._outlinePrimitive);
-    },
-
-    /**
-     * Removes the primitive from the scene.
-     * @private
-     */
-    _removePrimitive: function() {
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
-    },
-
-    // TODO(aramk) Use factory pattern to construct atlas-cesium Handle and move this to
-    // VertexedEntity.
-
-    createHandle: function(vertex, index) {
-      // TODO(aramk) Use a factory to use the right handle class.
-      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
-    },
-
-    // -------------------------------------------
-    // MODIFIERS
-    // -------------------------------------------
 
     /**
      * Creates the geometry data as required.
      * @private
      */
     _createGeometry: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      var geometryId = this.getId().replace('polygon', '');
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
+      var isStyleDirty = this.isDirty('style');
+
       // Generate new cartesians if the vertices have changed.
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
+      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
@@ -173,35 +256,28 @@ define([
         holes: holes
       };
 
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      var geometryId = this.getId().replace('polygon', '');
-
-      this._geometry = null;
-      if (fillColor) {
+      if (fillColor && (isModelDirty || !this._geometry)) {
         this._geometry = new GeometryInstance({
           id: geometryId,
           geometry: new PolygonGeometry({
             polygonHierarchy: polygonHierarchy,
             height: elevation,
-            extrudedHeight: elevation + height
-          }),
-          attributes: {
-            color: ColorGeometryInstanceAttribute.fromColor(fillColor)
-          }
+            extrudedHeight: elevation + height,
+            vertexFormat: VertexFormat.POSITION_AND_ST
+          })
         });
       }
 
-      this._outlineGeometry = null;
-      if (borderColor) {
+      if (borderColor && (isModelDirty || !this._outlineGeometry)) {
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
           geometry: new PolygonOutlineGeometry({
             polygonHierarchy: polygonHierarchy,
             height: elevation,
-            extrudedHeight: elevation + height
+            extrudedHeight: elevation + height,
+            vertexFormat: VertexFormat.POSITION_AND_ST
           }),
+          // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
           attributes: {
             color: ColorGeometryInstanceAttribute.fromColor(borderColor)
           }
@@ -209,41 +285,14 @@ define([
       }
     },
 
-    /**
-     * Updates the appearance data.
-     * @private
-     */
-    _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style')) {
-        var cesiumColors = this._getCesiumColors();
-        var fillColor = cesiumColors.fill;
-        var borderColor = cesiumColors.border;
-        if (this._geometry && fillColor) {
-          var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
-          geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
-        }
-        if (this._outlineGeometry && borderColor) {
-          var outlineGeometryAtts =
-              this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-          outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-        }
-      }
+    createHandle: function(vertex, index) {
+      // TODO(aramk) Use a factory to use the right handle class.
+      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-    /**
-     * Builds the geometry and appearance data required to render the Polygon in
-     * Cesium.
-     */
-    _build: function() {
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        this._removePrimitive();
-        this._createPrimitive();
-        this._addPrimitive();
-      } else if (this.isDirty('style')) {
-        this._updateAppearance();
-      }
-      this._super();
-    },
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
 
     /**
      * Shows the Polygon. If the current rendering data is out of data, the polygon is
@@ -256,10 +305,21 @@ define([
       } else if (this.isVisible()) {
         return true;
       }
-      this._selected && this.onSelect();
-      if (this._primitive) this._primitive.show = true;
-      if (this._outlinePrimitive) this._outlinePrimitive.show = true;
+      this._doShow();
       return this.isRenderable() && this.isVisible();
+    },
+
+    _doShow: function() {
+      var visible = this.isVisible();
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var borderColor = cesiumColors.border;
+      if (this._primitive) {
+        this._primitive.show = visible && !!fillColor;
+      }
+      if (this._outlinePrimitive) {
+        this._outlinePrimitive.show = visible && !!borderColor;
+      }
     },
 
     /**
@@ -277,13 +337,7 @@ define([
      */
     remove: function() {
       this._super();
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-      this._outlinePrimitive && this._renderManager.getPrimitives().remove(this._outlinePrimitive);
-    },
-
-    setStyle: function(style) {
-      this._super(style);
-      this._updateAppearance();
+      this._removePrimitives();
     },
 
     _getCesiumColors: function() {
