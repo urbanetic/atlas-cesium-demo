@@ -226,13 +226,19 @@ define([
             // Input angle must be in radians.
             Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
             new Cartesian3(0, 0, 0));
+
+
         // Apply rotation, translation and scale transformations.
         var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
 //        var modelMatrix = this._modelMatrix = Matrix4.IDENTITY.clone();
-        Matrix4.multiply(
-            Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
-            rotationTranslation);
-        Matrix4.multiplyByScale(rotationTranslation, this._scale, rotationTranslation);
+
+        var result = Transforms.eastNorthUpToFixedFrame(locationCartesian);
+
+        var result2 = Matrix4.multiply(
+            result, rotationTranslation, rotationTranslation);
+
+        var result3 = Matrix4.multiplyByScale(rotationTranslation, this._scale, rotationTranslation);
+
         this._modelMatrix = rotationTranslation;
       }
       return this._modelMatrix;
