@@ -185,8 +185,6 @@ define([
      * @private
      */
     _updateGeometry: function() {
-      var ellipsoid = this._renderManager.getEllipsoid();
-
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         var theGeometry = {};
@@ -230,11 +228,12 @@ define([
             new Cartesian3(0, 0, 0));
         // Apply rotation, translation and scale transformations.
         var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
-        var modelMatrix = this._modelMatrix = new Matrix4();
+//        var modelMatrix = this._modelMatrix = Matrix4.IDENTITY.clone();
         Matrix4.multiply(
             Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
-            modelMatrix);
-        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+            rotationTranslation);
+        Matrix4.multiplyByScale(rotationTranslation, this._scale, rotationTranslation);
+        this._modelMatrix = rotationTranslation;
       }
       return this._modelMatrix;
     },
