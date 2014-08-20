@@ -222,24 +222,18 @@ define([
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
       if (this.isDirty('entity') || this.isDirty('model')) {
+        // The matrix to apply transformations on.
+        var modelMatrix = Matrix4.IDENTITY.clone();
+        // Apply rotation, translation and scale transformations.
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
             Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
             new Cartesian3(0, 0, 0));
-
-
-        // Apply rotation, translation and scale transformations.
         var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
-//        var modelMatrix = this._modelMatrix = Matrix4.IDENTITY.clone();
-
-        var result = Transforms.eastNorthUpToFixedFrame(locationCartesian);
-
-        var result2 = Matrix4.multiply(
-            result, rotationTranslation, rotationTranslation);
-
-        var result3 = Matrix4.multiplyByScale(rotationTranslation, this._scale, rotationTranslation);
-
-        this._modelMatrix = rotationTranslation;
+        Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+            modelMatrix);
+        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+        this._modelMatrix = modelMatrix;
       }
       return this._modelMatrix;
     },

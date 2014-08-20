@@ -411,8 +411,7 @@ define([
      */
     cartesianFromVertex: function(cart) {
       var ellipsoid = this.getEllipsoid(),
-          cesiumCart = new Cartographic(cart.x, cart.y, cart.z);
-
+          cesiumCart = Cartographic.fromDegrees(cart.x, cart.y, cart.z);
       return ellipsoid.cartographicToCartesian(cesiumCart);
     },
 
@@ -437,7 +436,6 @@ define([
       var radCart = cart.toRadians(),
           ellipsoid = this.getEllipsoid(),
           cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
-
       return ellipsoid.cartographicToCartesian(cesiumCart);
     },
 
