@@ -1,5 +1,6 @@
 define([
   'atlas/util/DeveloperError',
+  'atlas/util/AtlasMath',
   'atlas/model/Style',
   'atlas/model/Vertex',
   'atlas/model/GeoEntity',
@@ -26,7 +27,7 @@ define([
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(DeveloperError, Style, Vertex, GeoEntity, BoundingSphere, Cartographic,
+], function(DeveloperError, AtlasMath, Style, Vertex, GeoEntity, BoundingSphere, Cartographic,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
@@ -216,7 +217,7 @@ define([
     },
 
     _updateModelMatrix: function() {
-      var ellipsoid = this._renderManager.getEllipsoid();
+      var renderManager = this._renderManager;
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0, 0, 0);
       }
@@ -225,17 +226,17 @@ define([
       if (this.isDirty('entity') || this.isDirty('model')) {
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
-            Matrix3.fromRotationZ(this._rotation.z * Math.PI / 180),
-            new Cartesian3(0.0, 0.0, 0));
+            Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
+            new Cartesian3(0, 0, 0));
         // Apply rotation, translation and scale transformations.
-        var modelMatrix = Matrix4.multiplyByScale(
-            Matrix4.multiply(
-                Transforms.eastNorthUpToFixedFrame(ellipsoid.cartographicToCartesian(
-                    Cartographic.fromDegrees(this._geoLocation.x, this._geoLocation.y))),
-                rotationTranslation),
-            this._scale);
+        var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
+        var modelMatrix = this._modelMatrix = new Matrix4();
+        Matrix4.multiply(
+            Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+            modelMatrix);
+        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
       }
-      return modelMatrix || this._modelMatrix;
+      return this._modelMatrix;
     },
 
     /**
