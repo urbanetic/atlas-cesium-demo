@@ -250,9 +250,9 @@ define([
      * @private
      */
     _getSleepFps: function() {
-      // NOTE: Removed adaptive sleep FPS in favour of the lowest possible FPS. Disable sleep when
+      // NOTE: Removed adaptive sleep FPS in favour of the minimum FPS. Disable sleep when
       // any movement occurs to allow max FPS.
-      return 1;
+      return this._minFps;
     },
 
     /**
