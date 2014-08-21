@@ -250,24 +250,9 @@ define([
      * @private
      */
     _getSleepFps: function() {
-      var stats = this._fpsStats;
-      var delta = stats.avg;
-      var ratio = (delta - stats.outlierMin) / (stats.outlierMax - stats.outlierMin);
-      // Quadratic is for mitigating effect of large outliers and reducing lower FPS.
-      var fps = this._minFps + (this._maxFps - this._minFps) * Math.pow(ratio, 2);
-      // Snap the FPS to avoid jitter.
-      if (fps > this._maxFps) {
-        fps = this._maxFps;
-      } else if (fps > 30 && this._minFps <= 30 && fps < this._maxFps) {
-        fps = 30;
-      } else if (fps > 15 && this._minFps <= 15 && fps < 30) {
-        fps = 15;
-      } else if (fps > 10 && this._minFps <= 10 && fps < 15) {
-        fps = 10;
-      } else {
-        fps = this._minFps;
-      }
-      return fps;
+      // NOTE: Removed adaptive sleep FPS in favour of the lowest possible FPS. Disable sleep when
+      // any movement occurs to allow max FPS.
+      return 1;
     },
 
     /**
@@ -295,6 +280,9 @@ define([
      * @private
      */
     _setSleeping: function(value) {
+      if (this._isSleeping === value) {
+        return;
+      }
       if (this._fpsDelayHandler !== null) {
         clearTimeout(this._fpsDelayHandler);
         this._fpsDelayHandler = null;
