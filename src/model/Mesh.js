@@ -229,7 +229,7 @@ define([
             // Input angle must be in radians.
             Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
             new Cartesian3(0, 0, 0));
-        var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
+        var locationCartesian = renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
