@@ -53,7 +53,7 @@
       var cartesian = ellipsoid.cartographicToCartesian(cartographic);
       var flightArgs = {
         destination: cartesian,
-        duration: 1000
+        duration: 1
       };
       scene.camera.flyTo(flightArgs);
       scene.debugShowFramesPerSecond = true;
