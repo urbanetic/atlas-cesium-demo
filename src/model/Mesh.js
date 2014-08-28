@@ -1,9 +1,6 @@
 define([
-  'atlas/util/DeveloperError',
   'atlas/util/AtlasMath',
-  'atlas/model/Style',
   'atlas/model/Vertex',
-  'atlas/model/GeoEntity',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartographic',
@@ -27,11 +24,11 @@ define([
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(DeveloperError, AtlasMath, Style, Vertex, GeoEntity, BoundingSphere, Cartographic,
-            Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
-            GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
-            Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
-            Primitive, Colour, MeshCore, Log) {
+], function(AtlasMath, Vertex, BoundingSphere, Cartographic, Cartesian3, CesiumColor,
+            ColorGeometryInstanceAttribute, ComponentDatatype, Geometry, GeometryAttribute,
+            GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3, Matrix4, PrimitiveType,
+            Transforms, MaterialAppearance, PerInstanceColorAppearance, Primitive, Colour, MeshCore,
+            Log) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -75,33 +72,9 @@ define([
      */
     _primitive: null,
 
-    _updateVisibility: function (visible) {
+    _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
     },
-
-    // TODO(aramk) Handle setting style rather than reacting to selection which is handled in
-    // GeoEntity. Refactor the logic around reacting to dirty models etc. and how to update the
-    // style and model by looking at the implementation in Polygon which I spent some time
-    // perfecting so it only updates what's necessary. Put that logic in a common place.
-
-//    _onSelect: function() {
-//      var attributes;
-//      if (this._primitive) {
-//        attributes =
-//            this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-//        attributes.color =
-//            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(GeoEntity.getSelectedStyle()).fill);
-//      }
-//    },
-//
-//    _onDeselect: function() {
-//      if (this._primitive) {
-//        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
-//            ''));
-//        attributes.color =
-//            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
-//      }
-//    },
 
     /**
      * Builds the geometry and appearance data required to render the Polygon in
