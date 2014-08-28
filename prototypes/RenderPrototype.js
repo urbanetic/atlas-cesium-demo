@@ -26,8 +26,8 @@ define([
 
 //      entity.setStyle(GeoEntity.getSelectedStyle());
 
-//      feature.onSelect();
-//        entity.onSelect();
+//      feature.setSelected(true);
+//        entity.setSelected(true);
 //      entity.setDirty('model');
 
 //      entity.setDirty('style');
@@ -52,14 +52,14 @@ define([
 
 //        return;
         setTimeout(function() {
-          entity.onSelect();
-//          entity.onSelect();
+          entity.setSelected(true);
+//          entity.setSelected(true);
           setTimeout(function() {
             // TODO(aramk) FAILS
             entity.show();
             return;
             setTimeout(function() {
-              entity.onSelect();
+              entity.setSelected(true);
               setTimeout(function() {
                 entity.show();
               }, 100);

@@ -67,7 +67,7 @@
 
       testWKT.forEach(function(wkt) {
         var styleArgs = {};
-        Setter.mixin(styleArgs, toAtlasStyleArgs('#ff0', 1, 'fill'));
+        Setter.mixin(styleArgs, toAtlasStyleArgs('#ccc', 1, 'fill'));
         Setter.mixin(styleArgs, toAtlasStyleArgs('#000', 1, 'border'));
         var id = args.id = i++;
         args.polygon = {
@@ -93,26 +93,30 @@
           './prototypes/CameraPrototype',
           './prototypes/EditPrototype',
           './prototypes/DrawPrototype',
+          './prototypes/TranslatePrototype',
           './prototypes/MeshPrototype',
           './prototypes/GeocoderPrototype',
           './prototypes/InputPrototype',
           './prototypes/RenderPrototype',
           './prototypes/StylePrototype',
           './prototypes/EventPrototype',
-          './prototypes/ProjectionPrototype'
-        ], function(CameraPrototype, EditPrototype, DrawPrototype, MeshPrototype, GeocoderPrototype,
-                    InputPrototype, RenderPrototype, StylePrototype, EventPrototype,
-                    ProjectionPrototype) {
+          './prototypes/ProjectionPrototype',
+          './prototypes/CollectionPrototype'
+        ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
+                    MeshPrototype, GeocoderPrototype, InputPrototype, RenderPrototype,
+                    StylePrototype, EventPrototype, ProjectionPrototype, CollectionPrototype) {
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
 //          new DrawPrototype(cesiumAtlas);
+//          new TranslatePrototype(cesiumAtlas);
 //          new MeshPrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
 //          new InputPrototype(cesiumAtlas);
 //          new RenderPrototype(cesiumAtlas);
 //          new StylePrototype(cesiumAtlas);
 //          new EventPrototype(cesiumAtlas);
-          new ProjectionPrototype(cesiumAtlas);
+//          new ProjectionPrototype(cesiumAtlas);
+          new CollectionPrototype(cesiumAtlas);
         });
       }, 2000);
 
