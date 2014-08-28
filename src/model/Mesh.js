@@ -75,58 +75,33 @@ define([
      */
     _primitive: null,
 
-    /**
-     * Shows the Mesh. The rendering data is recreated if it has been invalidated.
-     */
-    show: function() {
-      // TODO(bpstudds): Update this to new format.
-      if (!this.isRenderable()) {
-        this._build();
-      } else if (this.isVisible()) {
-        Log.debug('Tried to show entity ' + this.getId() +
-            ', which is already correctly rendered.');
-        return true;
-      }
-      this._selected && this.onSelect();
-      Log.debug('Showing entity', this.getId());
-      this._primitive && (this._primitive.show = true);
-      return this.isRenderable() && this.isVisible();
+    _updateVisibility: function (visible) {
+      if (this._primitive) this._primitive.show = visible;
     },
 
-    /**
-     * Hides the Mesh.
-     */
-    hide: function() {
-      this._primitive && (this._primitive.show = false);
-    },
+    // TODO(aramk) Handle setting style rather than reacting to selection which is handled in
+    // GeoEntity. Refactor the logic around reacting to dirty models etc. and how to update the
+    // style and model by looking at the implementation in Polygon which I spent some time
+    // perfecting so it only updates what's necessary. Put that logic in a common place.
 
-    /**
-     * @returns {Boolean} Whether the Mesh is visible.
-     */
-    isVisible: function() {
-      return this._primitive && this._primitive.show === true;
-    },
-
-    onSelect: function() {
-      this._super();
-      var attributes;
-      if (this._primitive) {
-        attributes =
-            this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(GeoEntity.getSelectedStyle()).fill);
-      }
-    },
-
-    onDeselect: function() {
-      this._super();
-      if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
-            ''));
-        attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
-      }
-    },
+//    _onSelect: function() {
+//      var attributes;
+//      if (this._primitive) {
+//        attributes =
+//            this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
+//        attributes.color =
+//            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(GeoEntity.getSelectedStyle()).fill);
+//      }
+//    },
+//
+//    _onDeselect: function() {
+//      if (this._primitive) {
+//        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
+//            ''));
+//        attributes.color =
+//            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
+//      }
+//    },
 
     /**
      * Builds the geometry and appearance data required to render the Polygon in

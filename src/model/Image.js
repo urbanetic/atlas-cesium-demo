@@ -179,34 +179,8 @@ define([
       this._super();
     },
 
-    /**
-     * Shows the Polygon. If the current rendering data is out of data, the polygon is
-     * rebuilt and then rendered.
-     * @returns {Boolean} Whether the polygon is shown.
-     */
-    show: function() {
-      if (!this.isRenderable()) {
-        this._build();
-      } else if (this.isVisible()) {
-        Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
-        return true;
-      }
-      this._selected && this.onSelect();
-      Log.debug('Showing entity ' + this.getId());
-      this._primitive.show = true;
-      return this.isRenderable() && this.isVisible();
-    },
-
-    /**
-     * Hides the Polygon.
-     * @returns {Boolean} Whether the polygon is hidden.
-     */
-    hide: function() {
-      if (this.isVisible()) {
-        Log.debug('hiding entity ' + this.getId());
-        this._primitive.show = false;
-      }
-      return !this.isVisible();
+    _updateVisibility: function (visible) {
+      if (this._primitive) this._primitive.show = visible;
     },
 
     /**

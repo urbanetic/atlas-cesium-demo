@@ -160,37 +160,8 @@ define([
       return this._geometry.geometry instanceof PolylineGeometry;
     },
 
-    show: function() {
-      if (this.isVisible() && this.isRenderable()) {
-        Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
-      } else {
-        Log.debug('showing entity ' + this.getId());
-        if (!this.isRenderable()) {
-          this._build();
-        }
-      }
-      return this.isRenderable() && this.isVisible();
-    },
-
-    /**
-     * Returns whether this Polygon is visible. Overrides the default Atlas implementation
-     * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
-     * @returns {Boolean} - Whether the Polygon is visible.
-     */
-    isVisible: function() {
-      return this._primitive && this._primitive.show === true;
-    },
-
-    /**
-     * Hides the Polygon.
-     * @returns {Boolean} Whether the polygon is hidden.
-     */
-    hide: function() {
-      if (this.isVisible()) {
-        Log.debug('hiding entity ' + this.getId());
-        this._primitive.show = false;
-      }
-      return !this.isVisible();
+    _updateVisibility: function (visible) {
+      if (this._primitive) this._primitive.show = visible;
     },
 
     /**

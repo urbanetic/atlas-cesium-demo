@@ -75,16 +75,6 @@ define([
     // GETTERS AND SETTERS
     // -------------------------------------------
 
-    /**
-     * Returns whether this Polygon is visible. Overrides the default Atlas implementation
-     * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
-     * @returns {Boolean} - Whether the Polygon is visible.
-     */
-    isVisible: function() {
-      return (this._primitive && this._primitive.show === true) ||
-          (this._outlinePrimitive && this._outlinePrimitive.show === true);
-    },
-
     // -------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------
@@ -182,7 +172,6 @@ define([
         }
       }
       this._addPrimitives();
-      this._doShow();
       this._super();
     },
 
@@ -294,42 +283,12 @@ define([
     // MODIFIERS
     // -------------------------------------------
 
-    /**
-     * Shows the Polygon. If the current rendering data is out of data, the polygon is
-     * rebuilt and then rendered.
-     * @returns {Boolean} Whether the polygon is shown.
-     */
-    show: function() {
-      if (!this.isRenderable()) {
-        this._build();
-      } else if (this.isVisible()) {
-        return true;
-      }
-      this._doShow();
-      return this.isRenderable() && this.isVisible();
-    },
-
-    _doShow: function() {
-      var visible = this.isVisible();
+    _updateVisibility: function(visible) {
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
-      if (this._primitive) {
-        this._primitive.show = visible && !!fillColor;
-      }
-      if (this._outlinePrimitive) {
-        this._outlinePrimitive.show = visible && !!borderColor;
-      }
-    },
-
-    /**
-     * Hides the Polygon.
-     * @returns {Boolean} Whether the polygon is hidden.
-     */
-    hide: function() {
-      if (this._primitive) this._primitive.show = false;
-      if (this._outlinePrimitive) this._outlinePrimitive.show = false;
-      return !this.isVisible();
+      if (this._primitive) this._primitive.show = visible && fillColor;
+      if (this._outlinePrimitive) this._outlinePrimitive.show = visible && borderColor;
     },
 
     /**
