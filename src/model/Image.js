@@ -169,7 +169,6 @@ define([
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
-      this._super();
     },
 
     _updateVisibility: function (visible) {

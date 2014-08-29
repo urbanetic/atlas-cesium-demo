@@ -45,7 +45,6 @@ define([
           });
         }
       }
-      this._super();
     },
 
     remove: function() {
