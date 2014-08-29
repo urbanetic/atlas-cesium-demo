@@ -20,6 +20,11 @@ define([
       // This is a hack!
       var args = feature._bindDependencies({show: true});
       var collection = new Collection('c1', {entities: featureIds}, args);
+
+      var a = feature.isRenderable();
+      var b = feature.getForm();
+      console.log(a, b);
+
     }
 
   });
