@@ -117,7 +117,8 @@ define([
                     color: fillColor
                   }
                 },
-                translucent: false
+                translucent: false,
+                flat: true
               })
             });
           }
@@ -230,8 +231,10 @@ define([
         var positions = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         var holes = [];
         this._holes && this._holes.forEach(function(holeArray) {
-          var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
-          holes.push({positions: positions});
+          if (holeArray.length > 0) {
+            var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
+            holes.push({positions: positions});
+          }
         }.bind(this));
         // Generate height and elevation.
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
