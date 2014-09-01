@@ -51,14 +51,6 @@ define([
     _outlinePrimitive: null,
 
     /**
-     * An array of Cesium cartesian coordinates describing the position of the Polygon
-     * on the Cesium globe.
-     * @see  {@link http://cesiumjs.org/Cesium/Build/Documentation/Cartesian3.html}
-     * @type {Cartesian3}
-     */
-    _cartesians: null,
-
-    /**
      * The minimum terrain elevation underneath the Polygon.
      * @type {Number}
      */
@@ -229,59 +221,55 @@ define([
       var geometryId = this.getId().replace('polygon', '');
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      var isStyleDirty = this.isDirty('style');
 
-      // Generate new cartesians if the vertices have changed.
-      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
-        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
+      var geometryIsDirty = fillColor && (isModelDirty || !this._geometry);
+      var outlineGeometryIsDirty = borderColor && (isModelDirty || !this._outlineGeometry);
+
+      if (geometryIsDirty || outlineGeometryIsDirty) {
+        // Generate coordinates.
+        var positions = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
+        var holes = [];
+        this._holes && this._holes.forEach(function(holeArray) {
+          var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
+          holes.push({positions: positions});
+        }.bind(this));
+        // Generate height and elevation.
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-      }
-
-      // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      var elevation = this._minTerrainElevation + this._elevation +
-          this._zIndex * this._zIndexOffset;
-      var height = (this._showAsExtrusion ? this._height : 0);
-
-      var holes = [];
-      if (this._holes) {
-        for (var i in this._holes) {
-          var hole = this._holes[i];
-          var cartesians = this._renderManager.cartesianArrayFromGeoPointArray(hole.coordinates);
-          holes.push({positions: cartesians});
+        // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
+        var elevation = this._minTerrainElevation + this._elevation +
+            this._zIndex * this._zIndexOffset;
+        var height = (this._showAsExtrusion ? this._height : 0);
+        // Generate geometry data.
+        var polygonHierarchy = {
+          positions: positions,
+          holes: holes
+        };
+        if (geometryIsDirty) {
+          this._geometry = new GeometryInstance({
+            id: geometryId,
+            geometry: new PolygonGeometry({
+              polygonHierarchy: polygonHierarchy,
+              height: elevation,
+              extrudedHeight: elevation + height,
+              vertexFormat: VertexFormat.POSITION_AND_ST
+            })
+          });
         }
-      }
-      // Generate geometry data.
-      var polygonHierarchy = {
-        positions: this._cartesians,
-        holes: holes
-      };
-
-      if (fillColor && (isModelDirty || !this._geometry)) {
-        this._geometry = new GeometryInstance({
-          id: geometryId,
-          geometry: new PolygonGeometry({
-            polygonHierarchy: polygonHierarchy,
-            height: elevation,
-            extrudedHeight: elevation + height,
-            vertexFormat: VertexFormat.POSITION_AND_ST
-          })
-        });
-      }
-
-      if (borderColor && (isModelDirty || !this._outlineGeometry)) {
-        this._outlineGeometry = new GeometryInstance({
-          id: geometryId + '-outline',
-          geometry: new PolygonOutlineGeometry({
-            polygonHierarchy: polygonHierarchy,
-            height: elevation,
-            extrudedHeight: elevation + height,
-            vertexFormat: VertexFormat.POSITION_AND_ST
-          }),
-          // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
-          attributes: {
-            color: ColorGeometryInstanceAttribute.fromColor(borderColor)
-          }
-        });
+        if (outlineGeometryIsDirty) {
+          this._outlineGeometry = new GeometryInstance({
+            id: geometryId + '-outline',
+            geometry: new PolygonOutlineGeometry({
+              polygonHierarchy: polygonHierarchy,
+              height: elevation,
+              extrudedHeight: elevation + height,
+              vertexFormat: VertexFormat.POSITION_AND_ST
+            }),
+            // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
+            attributes: {
+              color: ColorGeometryInstanceAttribute.fromColor(borderColor)
+            }
+          });
+        }
       }
     },
 
