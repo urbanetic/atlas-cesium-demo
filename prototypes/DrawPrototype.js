@@ -47,6 +47,17 @@ define([
 
       setTimeout(drawMode, 1000);
 
+      // Ensure drawing an empty polygon doesn't cause issues.
+      // TODO(aramk) Put this in a test.
+      atlas.publish('entity/show/bulk', {features: [
+        {
+          id: 'poly-123',
+          coordinates: [],
+          type: 'polygon',
+          show: true
+        }
+      ]});
+
     }
 
   });
