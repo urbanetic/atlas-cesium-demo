@@ -115,7 +115,7 @@ define([
       }
 //      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
       if (fillColor) {
-        if (isModelDirty || !this._primitive) {
+        if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
             this._appearance = new EllipsoidSurfaceAppearance({
               material: new Material({
@@ -133,12 +133,12 @@ define([
             geometryInstances: this._geometry,
             appearance: this._appearance
           });
-        } else if (isStyleDirty) {
+        } else if (isStyleDirty && this._appearance) {
           this._appearance.material.uniforms.color = fillColor;
         }
       }
       if (borderColor) {
-        if (isModelDirty || !this._outlinePrimitive) {
+        if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
           this._outlinePrimitive = new Primitive({
             geometryInstances: this._outlineGeometry,
             // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
@@ -233,6 +233,9 @@ define([
 
       // Generate new cartesians if the vertices have changed.
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
+        if (this._vertices.length === 0) {
+          return;
+        }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
