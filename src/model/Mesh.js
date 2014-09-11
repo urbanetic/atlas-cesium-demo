@@ -182,7 +182,6 @@ define([
         Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
         this._modelMatrix = modelMatrix;
       }
-      console.log('this._modelMatrix', this._modelMatrix);
       return this._modelMatrix;
     },
 
@@ -204,19 +203,11 @@ define([
     },
 
     _calcPositions: function() {
-      console.log('positions', this._positions);
       // Remove elevation from positions array.
-//      var positions = [];
-//      for (var i = 0; i < this._positions.length; i++) {
-//        (i + 1) % 3 !== 0 && positions.push(this._positions[i]);
-//      }
       var cartesians = [];
       for (var i = 0; i < this._positions.length; i += 3) {
         cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
       }
-//      console.log('positions', positions);
-//      var cartesians = Cartesian3.fromRadiansArray(positions);
-      console.log('cartesians', cartesians);
       // TODO(aramk) Only update if necessary.
       var modelMatrix = this._updateModelMatrix();
       return cartesians.map(function(position) {
@@ -224,11 +215,6 @@ define([
         return this._renderManager.geoPointFromCartesian(transformedCartesian);
       }, this);
     },
-
-    // TODO(aramk) Add support for this in Atlas - it needs matrix functions though.
-//    _calcCentroid: function() {
-//      var positions = this._calcPositions();
-//    },
 
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions for now.
     getOpenLayersGeometry: function() {
