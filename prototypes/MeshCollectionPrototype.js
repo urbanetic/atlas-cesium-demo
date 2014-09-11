@@ -1,13 +1,20 @@
 define([
+  'atlas/lib/ConvexHullGrahamScan',
   'atlas/lib/utility/Class',
   'atlas/lib/utility/Objects',
   'atlas/model/GeoEntity',
   'atlas/model/Collection',
   'atlas/model/Feature',
   'atlas/model/GeoPoint',
+  'atlas/model/Style',
+  'atlas/model/Colour',
   'atlas-cesium/model/Handle',
   'jquery'
-], function(Class, Objects, GeoEntity, Collection, Feature, GeoPoint, Handle, $) {
+], function(ConvexHullGrahamScan, Class, Objects, GeoEntity, Collection, Feature, GeoPoint, Style,
+            Colour, Handle, $) {
+
+  console.log('ConvexHullGrahamScan', ConvexHullGrahamScan);
+
   return Class.extend({
 
     atlas: null,
@@ -30,28 +37,63 @@ define([
             // TODO(aramk) Cannot get centroid of meshes yet, so manually move them.
             var c3mlPoint = new GeoPoint([145.2521592379, -37.81075024723, 0.0]);
 //            atlas.publish('camera/zoomTo', {position: c3mlPoint});
+
             var diff = featurePoint.subtract(c3mlPoint);
-            console.log('diff', diff);
-            ids.forEach(function(id) {
-              var meshFeature = entityManager.getById(id);
-              meshFeature.translate(diff);
+
+//            console.log('diff', diff);
+//            ids.forEach(function(id) {
+//              var meshFeature = entityManager.getById(id);
+//              meshFeature.translate(diff);
+//            });
+
+            var collection = new Collection('c1', {entities: ids},
+                feature._bindDependencies({show: true}));
+            feature.setForm(Feature.DisplayMode.MESH, collection);
+            feature.setDisplayMode(Feature.DisplayMode.MESH);
+
+            collection.translate(diff);
+
+            var centroid = collection.getCentroid();
+            var centroidHandle = new Handle(feature._bindDependencies({target: centroid, owner: collection}));
+            centroidHandle.show();
+
+            collection.setElevation(15);
+            var entityCount = 0;
+            collection.getEntities().forEach(function(entity) {
+              var centroid = entity.getCentroid();
+              if (!centroid) {
+                return;
+              }
+              entityCount++;
+              var vertices = entity.getForm()._getFootprintVertices();
+
+              console.log('vertices', vertices);
+              atlas.publish('entity/show', {
+                id: 'mesh-footprint' + entityCount,
+                polygon: {
+                  vertices: vertices,
+                  style: new Style({borderColour: new Colour('yellow')}),
+                  width: '1px'
+                }
+              });
+//              var centroidHandle = new Handle(feature._bindDependencies({target: centroid, owner: entity}));
+//              centroidHandle.show();
             });
 
-            var args = feature._bindDependencies({show: true});
-            var collection = new Collection('c1', {entities: ids}, args);
-            feature.setForm(Feature.DisplayMode.MESH, collection);
-            var modes = Objects.values(Feature.DisplayMode);
-            var nextIndex = 0;
-            setInterval(function() {
-              nextIndex = (nextIndex + 1) % modes.length;
-              var mode = modes[nextIndex];
-              console.log('mode', mode);
-              feature.setDisplayMode(mode);
-            }, 4000);
+//            var modes = Objects.values(Feature.DisplayMode);
+//            var nextIndex = 0;
+//            setInterval(function() {
+//              nextIndex = (nextIndex + 1) % modes.length;
+//              var mode = modes[nextIndex];
+//              console.log('mode', mode);
+//              feature.setDisplayMode(mode);
+//            }, 4000);
           }
         });
       });
     }
 
-  });
-});
+  })
+      ;
+})
+;
