@@ -1,10 +1,11 @@
 define([
+  'atlas/lib/ConvexHullGrahamScan',
   'atlas/util/AtlasMath',
   'atlas/util/WKT',
+  'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
@@ -18,18 +19,15 @@ define([
   'atlas-cesium/cesium/Source/Core/Matrix4',
   'atlas-cesium/cesium/Source/Core/PrimitiveType',
   'atlas-cesium/cesium/Source/Core/Transforms',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/model/Colour',
   //Base class.
-  'atlas/model/Mesh',
-  'atlas/lib/utility/Log'
-], function(AtlasMath, WKT, Vertex, BoundingSphere, Cartographic, Cartesian3, CesiumColor,
+  'atlas/model/Mesh'
+], function(ConvexHullGrahamScan, AtlasMath, WKT, GeoPoint, Vertex, BoundingSphere, Cartesian3, CesiumColor,
             ColorGeometryInstanceAttribute, ComponentDatatype, Geometry, GeometryAttribute,
             GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3, Matrix4, PrimitiveType,
-            Transforms, MaterialAppearance, PerInstanceColorAppearance, Primitive, Colour, MeshCore,
-            Log) {
+            Transforms, PerInstanceColorAppearance, Primitive, Colour, MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -82,7 +80,8 @@ define([
      * Cesium.
      */
     _build: function() {
-      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
+      if (!this._primitive || this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model')) {
         if (this._primitive) {
           this._renderManager.getPrimitives().remove(this._primitive);
         }
@@ -190,7 +189,6 @@ define([
      * @private
      */
     _updateAppearance: function() {
-
       if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._appearance) {
           this._appearance =
@@ -202,7 +200,7 @@ define([
       return this._appearance;
     },
 
-    _calcPositions: function() {
+    _calcVertices: function() {
       // Remove elevation from positions array.
       var cartesians = [];
       for (var i = 0; i < this._positions.length; i += 3) {
@@ -216,10 +214,23 @@ define([
       }, this);
     },
 
+    _getFootprintVertices: function() {
+      // TODO(aramk) Put this into a utility.
+      var convexHull = new ConvexHullGrahamScan();
+      this._calcVertices().forEach(function(vertex) {
+        convexHull.addPoint(vertex.longitude, vertex.latitude);
+      });
+      var hullPoints = convexHull.getHull();
+      return hullPoints.map(function (point) {
+        return GeoPoint.fromVertex(point);
+      });
+    },
+
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions for now.
     getOpenLayersGeometry: function() {
+      var vertices = this._getFootprintVertices();
       var wkt = WKT.getInstance();
-      return wkt.openLayersPolylineFromVertices(this._calcPositions());
+      return wkt.openLayersPolygonFromVertices(vertices);
     },
 
     /**

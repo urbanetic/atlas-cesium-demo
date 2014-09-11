@@ -11,7 +11,7 @@ define([
     var mesh, centroid, constructArgs;
 
     beforeEach(function() {
-      centroid = new GeoPoint({longitude: 142.10000000000002, latitude: 35.5, elevation: 0});
+      centroid = new GeoPoint({longitude: 142.1, latitude: 35.5, elevation: 0});
       // TODO(aramk) Abstract this for use in other tests which need to full Atlas-Cesium
       // environment set up.
       var cesiumAtlas = new CesiumAtlas();
@@ -28,8 +28,13 @@ define([
       mesh = null;
     });
 
+//    it('can be constructed into a footprint polygon', function () {
+//      var geometry = mesh.getOpenLayersGeometry();
+//      console.log('geometry', geometry);
+//    });
+
     it('has a centroid', function() {
-      expect(mesh.getCentroid()).toEqual(centroid);
+      expect(mesh.getCentroid().isCloseTo(centroid)).toBe(true);
     });
 
   });

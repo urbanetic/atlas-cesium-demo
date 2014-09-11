@@ -91,8 +91,17 @@ define([
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
-        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
+        // Remove duplicate vertices which cause Cesium to break (4 identical, consecutive vertices
+        // cause the renderer to crash).
+        var vertices = this._vertices.filter(function(point, i) {
+          if (i === 0) {
+            return true;
+          } else {
+            return !this._vertices[i - 1].equals(this._vertices[i]);
+          }
+        }, this);
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
+        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
@@ -160,7 +169,7 @@ define([
       return this._geometry.geometry instanceof PolylineGeometry;
     },
 
-    _updateVisibility: function (visible) {
+    _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
     },
 
@@ -207,7 +216,7 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-    _createEntityHandle: function () {
+    _createEntityHandle: function() {
       // Line doesn't need a handle on itself.
       return false;
     }
