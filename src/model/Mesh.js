@@ -1,7 +1,7 @@
 define([
-  'atlas/lib/ConvexHullGrahamScan',
   'atlas/util/AtlasMath',
   'atlas/util/WKT',
+  'atlas/util/ConvexHullFactory',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   // Cesium includes
@@ -24,10 +24,11 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(ConvexHullGrahamScan, AtlasMath, WKT, GeoPoint, Vertex, BoundingSphere, Cartesian3, CesiumColor,
-            ColorGeometryInstanceAttribute, ComponentDatatype, Geometry, GeometryAttribute,
-            GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3, Matrix4, PrimitiveType,
-            Transforms, PerInstanceColorAppearance, Primitive, Colour, MeshCore) {
+], function(AtlasMath, WKT, ConvexHullFactory, GeoPoint, Vertex, BoundingSphere,
+            Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
+            GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
+            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
+            MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -162,6 +163,7 @@ define([
     },
 
     _updateModelMatrix: function() {
+      // TODO(aramk) Only update if necessary.
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0, 0, 0);
       }
@@ -200,13 +202,17 @@ define([
       return this._appearance;
     },
 
+    /**
+     * @returns {Array.<atlas.model.GeoPoint>} The final vertices of this Mesh after all
+     * transformations.
+     * @private
+     */
     _calcVertices: function() {
       // Remove elevation from positions array.
       var cartesians = [];
       for (var i = 0; i < this._positions.length; i += 3) {
         cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
       }
-      // TODO(aramk) Only update if necessary.
       var modelMatrix = this._updateModelMatrix();
       return cartesians.map(function(position) {
         var transformedCartesian = Matrix4.multiplyByPoint(modelMatrix, position, new Cartesian3());
@@ -214,23 +220,20 @@ define([
       }, this);
     },
 
+    /**
+     * @returns {Array.<atlas.model.GeoPoint>} The vertices forming a footprint for this mesh
+     * constructed into a convex hull.
+     * @private
+     */
     _getFootprintVertices: function() {
-      // TODO(aramk) Put this into a utility.
-      var convexHull = new ConvexHullGrahamScan();
-      this._calcVertices().forEach(function(vertex) {
-        convexHull.addPoint(vertex.longitude, vertex.latitude);
-      });
-      var hullPoints = convexHull.getHull();
-      return hullPoints.map(function (point) {
-        return GeoPoint.fromVertex(point);
-      });
+      return ConvexHullFactory.getInstance().fromVertices(this._calcVertices());
     },
 
-    // TODO(aramk) Add support for this in Atlas - it needs matrix functions for now.
+    // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
+    // for now.
     getOpenLayersGeometry: function() {
       var vertices = this._getFootprintVertices();
-      var wkt = WKT.getInstance();
-      return wkt.openLayersPolygonFromVertices(vertices);
+      return WKT.getInstance().openLayersPolygonFromVertices(vertices);
     },
 
     /**
