@@ -1,5 +1,6 @@
 define([
   'atlas/util/AtlasMath',
+  'atlas/util/WKT',
   'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
@@ -24,7 +25,7 @@ define([
   //Base class.
   'atlas/model/Mesh',
   'atlas/lib/utility/Log'
-], function(AtlasMath, Vertex, BoundingSphere, Cartographic, Cartesian3, CesiumColor,
+], function(AtlasMath, WKT, Vertex, BoundingSphere, Cartographic, Cartesian3, CesiumColor,
             ColorGeometryInstanceAttribute, ComponentDatatype, Geometry, GeometryAttribute,
             GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3, Matrix4, PrimitiveType,
             Transforms, MaterialAppearance, PerInstanceColorAppearance, Primitive, Colour, MeshCore,
@@ -162,7 +163,6 @@ define([
     },
 
     _updateModelMatrix: function() {
-      var renderManager = this._renderManager;
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0, 0, 0);
       }
@@ -176,12 +176,13 @@ define([
             // Input angle must be in radians.
             Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
             new Cartesian3(0, 0, 0));
-        var locationCartesian = renderManager.cartesianFromGeoPoint(this._geoLocation);
+        var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
         this._modelMatrix = modelMatrix;
       }
+      console.log('this._modelMatrix', this._modelMatrix);
       return this._modelMatrix;
     },
 
@@ -200,6 +201,39 @@ define([
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
       }
       return this._appearance;
+    },
+
+    _calcPositions: function() {
+      console.log('positions', this._positions);
+      // Remove elevation from positions array.
+//      var positions = [];
+//      for (var i = 0; i < this._positions.length; i++) {
+//        (i + 1) % 3 !== 0 && positions.push(this._positions[i]);
+//      }
+      var cartesians = [];
+      for (var i = 0; i < this._positions.length; i += 3) {
+        cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
+      }
+//      console.log('positions', positions);
+//      var cartesians = Cartesian3.fromRadiansArray(positions);
+      console.log('cartesians', cartesians);
+      // TODO(aramk) Only update if necessary.
+      var modelMatrix = this._updateModelMatrix();
+      return cartesians.map(function(position) {
+        var transformedCartesian = Matrix4.multiplyByPoint(modelMatrix, position, new Cartesian3());
+        return this._renderManager.geoPointFromCartesian(transformedCartesian);
+      }, this);
+    },
+
+    // TODO(aramk) Add support for this in Atlas - it needs matrix functions though.
+//    _calcCentroid: function() {
+//      var positions = this._calcPositions();
+//    },
+
+    // TODO(aramk) Add support for this in Atlas - it needs matrix functions for now.
+    getOpenLayersGeometry: function() {
+      var wkt = WKT.getInstance();
+      return wkt.openLayersPolygonFromVertices(this._calcPositions());
     },
 
     /**
