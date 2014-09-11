@@ -233,7 +233,7 @@ define([
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions for now.
     getOpenLayersGeometry: function() {
       var wkt = WKT.getInstance();
-      return wkt.openLayersPolygonFromVertices(this._calcPositions());
+      return wkt.openLayersPolylineFromVertices(this._calcPositions());
     },
 
     /**
