@@ -33,26 +33,23 @@ define([
    */
   return Feature.extend(/** @lends atlas-cesium.model.Feature# */ {
     _init: function(id, args) {
-      this._super(id, args);
-      if (args.style === undefined) {
-        args.style = this._style;
-      }
-
+      // TODO(aramk) This construction should either be in both Feature classes, or in EntityManager only.
       if (args.line) {
-        this._line = new Line(id + 'line', args.line, args);
+        args.line = new Line(id + 'line', args.line, args);
       }
       if (args.ellipse) {
-        this._footprint = new Ellipse(id + 'ellipse', args.ellipse, args);
+        args.ellipse = new Ellipse(id + 'ellipse', args.ellipse, args);
       }
       if (args.polygon) {
-        this._footprint = new Polygon(id + 'polygon', args.polygon, args);
+        args.polygon = new Polygon(id + 'polygon', args.polygon, args);
       }
       if (args.mesh) {
-        this._mesh = new Mesh(id + 'mesh', args.mesh, args);
+        args.mesh = new Mesh(id + 'mesh', args.mesh, args);
       }
       if (args.image) {
-        this._image = new Image(id + 'image', args.image, args);
+        args.image = new Image(id + 'image', args.image, args);
       }
+      this._super(id, args);
     }
   });
 });
