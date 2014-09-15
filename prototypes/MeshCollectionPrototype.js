@@ -34,18 +34,8 @@ define([
         atlas.publish('entity/show/bulk', {
           features: c3mls,
           callback: function(ids) {
-            // TODO(aramk) Cannot get centroid of meshes yet, so manually move them.
             var c3mlPoint = new GeoPoint([145.2521592379, -37.81075024723, 0.0]);
-//            atlas.publish('camera/zoomTo', {position: c3mlPoint});
-
             var diff = featurePoint.subtract(c3mlPoint);
-
-//            console.log('diff', diff);
-//            ids.forEach(function(id) {
-//              var meshFeature = entityManager.getById(id);
-//              meshFeature.translate(diff);
-//            });
-
             var collection = new Collection('c1', {entities: ids},
                 feature._bindDependencies({show: true}));
             feature.setForm(Feature.DisplayMode.MESH, collection);
@@ -67,7 +57,6 @@ define([
               entityCount++;
               var vertices = entity.getForm()._getFootprintVertices();
 
-              console.log('vertices', vertices);
               atlas.publish('entity/show', {
                 id: 'mesh-footprint' + entityCount,
                 polygon: {
