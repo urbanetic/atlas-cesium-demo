@@ -79,7 +79,8 @@ define([
      */
     _updateStyleHandle: null,
 
-    // TODO(aramk)
+    // TODO(aramk) Add these to geo entity.
+
     _rotation: null,
 
     _scale: 1,
@@ -354,22 +355,71 @@ define([
     // MODIFIERS
     // -------------------------------------------
 
-    rotate: function(rotation) {
-      this.setRotation(this.getRotation().translate(rotation));
+    // TODO(aramk) Add these methods to GeoEntity and refactor Ellipse etc.
+
+    translate: function (translation) {
+      // TODO(aramk) Modify the input vertices as well to ensure getters still work and centroid
+      // is updated. Write a test for that.
+      var centroid = this.getCentroid();
+      var target = centroid.translate(translation);
+      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
+      this._transformModelMatrix(Matrix4.fromTranslation(diffCartesian));
+      this._super(translation);
+      this._invalidateVertices();
     },
 
-    // TODO(aramk) Add to GeoEntity and refactor Ellipse etc.
+    _setModelMatrix: function (modelMatrix) {
+      // TODO(aramk) Ensure primitives are rendered before doing this.
+      this._primitive.modelMatrix = modelMatrix;
+      this._outlinePrimitive.modelMatrix = modelMatrix;
+    },
+
+    _transformModelMatrix: function (modelMatrix) {
+      var oldModelMatrix = this._primitive.modelMatrix;
+      var newModelMatrix = Matrix4.multiply(oldModelMatrix, modelMatrix, Matrix4.IDENTITY.clone());
+      this._setModelMatrix(newModelMatrix);
+    },
+
+//    scale: function (scale) {
+//      this.setScale(this.getScale() * scale);
+//      this._super(scale);
+//      this._invalidateVertices();
+//    },
+//
+//    setScale: function (scale) {
+//      this._scale = scale;
+//      // TODO
+//    },
+//
+//    getScale: function() {
+//      return this._scale;
+//    },
+
+    rotate: function(rotation) {
+      this._rotation = this.getRotation().translate(rotation);
+      this._super(rotation);
+      this._invalidateVertices();
+    },
+
     setRotation: function(rotation) {
-      this._rotation = rotation;
+      var diff = rotation.subtract(this.getRotation());
+      this.rotate(diff);
+
       // TODO(aramk) Reuse existing geometry instance and manipulate the model matrix instead.
       // TODO(aramk) Create primitive if not existent. Move this logic elsewhere and reuse.
-      var modelMatrix = this._getModelMatrix();
-      this._primitive.modelMatrix = modelMatrix;
+//      var modelMatrix = this._getModelMatrix();
+//      this._primitive.modelMatrix = modelMatrix;
 //      this._outlinePrimitive.modelMatrix = modelMatrix;
     },
 
     getRotation: function() {
       return this._rotation;
+    },
+
+    _onTransform: function () {
+      // Avoid rebuilding when transforming since we use the matrix transformations in Cesium.
     },
 
     _updateVisibility: function(visible) {
