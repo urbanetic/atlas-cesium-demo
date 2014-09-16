@@ -94,6 +94,8 @@
           './prototypes/EditPrototype',
           './prototypes/DrawPrototype',
           './prototypes/TranslatePrototype',
+          './prototypes/RotationPrototype',
+          './prototypes/ScalePrototype',
           './prototypes/MeshPrototype',
           './prototypes/MeshCollectionPrototype',
           './prototypes/GeocoderPrototype',
@@ -102,15 +104,18 @@
           './prototypes/StylePrototype',
           './prototypes/EventPrototype',
           './prototypes/ProjectionPrototype',
-          './prototypes/CollectionPrototype'
+          './prototypes/CollectionPrototype',
+          './prototypes/SelectionPrototype'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
-                    MeshPrototype, MeshCollectionPrototype, GeocoderPrototype, InputPrototype,
-                    RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    CollectionPrototype) {
+                    RotationPrototype, ScalePrototype, MeshPrototype, MeshCollectionPrototype,
+                    GeocoderPrototype, InputPrototype, RenderPrototype, StylePrototype,
+                    EventPrototype, ProjectionPrototype, CollectionPrototype, SelectionPrototype) {
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
 //          new DrawPrototype(cesiumAtlas);
 //          new TranslatePrototype(cesiumAtlas);
+//          new RotationPrototype(cesiumAtlas);
+          new ScalePrototype(cesiumAtlas);
 //          new MeshPrototype(cesiumAtlas);
 //          new MeshCollectionPrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
@@ -120,6 +125,7 @@
 //          new EventPrototype(cesiumAtlas);
 //          new ProjectionPrototype(cesiumAtlas);
 //          new CollectionPrototype(cesiumAtlas);
+//          new SelectionPrototype(cesiumAtlas);
         });
       }, 2000);
 

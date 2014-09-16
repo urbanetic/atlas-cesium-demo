@@ -1,7 +1,7 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/GeoPoint'
-], function(Class, GeoPoint) {
+  'atlas/model/Vertex'
+], function(Class, Vertex) {
   return Class.extend({
 
     atlas: null,
@@ -12,10 +12,8 @@ define([
       var features = entityManager.getFeatures();
       var feature = features[0];
 
-      var translation = new GeoPoint({latitude: 0.0005, longitude: 0.0005});
-
       setInterval(function() {
-        feature.translate(translation);
+        feature.scale(new Vertex(2, 2, 2));
       }, 1000);
     }
 
