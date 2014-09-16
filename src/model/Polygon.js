@@ -192,14 +192,38 @@ define([
           }
         }
       }
-      // Update model matrix after primitives are visible.
-      if (this.isDirty('modelMatrix')) {
-        var modelMatrix = this._getModelMatrix();
-        if (this._primitive) this._primitive.modelMatrix = modelMatrix;
-        if (this._outlinePrimitive) this._outlinePrimitive.modelMatrix = modelMatrix;
-      }
       this._addPrimitives();
+      // Update model matrix after primitives are visible and ready.
+      var modelMatrix = this._modelMatrix;
+      if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
+        [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
+          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+        }, this);
+      }
       this._super();
+    },
+
+    /**
+     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
+     * Before this point, setting has no effect and is ignored when the primitive is eventually
+     * ready.
+     * @param primitive
+     * @param modelMatrix
+     * @private
+     */
+    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
+      var timeout = 60000;
+      var freq = 200;
+      var totalTime = 0;
+      var handler = function() {
+        if (totalTime >= timeout || primitive.ready) {
+          primitive.modelMatrix = modelMatrix;
+          clearInterval(handle);
+        }
+        totalTime += freq;
+      };
+      var handle = setInterval(handler, freq);
+      handler();
     },
 
     /**
@@ -334,7 +358,8 @@ define([
     rotate: function(rotation) {
       this._rotation = this.getRotation().translate(rotation);
       // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+      var rotMatrix = Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
       this._transformModelMatrix(this._transformOrigin(rotMatrix));
       this._super(rotation);
       this._invalidateVertices();
@@ -349,7 +374,7 @@ define([
      * the centre of the earth and back.
      * @private
      */
-    _transformOrigin: function (matrix) {
+    _transformOrigin: function(matrix) {
       var centroid = this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
@@ -396,7 +421,7 @@ define([
      */
     _transformModelMatrix: function(modelMatrix) {
       var oldModelMatrix = this._getModelMatrix();
-      var newModelMatrix = Matrix4.multiply(oldModelMatrix, modelMatrix, Matrix4.IDENTITY.clone());
+      var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
       this._setModelMatrix(newModelMatrix);
     },
 
