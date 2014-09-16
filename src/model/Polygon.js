@@ -83,12 +83,13 @@ define([
 
     _rotation: null,
 
-    _scale: 1,
+    _scale: null,
 
     _modelMatrix: null,
 
     _init: function() {
       this._rotation = new Vertex(0, 0, 0);
+      this._scale = new Vertex(1, 1, 1);
       this._super.apply(this, arguments);
     },
 
@@ -311,6 +312,7 @@ define([
     // -------------------------------------------
 
     // TODO(aramk) Add these methods to GeoEntity and refactor Ellipse etc.
+    // TODO(aramk) Add docs for these methods.
 
     translate: function(translation) {
       // TODO(aramk) Modify the input vertices as well to ensure getters still work and centroid
@@ -322,26 +324,20 @@ define([
       this._invalidateVertices();
     },
 
-    //    scale: function (scale) {
-//      this.setScale(this.getScale() * scale);
-//      this._super(scale);
-//      this._invalidateVertices();
-//    },
-//
-//    setScale: function (scale) {
-//      this._scale = scale;
-//      // TODO
-//    },
-//
-//    getScale: function() {
-//      return this._scale;
-//    },
+    scale: function(scale) {
+      var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
+      var scaleMatrix = Matrix4.fromScale(scaleCartesian);
+      this._transformModelMatrix(this._transformOrigin(scaleMatrix));
+      this._super(scale);
+      this._invalidateVertices();
+    },
 
-    _translateMatrix: function(source, target) {
-      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
-      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
-      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
-      return Matrix4.fromTranslation(diffCartesian);
+    setScale: function(scale) {
+      this.rotate(scale.componentwiseDivide(this.getScale()));
+    },
+
+    getScale: function() {
+      return this._scale;
     },
 
     rotate: function(rotation) {
@@ -352,6 +348,14 @@ define([
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // TODO(aramk) Support rotation in all axes.
       var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+      this._transformModelMatrix(this._transformOrigin(rotMatrix));
+      this._super(rotation);
+      this._invalidateVertices();
+    },
+
+    _transformOrigin: function (matrix) {
+      var centroid = this.getCentroid();
+      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
       // earth to the surface location and points upward from the earth - it's the normal vector
@@ -359,18 +363,13 @@ define([
       var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
       // Since our existing position after construction is NOT the centre of the earth, we must
       // reverse the above transformation and move the geometry back to the origin, apply the
-      // rotation, then apply the transformation again.
+      // given matrix transformation, then apply the transformation again.
       var invOriginMatrix = Matrix4.inverseTransformation(originMatrix, Matrix4.IDENTITY.clone());
       var modelMatrix = Matrix4.multiply(
-          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
+          matrix,
           invOriginMatrix,
           Matrix4.IDENTITY.clone());
-      modelMatrix = Matrix4.multiply(
-          originMatrix,
-          modelMatrix, modelMatrix);
-      this._transformModelMatrix(modelMatrix);
-      this._super(rotation);
-      this._invalidateVertices();
+      return Matrix4.multiply(originMatrix, modelMatrix, modelMatrix);
     },
 
     setRotation: function(rotation) {
@@ -399,6 +398,13 @@ define([
       var oldModelMatrix = this._getModelMatrix();
       var newModelMatrix = Matrix4.multiply(oldModelMatrix, modelMatrix, Matrix4.IDENTITY.clone());
       this._setModelMatrix(newModelMatrix);
+    },
+
+    _translateMatrix: function(source, target) {
+      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
+      return Matrix4.fromTranslation(diffCartesian);
     },
 
     _onTransform: function() {

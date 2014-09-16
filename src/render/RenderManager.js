@@ -3,6 +3,7 @@ define([
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   // Cesium imports.
+  'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
@@ -12,8 +13,8 @@ define([
   'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, Cartographic, requestAnimationFrame, Imagery, ImageryState,
-            SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame, Imagery,
+            ImageryState, SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
 
   /**
    * @typedef atlas-cesium.render.RenderManager
@@ -366,7 +367,7 @@ define([
      * @param {atlas.model.GeoPoint} point - The world coordinates in cartographic degrees.
      * @returns {atlas.model.Vertex} The given coordinates in screen pixels.
      */
-    screenCoordsFromGeoPoint: function (point) {
+    screenCoordsFromGeoPoint: function(point) {
       var position = this.cartesianFromGeoPoint(point);
       var cartesian = SceneTransforms.wgs84ToDrawingBufferCoordinates(this.getScene(), position);
       return new Vertex(cartesian);
@@ -389,18 +390,11 @@ define([
     },
 
     /**
-     * Converts a Vertex representing a geographic position and converts it to a
-     * Cesium Cartestian3 object.
      * @param {atlas.model.Vertex} cart - The vertex.
-     * @param {Number} cart.x - The longitude in decimal degrees.
-     * @param {Number} cart.y - The latitude in decimal degrees.
-     * @param {Number} cart.z - The elevation in metres.
      * @returns {Cartesian3}
      */
     cartesianFromVertex: function(cart) {
-      var ellipsoid = this.getEllipsoid(),
-          cesiumCart = Cartographic.fromDegrees(cart.x, cart.y, cart.z);
-      return ellipsoid.cartographicToCartesian(cesiumCart);
+      return new Cartesian3(cart.x, cart.y, cart.z);
     },
 
     cartesianArrayFromVertexArray: function(vertices) {
@@ -474,7 +468,7 @@ define([
       return this._widget.scene;
     },
 
-    getGlobe: function () {
+    getGlobe: function() {
       return this.getScene().globe;
     },
 
