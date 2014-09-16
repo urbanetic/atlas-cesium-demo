@@ -85,6 +85,8 @@ define([
 
     _scale: 1,
 
+    _modelMatrix: null,
+
     _init: function() {
       this._rotation = new Vertex(0, 0, 0);
       this._super.apply(this, arguments);
@@ -122,7 +124,6 @@ define([
         // Cancel any existing handler for updating to avoid race conditions.
         cancelStyleUpdate();
       }
-//      console.debug('build', 'isModelDirty', isModelDirty, 'isStyleDirty', isStyleDirty);
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
@@ -190,6 +191,12 @@ define([
           }
         }
       }
+      // Update model matrix after primitives are visible.
+      if (this.isDirty('modelMatrix')) {
+        var modelMatrix = this._getModelMatrix();
+        if (this._primitive) this._primitive.modelMatrix = modelMatrix;
+        if (this._outlinePrimitive) this._outlinePrimitive.modelMatrix = modelMatrix;
+      }
       this._addPrimitives();
       this._super();
     },
@@ -237,8 +244,6 @@ define([
       var geometryId = this.getId().replace('polygon', '');
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      var isStyleDirty = this.isDirty('style');
-
       // Generate new cartesians if the vertices have changed.
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         if (this._vertices.length === 0) {
@@ -247,12 +252,16 @@ define([
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
       }
+      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
+      var shouldCreateOutlineGeometry = borderColor && (isModelDirty || !this._outlineGeometry);
+      if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
+        return;
+      }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
       var elevation = this._minTerrainElevation + this._elevation +
           this._zIndex * this._zIndexOffset;
       var height = (this._showAsExtrusion ? this._height : 0);
-
       var holes = [];
       if (this._holes) {
         for (var i in this._holes) {
@@ -266,9 +275,7 @@ define([
         positions: this._cartesians,
         holes: holes
       };
-
-      if (fillColor && (isModelDirty || !this._geometry)) {
-//        var modelMatrix = this._getModelMatrix();
+      if (shouldCreateGeometry) {
         this._geometry = new GeometryInstance({
           id: geometryId,
           geometry: new PolygonGeometry({
@@ -276,12 +283,10 @@ define([
             height: elevation,
             extrudedHeight: elevation + height,
             vertexFormat: VertexFormat.POSITION_AND_ST
-          }),
-//          modelMatrix: modelMatrix
+          })
         });
       }
-
-      if (borderColor && (isModelDirty || !this._outlineGeometry)) {
+      if (shouldCreateOutlineGeometry) {
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
           geometry: new PolygonOutlineGeometry({
@@ -303,53 +308,53 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-    _getModelMatrix: function() {
-      // Construct rotation and translation transformation matrix.
-      // TODO(bpstudds): Only rotation about the vertical axis is implemented.
-      // The matrix to apply transformations on.
-      var modelMatrix = Matrix4.IDENTITY.clone();
-      var centroid = this.getCentroid();
-//      var negCentroid = new GeoPoint(0, 0, 0).subtract(centroid);
-//      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
-//      var locationCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-//      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
-//      var translation = Matrix4.fromTranslation(locationCartesian);
-//      // Apply rotation, translation and scale transformations.
-//      var rotationTranslation = Matrix4.fromRotationTranslation(
-//          // Input angle must be in radians.
-//          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3(0, 0, 0));
-
-      var target = centroid.subtract(new GeoPoint(0.001, 0.001, 0));
-      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
-      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
-      var translation = Matrix4.fromTranslation(diffCartesian);
-
-//      var negCentroid = new GeoPoint(0, 0, 0);
-//      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
-//      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
-//      negTranslation.x = 0;
-
-      Matrix4.multiply(translation, modelMatrix, modelMatrix);
-
-//      Matrix4.multiply(negTranslation, translation, modelMatrix);
-
-      // TODO(aramk) Use optimised multiply methods.
-//      Matrix4.multiply(negTranslation, rotationTranslation, modelMatrix);
-//      Matrix4.multiply(modelMatrix, translation, modelMatrix);
-
-      return modelMatrix;
-
-//      return Transforms.eastNorthUpToFixedFrame(locationCartesian);
-
-//      Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
-//          modelMatrix);
-//      if (this._scale !== 1) {
-//        // TODO(aramk) Breaks
-//        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
-//      }
+//    _getModelMatrix: function() {
+//      // Construct rotation and translation transformation matrix.
+//      // TODO(bpstudds): Only rotation about the vertical axis is implemented.
+//      // The matrix to apply transformations on.
+//      var modelMatrix = Matrix4.IDENTITY.clone();
+//      var centroid = this.getCentroid();
+////      var negCentroid = new GeoPoint(0, 0, 0).subtract(centroid);
+////      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
+////      var locationCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+////      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
+////      var translation = Matrix4.fromTranslation(locationCartesian);
+////      // Apply rotation, translation and scale transformations.
+////      var rotationTranslation = Matrix4.fromRotationTranslation(
+////          // Input angle must be in radians.
+////          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3(0, 0, 0));
+//
+//      var target = centroid.subtract(new GeoPoint(0.001, 0.001, 0));
+//      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+//      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+//      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
+//      var translation = Matrix4.fromTranslation(diffCartesian);
+//
+////      var negCentroid = new GeoPoint(0, 0, 0);
+////      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
+////      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
+////      negTranslation.x = 0;
+//
+//      Matrix4.multiply(translation, modelMatrix, modelMatrix);
+//
+////      Matrix4.multiply(negTranslation, translation, modelMatrix);
+//
+//      // TODO(aramk) Use optimised multiply methods.
+////      Matrix4.multiply(negTranslation, rotationTranslation, modelMatrix);
+////      Matrix4.multiply(modelMatrix, translation, modelMatrix);
+//
 //      return modelMatrix;
-    },
+//
+////      return Transforms.eastNorthUpToFixedFrame(locationCartesian);
+//
+////      Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+////          modelMatrix);
+////      if (this._scale !== 1) {
+////        // TODO(aramk) Breaks
+////        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+////      }
+////      return modelMatrix;
+//    },
 
     // -------------------------------------------
     // MODIFIERS
@@ -357,32 +362,17 @@ define([
 
     // TODO(aramk) Add these methods to GeoEntity and refactor Ellipse etc.
 
-    translate: function (translation) {
+    translate: function(translation) {
       // TODO(aramk) Modify the input vertices as well to ensure getters still work and centroid
       // is updated. Write a test for that.
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
-      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
-      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
-      this._transformModelMatrix(Matrix4.fromTranslation(diffCartesian));
+      this._transformModelMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
       this._invalidateVertices();
     },
 
-    _setModelMatrix: function (modelMatrix) {
-      // TODO(aramk) Ensure primitives are rendered before doing this.
-      this._primitive.modelMatrix = modelMatrix;
-      this._outlinePrimitive.modelMatrix = modelMatrix;
-    },
-
-    _transformModelMatrix: function (modelMatrix) {
-      var oldModelMatrix = this._primitive.modelMatrix;
-      var newModelMatrix = Matrix4.multiply(oldModelMatrix, modelMatrix, Matrix4.IDENTITY.clone());
-      this._setModelMatrix(newModelMatrix);
-    },
-
-//    scale: function (scale) {
+    //    scale: function (scale) {
 //      this.setScale(this.getScale() * scale);
 //      this._super(scale);
 //      this._invalidateVertices();
@@ -397,8 +387,40 @@ define([
 //      return this._scale;
 //    },
 
+    _translateMatrix: function(source, target) {
+      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
+      return Matrix4.fromTranslation(diffCartesian);
+    },
+
     rotate: function(rotation) {
+      // Matrix rotation transformations must be performed at the origin, so we translate it there,
+      // then rotate, then translate it back.
       this._rotation = this.getRotation().translate(rotation);
+
+      var centroid = this.getCentroid();
+      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+      var negCentroidCartesian = Cartesian3.negate(centroidCartesian, new Cartesian3());
+      var negTranslation = Matrix4.fromTranslation(negCentroidCartesian);
+      var posTranslation = Matrix4.fromTranslation(centroidCartesian);
+
+      // TODO(aramk) Can we provide position into rotation without initial translation?
+      // TODO(aramk) Support rotation in all axes.
+      var rotationTransform = Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
+      var modelMatrix = Matrix4.multiply(rotationTransform, negTranslation, Matrix4.IDENTITY.clone());
+      modelMatrix = Matrix4.multiply(posTranslation, modelMatrix, modelMatrix);
+      this._transformModelMatrix(modelMatrix);
+
+//      var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+//      var modelMatrix = Matrix4.multiply(
+//          Transforms.eastNorthUpToFixedFrame(centroidCartesian),
+//          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
+//          Matrix4.IDENTITY.clone());
+//      // TODO(aramk) Can we transform by multiplying to the existing?
+//      this._setModelMatrix(modelMatrix);
+
       this._super(rotation);
       this._invalidateVertices();
     },
@@ -406,20 +428,36 @@ define([
     setRotation: function(rotation) {
       var diff = rotation.subtract(this.getRotation());
       this.rotate(diff);
-
-      // TODO(aramk) Reuse existing geometry instance and manipulate the model matrix instead.
-      // TODO(aramk) Create primitive if not existent. Move this logic elsewhere and reuse.
-//      var modelMatrix = this._getModelMatrix();
-//      this._primitive.modelMatrix = modelMatrix;
-//      this._outlinePrimitive.modelMatrix = modelMatrix;
     },
 
     getRotation: function() {
       return this._rotation;
     },
 
-    _onTransform: function () {
-      // Avoid rebuilding when transforming since we use the matrix transformations in Cesium.
+    _setModelMatrix: function(modelMatrix) {
+      this._modelMatrix = modelMatrix;
+      this.setDirty('modelMatrix');
+    },
+
+    _getModelMatrix: function() {
+      // Avoids storing data that may not be used for all polygons.
+      if (!this._modelMatrix) {
+        this._modelMatrix = Matrix4.IDENTITY.clone();
+      }
+      return this._modelMatrix;
+    },
+
+    _transformModelMatrix: function(modelMatrix) {
+      var oldModelMatrix = this._getModelMatrix();
+      var newModelMatrix = Matrix4.multiply(oldModelMatrix, modelMatrix, Matrix4.IDENTITY.clone());
+      this._setModelMatrix(newModelMatrix);
+    },
+
+    _onTransform: function() {
+      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
+      // Cesium.
+      this.setDirty('modelMatrix');
+      this._update();
     },
 
     _updateVisibility: function(visible) {
@@ -441,7 +479,7 @@ define([
     _getCesiumColors: function() {
       var style = this.getStyle();
       return Style.toCesiumColors(style);
-    },
+    }
 
   });
 
