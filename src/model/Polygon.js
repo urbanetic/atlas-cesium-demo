@@ -221,13 +221,11 @@ define([
       var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
         this._primitive.show = false;
-//        primitives.remove(this._primitive);
         this._primitive = null;
         this._geometry = null;
       }
       if (this._outlinePrimitive) {
         this._outlinePrimitive.show = false;
-//        primitives.remove(this._outlinePrimitive);
         this._outlinePrimitive = null;
         this._outlineGeometry = null;
       }
@@ -308,54 +306,6 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-//    _getModelMatrix: function() {
-//      // Construct rotation and translation transformation matrix.
-//      // TODO(bpstudds): Only rotation about the vertical axis is implemented.
-//      // The matrix to apply transformations on.
-//      var modelMatrix = Matrix4.IDENTITY.clone();
-//      var centroid = this.getCentroid();
-////      var negCentroid = new GeoPoint(0, 0, 0).subtract(centroid);
-////      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
-////      var locationCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-////      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
-////      var translation = Matrix4.fromTranslation(locationCartesian);
-////      // Apply rotation, translation and scale transformations.
-////      var rotationTranslation = Matrix4.fromRotationTranslation(
-////          // Input angle must be in radians.
-////          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3(0, 0, 0));
-//
-//      var target = centroid.subtract(new GeoPoint(0.001, 0.001, 0));
-//      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-//      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
-//      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
-//      var translation = Matrix4.fromTranslation(diffCartesian);
-//
-////      var negCentroid = new GeoPoint(0, 0, 0);
-////      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
-////      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
-////      negTranslation.x = 0;
-//
-//      Matrix4.multiply(translation, modelMatrix, modelMatrix);
-//
-////      Matrix4.multiply(negTranslation, translation, modelMatrix);
-//
-//      // TODO(aramk) Use optimised multiply methods.
-////      Matrix4.multiply(negTranslation, rotationTranslation, modelMatrix);
-////      Matrix4.multiply(modelMatrix, translation, modelMatrix);
-//
-//      return modelMatrix;
-//
-////      return Transforms.eastNorthUpToFixedFrame(locationCartesian);
-//
-////      Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
-////          modelMatrix);
-////      if (this._scale !== 1) {
-////        // TODO(aramk) Breaks
-////        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
-////      }
-////      return modelMatrix;
-//    },
-
     // -------------------------------------------
     // MODIFIERS
     // -------------------------------------------
@@ -398,32 +348,18 @@ define([
       // Matrix rotation transformations must be performed at the origin, so we translate it there,
       // then rotate, then translate it back.
       this._rotation = this.getRotation().translate(rotation);
-
       var centroid = this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
-      var negCentroidCartesian = Cartesian3.negate(centroidCartesian, new Cartesian3());
-      var negTranslation = Matrix4.fromTranslation(negCentroidCartesian);
-      var posTranslation = Matrix4.fromTranslation(centroidCartesian);
-
       // TODO(aramk) Support rotation in all axes.
-//      var rotationTransform = Matrix4.fromRotationTranslation(
-//          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
-//      var modelMatrix = Matrix4.multiply(rotationTransform, negTranslation, Matrix4.IDENTITY.clone());
-//      modelMatrix = Matrix4.multiply(posTranslation, modelMatrix, modelMatrix);
-//      this._transformModelMatrix(modelMatrix);
-
-//      var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
-//      var modelMatrix = Matrix4.multiply(
-//          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
-//          Transforms.northEastDownToFixedFrame(centroidCartesian),
-//          Matrix4.IDENTITY.clone());
-//      modelMatrix = Matrix4.multiply(
-//          Transforms.eastNorthUpToFixedFrame(centroidCartesian),
-//          modelMatrix, modelMatrix);
-
-
       var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+      // This transforms from the centre of the earth to the surface at the given position and
+      // aligns the east and north as the x and y axes. The z is the vector from the centre of the
+      // earth to the surface location and points upward from the earth - it's the normal vector
+      // for the surface of the earth at that location.
       var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
+      // Since our existing position after construction is NOT the centre of the earth, we must
+      // reverse the above transformation and move the geometry back to the origin, apply the
+      // rotation, then apply the transformation again.
       var invOriginMatrix = Matrix4.inverseTransformation(originMatrix, Matrix4.IDENTITY.clone());
       var modelMatrix = Matrix4.multiply(
           Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
@@ -432,17 +368,7 @@ define([
       modelMatrix = Matrix4.multiply(
           originMatrix,
           modelMatrix, modelMatrix);
-
-
-//      var modelMatrix = Matrix4.multiply(
-//          Transforms.eastNorthUpToFixedFrame(centroidCartesian),
-//          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
-//          Matrix4.IDENTITY.clone());
-
-      // TODO(aramk) Can we transform by multiplying to the existing?
-//      this._setModelMatrix(modelMatrix)
       this._transformModelMatrix(modelMatrix);
-
       this._super(rotation);
       this._invalidateVertices();
     },
