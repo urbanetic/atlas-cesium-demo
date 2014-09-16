@@ -1,20 +1,28 @@
 define([
   // Base class
   'atlas/model/Polygon',
+  'atlas/model/GeoPoint',
+  'atlas/model/Vertex',
+  'atlas/util/AtlasMath',
   'atlas-cesium/model/Handle',
   'atlas-cesium/model/Style',
+  'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
   'atlas-cesium/cesium/Source/Core/PolygonOutlineGeometry',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/VertexFormat',
+  'atlas-cesium/cesium/Source/Core/Matrix3',
+  'atlas-cesium/cesium/Source/Core/Matrix4',
+  'atlas-cesium/cesium/Source/Core/Transforms',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(PolygonCore, Handle, Style, GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
-            ColorGeometryInstanceAttribute, VertexFormat, Primitive, Material,
-            PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
+], function(PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3, GeometryInstance,
+            PolygonGeometry, PolygonOutlineGeometry, ColorGeometryInstanceAttribute, VertexFormat,
+            Matrix3, Matrix4, Transforms, Primitive, Material, PerInstanceColorAppearance,
+            EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -70,6 +78,16 @@ define([
      * @type {Number}
      */
     _updateStyleHandle: null,
+
+    // TODO(aramk)
+    _rotation: null,
+
+    _scale: 1,
+
+    _init: function() {
+      this._rotation = new Vertex(0, 0, 0);
+      this._super.apply(this, arguments);
+    },
 
     // -------------------------------------------
     // GETTERS AND SETTERS
@@ -249,6 +267,7 @@ define([
       };
 
       if (fillColor && (isModelDirty || !this._geometry)) {
+//        var modelMatrix = this._getModelMatrix();
         this._geometry = new GeometryInstance({
           id: geometryId,
           geometry: new PolygonGeometry({
@@ -256,7 +275,8 @@ define([
             height: elevation,
             extrudedHeight: elevation + height,
             vertexFormat: VertexFormat.POSITION_AND_ST
-          })
+          }),
+//          modelMatrix: modelMatrix
         });
       }
 
@@ -282,9 +302,75 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
+    _getModelMatrix: function() {
+      // Construct rotation and translation transformation matrix.
+      // TODO(bpstudds): Only rotation about the vertical axis is implemented.
+      // The matrix to apply transformations on.
+      var modelMatrix = Matrix4.IDENTITY.clone();
+      var centroid = this.getCentroid();
+//      var negCentroid = new GeoPoint(0, 0, 0).subtract(centroid);
+//      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
+//      var locationCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+//      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
+//      var translation = Matrix4.fromTranslation(locationCartesian);
+//      // Apply rotation, translation and scale transformations.
+//      var rotationTranslation = Matrix4.fromRotationTranslation(
+//          // Input angle must be in radians.
+//          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3(0, 0, 0));
+
+      var target = centroid.subtract(new GeoPoint(0.001, 0.001, 0));
+      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, centroidCartesian, new Cartesian3());
+      var translation = Matrix4.fromTranslation(diffCartesian);
+
+//      var negCentroid = new GeoPoint(0, 0, 0);
+//      var negLocationCartesian = this._renderManager.cartesianFromGeoPoint(negCentroid);
+//      var negTranslation = Matrix4.fromTranslation(negLocationCartesian);
+//      negTranslation.x = 0;
+
+      Matrix4.multiply(translation, modelMatrix, modelMatrix);
+
+//      Matrix4.multiply(negTranslation, translation, modelMatrix);
+
+      // TODO(aramk) Use optimised multiply methods.
+//      Matrix4.multiply(negTranslation, rotationTranslation, modelMatrix);
+//      Matrix4.multiply(modelMatrix, translation, modelMatrix);
+
+      return modelMatrix;
+
+//      return Transforms.eastNorthUpToFixedFrame(locationCartesian);
+
+//      Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+//          modelMatrix);
+//      if (this._scale !== 1) {
+//        // TODO(aramk) Breaks
+//        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+//      }
+//      return modelMatrix;
+    },
+
     // -------------------------------------------
     // MODIFIERS
     // -------------------------------------------
+
+    rotate: function(rotation) {
+      this.setRotation(this.getRotation().translate(rotation));
+    },
+
+    // TODO(aramk) Add to GeoEntity and refactor Ellipse etc.
+    setRotation: function(rotation) {
+      this._rotation = rotation;
+      // TODO(aramk) Reuse existing geometry instance and manipulate the model matrix instead.
+      // TODO(aramk) Create primitive if not existent. Move this logic elsewhere and reuse.
+      var modelMatrix = this._getModelMatrix();
+      this._primitive.modelMatrix = modelMatrix;
+//      this._outlinePrimitive.modelMatrix = modelMatrix;
+    },
+
+    getRotation: function() {
+      return this._rotation;
+    },
 
     _updateVisibility: function(visible) {
       var cesiumColors = this._getCesiumColors();
@@ -305,7 +391,7 @@ define([
     _getCesiumColors: function() {
       var style = this.getStyle();
       return Style.toCesiumColors(style);
-    }
+    },
 
   });
 
