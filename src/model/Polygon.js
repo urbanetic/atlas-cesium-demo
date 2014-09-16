@@ -405,21 +405,43 @@ define([
       var negTranslation = Matrix4.fromTranslation(negCentroidCartesian);
       var posTranslation = Matrix4.fromTranslation(centroidCartesian);
 
-      // TODO(aramk) Can we provide position into rotation without initial translation?
       // TODO(aramk) Support rotation in all axes.
-      var rotationTransform = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
-      var modelMatrix = Matrix4.multiply(rotationTransform, negTranslation, Matrix4.IDENTITY.clone());
-      modelMatrix = Matrix4.multiply(posTranslation, modelMatrix, modelMatrix);
-      this._transformModelMatrix(modelMatrix);
+//      var rotationTransform = Matrix4.fromRotationTranslation(
+//          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
+//      var modelMatrix = Matrix4.multiply(rotationTransform, negTranslation, Matrix4.IDENTITY.clone());
+//      modelMatrix = Matrix4.multiply(posTranslation, modelMatrix, modelMatrix);
+//      this._transformModelMatrix(modelMatrix);
 
 //      var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+//      var modelMatrix = Matrix4.multiply(
+//          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
+//          Transforms.northEastDownToFixedFrame(centroidCartesian),
+//          Matrix4.IDENTITY.clone());
+//      modelMatrix = Matrix4.multiply(
+//          Transforms.eastNorthUpToFixedFrame(centroidCartesian),
+//          modelMatrix, modelMatrix);
+
+
+      var rotMatrix = Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z));
+      var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
+      var invOriginMatrix = Matrix4.inverseTransformation(originMatrix, Matrix4.IDENTITY.clone());
+      var modelMatrix = Matrix4.multiply(
+          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
+          invOriginMatrix,
+          Matrix4.IDENTITY.clone());
+      modelMatrix = Matrix4.multiply(
+          originMatrix,
+          modelMatrix, modelMatrix);
+
+
 //      var modelMatrix = Matrix4.multiply(
 //          Transforms.eastNorthUpToFixedFrame(centroidCartesian),
 //          Matrix4.fromRotationTranslation(rotMatrix, new Cartesian3()),
 //          Matrix4.IDENTITY.clone());
-//      // TODO(aramk) Can we transform by multiplying to the existing?
-//      this._setModelMatrix(modelMatrix);
+
+      // TODO(aramk) Can we transform by multiplying to the existing?
+//      this._setModelMatrix(modelMatrix)
+      this._transformModelMatrix(modelMatrix);
 
       this._super(rotation);
       this._invalidateVertices();
