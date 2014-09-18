@@ -79,19 +79,12 @@ define([
      */
     _updateStyleHandle: null,
 
-    // TODO(aramk) Add these to geo entity.
-
-    _rotation: null,
-
-    _scale: null,
-
+    /**
+     * The model matrix applied after primitives are rendered. This is used to perform transient
+     * transformations which are faster than rebuilding the primitives.
+     * @type {Matrix4}
+     */
     _modelMatrix: null,
-
-    _init: function() {
-      this._rotation = new Vertex(0, 0, 0);
-      this._scale = new Vertex(1, 1, 1);
-      this._super.apply(this, arguments);
-    },
 
     // -------------------------------------------
     // GETTERS AND SETTERS
