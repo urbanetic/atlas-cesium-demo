@@ -196,6 +196,15 @@ define([
       // Update model matrix after primitives are visible and ready.
       var modelMatrix = this._modelMatrix;
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
+        // If the model has been redrawn, then we don't want to apply the existing matrix, since
+        // the transformations have been applied to the underlying vertices and transforming them
+        // again with the matrix would apply the transformation twice. We use the model matrix only
+        // for transformations between rebuilds for performance, so it's safe to remove it.
+        if (isModelDirty) {
+          // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
+          modelMatrix = this._calcRotateMatrix(this.getRotation());
+          this._setModelMatrix(modelMatrix);
+        }
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
           primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
         }, this);
@@ -357,12 +366,20 @@ define([
 
     rotate: function(rotation) {
       this._rotation = this.getRotation().translate(rotation);
-      // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)), new Cartesian3());
-      this._transformModelMatrix(this._transformOrigin(rotMatrix));
+      this._transformModelMatrix(this._calcRotateMatrix(this._rotation));
       this._super(rotation);
       this._invalidateVertices();
+    },
+
+    /**
+     * @param {atlas.model.Vertex} rotation
+     * @private
+     */
+    _calcRotateMatrix: function(rotation) {
+      // TODO(aramk) Support rotation in all axes.
+      var rotMatrix = Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
+      return this._transformOrigin(rotMatrix);
     },
 
     /**
