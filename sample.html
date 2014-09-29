@@ -11,8 +11,9 @@
   <link rel="stylesheet/less" href="atlas/resources/atlas.less">
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
   <style>
-    html, body {
+    html, body, #cesium {
       margin: 0;
+      height: 100%;
     }
   </style>
   <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
@@ -97,6 +98,7 @@
           './prototypes/RotationPrototype',
           './prototypes/ScalePrototype',
           './prototypes/MeshPrototype',
+          './prototypes/MeshPrototype2',
           './prototypes/MeshCollectionPrototype',
           './prototypes/GeocoderPrototype',
           './prototypes/InputPrototype',
@@ -107,17 +109,19 @@
           './prototypes/CollectionPrototype',
           './prototypes/SelectionPrototype'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
-                    RotationPrototype, ScalePrototype, MeshPrototype, MeshCollectionPrototype,
-                    GeocoderPrototype, InputPrototype, RenderPrototype, StylePrototype,
-                    EventPrototype, ProjectionPrototype, CollectionPrototype, SelectionPrototype) {
+                    RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
+                    MeshCollectionPrototype, GeocoderPrototype, InputPrototype, RenderPrototype,
+                    StylePrototype, EventPrototype, ProjectionPrototype, CollectionPrototype,
+                    SelectionPrototype) {
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
 //          new DrawPrototype(cesiumAtlas);
 //          new TranslatePrototype(cesiumAtlas);
-          new RotationPrototype(cesiumAtlas);
+//          new RotationPrototype(cesiumAtlas);
 //          new ScalePrototype(cesiumAtlas);
 //          new MeshPrototype(cesiumAtlas);
-//          new MeshCollectionPrototype(cesiumAtlas);
+//          new MeshPrototype2(cesiumAtlas);
+          new MeshCollectionPrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
 //          new InputPrototype(cesiumAtlas);
 //          new RenderPrototype(cesiumAtlas);

@@ -71,12 +71,14 @@ define([
 
 //            var modes = Objects.values(Feature.DisplayMode);
 //            var nextIndex = 0;
-//            setInterval(function() {
+            setInterval(function() {
 //              nextIndex = (nextIndex + 1) % modes.length;
 //              var mode = modes[nextIndex];
 //              console.log('mode', mode);
 //              feature.setDisplayMode(mode);
-//            }, 4000);
+              console.debug('translate');
+              feature.translate(new GeoPoint(0.0001, 0.0001));
+            }, 4000);
           }
         });
       });
