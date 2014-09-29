@@ -102,7 +102,7 @@ define([
      */
     _createPrimitive: function() {
       var thePrimitive,
-          geometry = this._updateGeometry(),
+          geometry = this._createGeometry(),
           modelMatrix = this._updateModelMatrix(),
           color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
           instance = new GeometryInstance({
@@ -123,7 +123,6 @@ define([
         }),
         debugShowBoundingVolume: false
       });
-      thePrimitive.show = false;
       return thePrimitive;
     },
 
@@ -132,10 +131,9 @@ define([
      * @returns {GeometryInstance}
      * @private
      */
-    _updateGeometry: function() {
+    _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        var theGeometry = {};
         var attributes = new GeometryAttributes({
           position: new GeometryAttribute({
             componentDatatype: ComponentDatatype.DOUBLE,
@@ -153,13 +151,9 @@ define([
         // Force compute normals to fix abnormal normals from winding orders.
         // TODO(Brandon) Gets server to calculate correct normals.
         geometry = GeometryPipeline.computeNormal(geometry);
-
-        theGeometry.attributes = geometry.attributes;
-        theGeometry.indices = geometry.indices;
-        theGeometry.primitiveType = geometry.primitiveType;
-        theGeometry.boundingSphere = geometry.boundingSphere;
+        this._geometry = geometry;
       }
-      return theGeometry || this._geometry;
+      return this._geometry;
     },
 
     _updateModelMatrix: function() {
@@ -219,6 +213,15 @@ define([
         return this._renderManager.geoPointFromCartesian(transformedCartesian);
       }, this);
     },
+
+//  TODO(aramk) This is disabled for now since Mesh doesn't support reusing primitives and
+//  applying a differnet model matrix like Polygon can.
+//    _onTransform: function() {
+//      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
+//      // Cesium.
+//      this.setDirty('modelMatrix');
+//      this._update();
+//    },
 
     /**
      * @returns {Array.<atlas.model.GeoPoint>} The vertices forming a footprint for this mesh

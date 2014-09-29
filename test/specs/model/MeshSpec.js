@@ -37,5 +37,12 @@ define([
       expect(mesh.getCentroid().isCloseTo(centroid)).toBe(true);
     });
 
+    it('can be translated', function() {
+      var oldCentroid = mesh.getCentroid();
+      var value = new GeoPoint({latitude: 0.001, longitude: 0.001});
+      mesh.translate(value);
+      expect(mesh.getCentroid().isCloseTo(oldCentroid.translate(value))).toBe(true);
+    });
+
   });
 });
