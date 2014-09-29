@@ -346,7 +346,6 @@ define([
       var target = centroid.translate(translation);
       this._transformModelMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
-      this._invalidateVertices();
     },
 
     scale: function(scale) {
@@ -354,14 +353,12 @@ define([
       var scaleMatrix = Matrix4.fromScale(scaleCartesian);
       this._transformModelMatrix(this._transformOrigin(scaleMatrix));
       this._super(scale);
-      this._invalidateVertices();
     },
 
     rotate: function(rotation) {
       this._rotation = this.getRotation().translate(rotation);
       this._transformModelMatrix(this._calcRotateMatrix(this._rotation));
       this._super(rotation);
-      this._invalidateVertices();
     },
 
     /**
@@ -453,6 +450,7 @@ define([
       // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
       // Cesium.
       this.setDirty('modelMatrix');
+      this._invalidateGeometry();
       this._update();
     },
 
