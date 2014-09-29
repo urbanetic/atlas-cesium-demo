@@ -11,7 +11,7 @@ define([
     var mesh, centroid, constructArgs;
 
     beforeEach(function() {
-      centroid = new GeoPoint({longitude: 142.1, latitude: 35.5, elevation: 0});
+      centroid = new GeoPoint({longitude: 144.5, latitude: -37.8999, elevation: 0});
       // TODO(aramk) Abstract this for use in other tests which need to full Atlas-Cesium
       // environment set up.
       var cesiumAtlas = new CesiumAtlas();
@@ -34,7 +34,7 @@ define([
 //    });
 
     it('has a centroid', function() {
-      expect(mesh.getCentroid().isCloseTo(centroid)).toBe(true);
+      expect(mesh.getCentroid().isCloseTo(centroid, 3)).toBe(true);
     });
 
     it('can be translated', function() {
