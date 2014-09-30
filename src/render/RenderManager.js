@@ -410,15 +410,23 @@ define([
     },
 
     /**
+     * Converts a GeoPoint to a Cesium Carographic object.
+     * @param {atlas.model.GeoPoint} point - The geographic position.
+     * @returns {Cartographic}
+     */
+    cartographicFromGeoPoint: function(point) {
+      var radCart = point.toRadians();
+      return new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
+    },
+
+    /**
      * Converts a GeoPoint to a Cesium Cartestian3 object.
-     * @param {atlas.model.GeoPoint} cart - The geographic position.
+     * @param {atlas.model.GeoPoint} point - The geographic position.
      * @returns {Cartesian3}
      */
-    cartesianFromGeoPoint: function(cart) {
-      var radCart = cart.toRadians(),
-          ellipsoid = this.getEllipsoid(),
-          cesiumCart = new Cartographic(radCart.longitude, radCart.latitude, radCart.elevation);
-      return ellipsoid.cartographicToCartesian(cesiumCart);
+    cartesianFromGeoPoint: function(point) {
+      var ellipsoid = this.getEllipsoid();
+      return ellipsoid.cartographicToCartesian(this.cartographicFromGeoPoint(point));
     },
 
     /**

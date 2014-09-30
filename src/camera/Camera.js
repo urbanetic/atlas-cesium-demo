@@ -111,10 +111,7 @@ define([
         rectangle = new Rectangle(rectangle);
         destination = rectangle.toCesiumRectangle();
       } else if (position) {
-        var point = position.toRadians();
-        destination = new Cartographic(point.longitude, point.latitude, point.elevation);
-        flightArgs.destination =
-            this._renderManager.getEllipsoid().cartographicToCartesian(destination);
+        destination = this._renderManager.cartesianFromGeoPoint(position);
       } else {
         throw new Error('Either position or rectangle must be provided.');
       }
