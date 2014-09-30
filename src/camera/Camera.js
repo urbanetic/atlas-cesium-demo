@@ -6,8 +6,9 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/util/AtlasMath',
   'atlas/util/DeveloperError',
-  'atlas-cesium/cesium/Source/Core/Cartographic'
-], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, Cartographic) {
+  'atlas-cesium/cesium/Source/Core/Cartographic',
+  'atlas-cesium/model/Rectangle'
+], function(CameraCore, Vertex, Log, Setter, AtlasMath, DeveloperError, Cartographic, Rectangle) {
   /**
    * @class atlas-cesium.camera.Camera
    * @extends atlas.camera.Camera
@@ -93,38 +94,56 @@ define([
 
     _animate: function(args) {
       args = Setter.mixin({}, args);
+      // TODO(aramk) Rename position and rectangle to just "destination".
       var position = args.position,
+          rectangle = args.rectangle,
           orientation = args.orientation,
-          point = position.toRadians();
-      var destination = new Cartographic(point.longitude, point.latitude, point.elevation);
-      destination = this._renderManager.getEllipsoid().cartographicToCartesian(destination);
+          scene = this._renderManager.getScene(),
+          destination;
       var flightArgs = {
-        destination: destination,
         // Cesium uses duration in seconds.
         duration: args.duration / 1000 || 0,
         path: args.path
       };
-      if (!args.direction && orientation) {
-        // TODO(aramk) This is still somewhat problematic - giving default tilt still causes
-        // strange angles and isn't stable when Cesium is loading. Just omit the orientation
-        // if you're using the default during loading for now.
-
-        // Use the given orientation in place of the direction.
-        var cesiumCamera = this._renderManager.getCesiumCamera().clone();
-        cesiumCamera.position = this._getPositionAsCartesian(position);
-        cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
-        cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
-        flightArgs.direction = cesiumCamera.direction;
-        flightArgs.up = cesiumCamera.up;
-        // TODO(aramk) Handle rotation.
+      if (rectangle) {
+        // TODO(aramk) Currently passes atlas model into atlas-cesium constructor. If we had a
+        // factory we would have the right type and not need this.
+        rectangle = new Rectangle(rectangle);
+        destination = rectangle.toCesiumRectangle();
+      } else if (position) {
+        var point = position.toRadians();
+        destination = new Cartographic(point.longitude, point.latitude, point.elevation);
+        flightArgs.destination =
+            this._renderManager.getEllipsoid().cartographicToCartesian(destination);
       } else {
-        flightArgs.direction = args.direction;
-        flightArgs.up = args.up;
+        throw new Error('Either position or rectangle must be provided.');
       }
-      var scene = this._renderManager.getScene();
-      // TODO(aramk) Add support for atlas.camera.PathType back in.
-      scene.camera.flyTo(flightArgs);
-      Log.debug('Animating camera to', position, orientation);
+      flightArgs.destination = destination;
+      if (position) {
+        if (!args.direction && orientation) {
+          // TODO(aramk) This is still somewhat problematic - giving default tilt still causes
+          // strange angles and isn't stable when Cesium is loading. Just omit the orientation
+          // if you're using the default during loading for now.
+
+          // Use the given orientation in place of the direction.
+          var cesiumCamera = this._renderManager.getCesiumCamera().clone();
+          cesiumCamera.position = this._getPositionAsCartesian(position);
+          cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
+          cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
+          flightArgs.direction = cesiumCamera.direction;
+          flightArgs.up = cesiumCamera.up;
+          // TODO(aramk) Handle rotation.
+        } else {
+          flightArgs.direction = args.direction;
+          flightArgs.up = args.up;
+        }
+        // TODO(aramk) Add support for atlas.camera.PathType back in.
+        scene.camera.flyTo(flightArgs);
+        Log.debug('Animating camera to position', position, orientation);
+      } else {
+        scene.camera.flyToRectangle(flightArgs);
+        Log.debug('Animating camera to rectangle', rectangle);
+      }
     }
   });
 });
