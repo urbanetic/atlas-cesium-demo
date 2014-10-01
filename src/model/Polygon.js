@@ -458,8 +458,8 @@ define([
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
-      if (this._primitive) this._primitive.show = visible && fillColor;
-      if (this._outlinePrimitive) this._outlinePrimitive.show = visible && borderColor;
+      if (this._primitive) this._primitive.show = !!(visible && fillColor);
+      if (this._outlinePrimitive) this._outlinePrimitive.show = !!(visible && borderColor);
     },
 
     /**
