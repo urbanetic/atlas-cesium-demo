@@ -236,7 +236,7 @@ define([
     // for now.
     getOpenLayersGeometry: function() {
       var vertices = this._getFootprintVertices();
-      return WKT.getInstance().openLayersPolygonFromVertices(vertices);
+      return WKT.getInstance().openLayersPolygonFromGeoPoints(vertices);
     },
 
     /**
