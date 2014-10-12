@@ -1,12 +1,12 @@
 {
   "dependencies": [
     [
-      "meteor",
-      "1.1.1"
+      "aramk:requirejs",
+      "2.1.14"
     ],
     [
-      "requirejs",
-      "0.0.0"
+      "meteor",
+      "1.1.1"
     ],
     [
       "underscore",
