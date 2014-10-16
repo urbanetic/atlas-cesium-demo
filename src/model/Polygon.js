@@ -157,7 +157,7 @@ define([
               }
             })
           });
-        } else if (isStyleDirty) {
+        } else if (isStyleDirty && this._outlinePrimitive) {
           var timeout = 3000;
           var duration = 0;
           var freq = 100;
