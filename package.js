@@ -3,12 +3,8 @@ Package.describe({
   summary: 'An AGI Cesium <cesiumjs.org> implementation of the Atlas rendering API.'
 });
 
-Package.on_use(function (api) {
-  // Depends on the requirejs package.
-  api.use('requirejs', 'client');
-  // Make the built source code and styles available for the client.
-  api.add_files([
-    'dist/atlas-cesium.min.js',
-    'dist/resources/atlas-cesium.min.css'
-  ], 'client');
+Package.onUse(function(api) {
+  api.use('aramk:requirejs', ['client', 'server']);
+  api.addFiles(['dist/atlas-cesium.min.js'], ['client', 'server']);
+  api.addFiles(['dist/resources/atlas-cesium.min.css'], 'client');
 });

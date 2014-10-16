@@ -91,8 +91,17 @@ define([
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
         Log.debug('updating geometry for entity ' + this.getId());
-        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
-        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
+        // Remove duplicate vertices which cause Cesium to break (4 identical, consecutive vertices
+        // cause the renderer to crash).
+        var vertices = this._vertices.filter(function(point, i) {
+          if (i === 0) {
+            return true;
+          } else {
+            return !this._vertices[i - 1].equals(this._vertices[i]);
+          }
+        }, this);
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
+        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
 
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
@@ -160,37 +169,8 @@ define([
       return this._geometry.geometry instanceof PolylineGeometry;
     },
 
-    show: function() {
-      if (this.isVisible() && this.isRenderable()) {
-        Log.debug('entity ' + this.getId() + ' already visible and correctly rendered');
-      } else {
-        Log.debug('showing entity ' + this.getId());
-        if (!this.isRenderable()) {
-          this._build();
-        }
-      }
-      return this.isRenderable() && this.isVisible();
-    },
-
-    /**
-     * Returns whether this Polygon is visible. Overrides the default Atlas implementation
-     * to use the visibility flag that is set of the Cesium Primitive of the Polygon.
-     * @returns {Boolean} - Whether the Polygon is visible.
-     */
-    isVisible: function() {
-      return this._primitive && this._primitive.show === true;
-    },
-
-    /**
-     * Hides the Polygon.
-     * @returns {Boolean} Whether the polygon is hidden.
-     */
-    hide: function() {
-      if (this.isVisible()) {
-        Log.debug('hiding entity ' + this.getId());
-        this._primitive.show = false;
-      }
-      return !this.isVisible();
+    _updateVisibility: function(visible) {
+      if (this._primitive) this._primitive.show = visible;
     },
 
     /**
@@ -236,7 +216,7 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
-    _createEntityHandle: function () {
+    _createEntityHandle: function() {
       // Line doesn't need a handle on itself.
       return false;
     }

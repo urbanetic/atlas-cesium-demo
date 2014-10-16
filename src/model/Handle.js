@@ -45,7 +45,6 @@ define([
           });
         }
       }
-      this._super();
     },
 
     remove: function() {
@@ -64,15 +63,8 @@ define([
       return billboards;
     },
 
-    show: function() {
-      if (!this.isRenderable()) {
-        this._build();
-      }
-      return this._billboard.show = true;
-    },
-
-    hide: function() {
-      return this._billboard.show = false;
+    _updateVisibility: function (visible) {
+      if (this._billboard) this._billboard.show = visible;
     }
 
   });

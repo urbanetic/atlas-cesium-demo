@@ -1,12 +1,11 @@
 define([
-  'atlas/util/DeveloperError',
   'atlas/util/AtlasMath',
-  'atlas/model/Style',
+  'atlas/util/WKT',
+  'atlas/util/ConvexHullFactory',
+  'atlas/model/GeoPoint',
   'atlas/model/Vertex',
-  'atlas/model/GeoEntity',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
-  'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
@@ -20,18 +19,16 @@ define([
   'atlas-cesium/cesium/Source/Core/Matrix4',
   'atlas-cesium/cesium/Source/Core/PrimitiveType',
   'atlas-cesium/cesium/Source/Core/Transforms',
-  'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
   'atlas-cesium/model/Colour',
   //Base class.
-  'atlas/model/Mesh',
-  'atlas/lib/utility/Log'
-], function(DeveloperError, AtlasMath, Style, Vertex, GeoEntity, BoundingSphere, Cartographic,
+  'atlas/model/Mesh'
+], function(AtlasMath, WKT, ConvexHullFactory, GeoPoint, Vertex, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
-            Matrix4, PrimitiveType, Transforms, MaterialAppearance, PerInstanceColorAppearance,
-            Primitive, Colour, MeshCore, Log) {
+            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
+            MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -75,57 +72,8 @@ define([
      */
     _primitive: null,
 
-    /**
-     * Shows the Mesh. The rendering data is recreated if it has been invalidated.
-     */
-    show: function() {
-      // TODO(bpstudds): Update this to new format.
-      if (!this.isRenderable()) {
-        this._build();
-      } else if (this.isVisible()) {
-        Log.debug('Tried to show entity ' + this.getId() +
-            ', which is already correctly rendered.');
-        return true;
-      }
-      this._selected && this.onSelect();
-      Log.debug('Showing entity', this.getId());
-      this._primitive && (this._primitive.show = true);
-      return this.isRenderable() && this.isVisible();
-    },
-
-    /**
-     * Hides the Mesh.
-     */
-    hide: function() {
-      this._primitive && (this._primitive.show = false);
-    },
-
-    /**
-     * @returns {Boolean} Whether the Mesh is visible.
-     */
-    isVisible: function() {
-      return this._primitive && this._primitive.show === true;
-    },
-
-    onSelect: function() {
-      this._super();
-      var attributes;
-      if (this._primitive) {
-        attributes =
-            this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
-        attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(GeoEntity.getSelectedStyle()).fill);
-      }
-    },
-
-    onDeselect: function() {
-      this._super();
-      if (this._primitive) {
-        var attributes = this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh',
-            ''));
-        attributes.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style._fillColour));
-      }
+    _updateVisibility: function(visible) {
+      if (this._primitive) this._primitive.show = visible;
     },
 
     /**
@@ -133,7 +81,8 @@ define([
      * Cesium.
      */
     _build: function() {
-      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
+      if (!this._primitive || this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model')) {
         if (this._primitive) {
           this._renderManager.getPrimitives().remove(this._primitive);
         }
@@ -142,7 +91,6 @@ define([
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
-      this.clean();
     },
 
     /**
@@ -154,7 +102,7 @@ define([
      */
     _createPrimitive: function() {
       var thePrimitive,
-          geometry = this._updateGeometry(),
+          geometry = this._createGeometry(),
           modelMatrix = this._updateModelMatrix(),
           color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
           instance = new GeometryInstance({
@@ -175,7 +123,6 @@ define([
         }),
         debugShowBoundingVolume: false
       });
-      thePrimitive.show = false;
       return thePrimitive;
     },
 
@@ -184,10 +131,9 @@ define([
      * @returns {GeometryInstance}
      * @private
      */
-    _updateGeometry: function() {
+    _createGeometry: function() {
       // Generate new cartesians if the vertices have changed.
       if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
-        var theGeometry = {};
         var attributes = new GeometryAttributes({
           position: new GeometryAttribute({
             componentDatatype: ComponentDatatype.DOUBLE,
@@ -205,17 +151,13 @@ define([
         // Force compute normals to fix abnormal normals from winding orders.
         // TODO(Brandon) Gets server to calculate correct normals.
         geometry = GeometryPipeline.computeNormal(geometry);
-
-        theGeometry.attributes = geometry.attributes;
-        theGeometry.indices = geometry.indices;
-        theGeometry.primitiveType = geometry.primitiveType;
-        theGeometry.boundingSphere = geometry.boundingSphere;
+        this._geometry = geometry;
       }
-      return theGeometry || this._geometry;
+      return this._geometry;
     },
 
     _updateModelMatrix: function() {
-      var renderManager = this._renderManager;
+      // TODO(aramk) Only update if necessary.
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0, 0, 0);
       }
@@ -229,7 +171,7 @@ define([
             // Input angle must be in radians.
             Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
             new Cartesian3(0, 0, 0));
-        var locationCartesian = renderManager.cartesianFromVertex(this._geoLocation);
+        var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
@@ -243,7 +185,6 @@ define([
      * @private
      */
     _updateAppearance: function() {
-
       if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._appearance) {
           this._appearance =
@@ -253,6 +194,49 @@ define([
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
       }
       return this._appearance;
+    },
+
+    /**
+     * @returns {Array.<atlas.model.GeoPoint>} The final vertices of this Mesh after all
+     * transformations.
+     * @private
+     */
+    _calcVertices: function() {
+      // Remove elevation from positions array.
+      var cartesians = [];
+      for (var i = 0; i < this._positions.length; i += 3) {
+        cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
+      }
+      var modelMatrix = this._updateModelMatrix();
+      return cartesians.map(function(position) {
+        var transformedCartesian = Matrix4.multiplyByPoint(modelMatrix, position, new Cartesian3());
+        return this._renderManager.geoPointFromCartesian(transformedCartesian);
+      }, this);
+    },
+
+//  TODO(aramk) This is disabled for now since Mesh doesn't support reusing primitives and
+//  applying a differnet model matrix like Polygon can.
+//    _onTransform: function() {
+//      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
+//      // Cesium.
+//      this.setDirty('modelMatrix');
+//      this._update();
+//    },
+
+    /**
+     * @returns {Array.<atlas.model.GeoPoint>} The vertices forming a footprint for this mesh
+     * constructed into a convex hull.
+     * @private
+     */
+    _getFootprintVertices: function() {
+      return ConvexHullFactory.getInstance().fromVertices(this._calcVertices());
+    },
+
+    // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
+    // for now.
+    getOpenLayersGeometry: function() {
+      var vertices = this._getFootprintVertices();
+      return WKT.getInstance().openLayersPolygonFromGeoPoints(vertices);
     },
 
     /**

@@ -13,16 +13,30 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'atlas-cesium/test/test-main.js',
+      {pattern: 'atlas/assets/**/*', included: false},
       {pattern: 'atlas/src/**/*.js', included: false},
       {pattern: 'atlas/lib/**/*.js', included: false},
       {pattern: 'atlas-cesium/src/**/*.js', included: false},
       {pattern: 'atlas-cesium/lib/**/*.js', included: false},
-      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false}
+      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false},
+//      {pattern: 'atlas-cesium/lib/cesium/Source/**/*.js', included: false}
     ],
 
     // list of files to exclude
     exclude: [
-      'atlas-cesium/lib/cesium/*',
+//      'atlas-cesium/lib/cesium/**/*',
+      'atlas-cesium/lib/cesium/Apps/**/*',
+      'atlas-cesium/lib/cesium/Build/**/*',
+      'atlas-cesium/lib/cesium/Documentation/**/*',
+      'atlas-cesium/lib/cesium/launches/**/*',
+      'atlas-cesium/lib/cesium/Specs/**/*',
+      'atlas-cesium/lib/cesium/ThirdParty/**/*',
+      'atlas-cesium/lib/cesium/Tools/**/*',
+      // Used locally to keep various other versions of Cesium.
+      'atlas-cesium/lib/cesium_*/**/*',
+//      'atlas-cesium/lib/cesium_b25/**/*',
+//      'atlas-cesium/lib/cesium_b27/**/*',
+//      'atlas-cesium/lib/cesium_b30/**/*',
       '../docs/*',
       '../docs/**/*'
     ],

@@ -1,8 +1,9 @@
 var tests = [];
     specsConfig = [
-      { name: 'model/Handle', run: true },
+      { name: 'camera/Camera', run: true },
       { name: 'model/Ellipse', run: true },
-      { name: 'camera/Camera', run: true }
+      { name: 'model/Handle', run: true },
+      { name: 'model/Mesh', run: true }
     ];
 
 specsConfig.forEach(function (config) {
@@ -26,6 +27,7 @@ requirejs.config({
 
   packages: [
     { name: 'atlas/lib', location: 'atlas/lib'},
+    { name: 'atlas/lib/utility', location: 'atlas/lib/utility/src'},
     { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
     { name: 'atlas', location: 'atlas/src'},
     { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
