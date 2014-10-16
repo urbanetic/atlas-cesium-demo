@@ -1,8 +1,8 @@
 var tests = [];
     specsConfig = [
-//      { name: 'camera/Camera', run: true },
-//      { name: 'model/Ellipse', run: true },
-//      { name: 'model/Handle', run: true },
+      { name: 'camera/Camera', run: true },
+      { name: 'model/Ellipse', run: true },
+      { name: 'model/Handle', run: true },
       { name: 'model/Mesh', run: true }
     ];
 
