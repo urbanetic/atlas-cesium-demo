@@ -193,11 +193,11 @@ define([
         // the transformations have been applied to the underlying vertices and transforming them
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
-        if (isModelDirty) {
-          // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
-          modelMatrix = this._calcRotateMatrix(this.getRotation());
-          this._setModelMatrix(modelMatrix);
-        }
+        // if (isModelDirty) {
+        //   // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
+        //   modelMatrix = this._calcRotateMatrix(this.getRotation());
+        //   this._setModelMatrix(modelMatrix);
+        // }
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
           primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
         }, this);
@@ -356,8 +356,8 @@ define([
     },
 
     rotate: function(rotation) {
-      this._rotation = this.getRotation().translate(rotation);
-      this._transformModelMatrix(this._calcRotateMatrix(this._rotation));
+      // var rotation = this.getRotation().translate(rotation);
+      this._transformModelMatrix(this._calcRotateMatrix(rotation));
       this._super(rotation);
     },
 

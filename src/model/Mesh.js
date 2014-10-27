@@ -72,6 +72,19 @@ define([
      */
     _primitive: null,
 
+    /**
+     * The model matrix applied after primitives are rendered. This is used to perform transient
+     * transformations which are faster than rebuilding the primitives.
+     * @type {Matrix4}
+     */
+    _modelMatrix: null,
+
+    _init: function () {
+      this._super.apply(this, arguments);
+      // TODO(aramk): This overwrites all the matrix transformations in subclass.
+      this._setModelMatrix(this._initModelMatrix());
+    },
+
     _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
     },
@@ -81,6 +94,8 @@ define([
      * Cesium.
      */
     _build: function() {
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
       if (!this._primitive || this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model')) {
         if (this._primitive) {
@@ -91,6 +106,50 @@ define([
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
+
+      // Update model matrix after primitives are visible and ready.
+      var modelMatrix = this._modelMatrix;
+      // var modelMatrix = this._initModelMatrix();
+      // console.log('expected', modelMatrix);
+      // console.log('  actual', this._modelMatrix);
+
+      if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
+        // If the model has been redrawn, then we don't want to apply the existing matrix, since
+        // the transformations have been applied to the underlying vertices and transforming them
+        // again with the matrix would apply the transformation twice. We use the model matrix only
+        // for transformations between rebuilds for performance, so it's safe to remove it.
+        // if (isModelDirty) {
+        //   // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
+        //   modelMatrix = this._calcRotateMatrix(this.getRotation());
+        //   this._setModelMatrix(modelMatrix);
+        // }
+        [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
+          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+        }, this);
+      }
+    },
+
+    /**
+     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
+     * Before this point, setting has no effect and is ignored when the primitive is eventually
+     * ready.
+     * @param primitive
+     * @param modelMatrix
+     * @private
+     */
+    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
+      var timeout = 60000;
+      var freq = 200;
+      var totalTime = 0;
+      var handler = function() {
+        if (totalTime >= timeout || primitive.ready) {
+          primitive.modelMatrix = modelMatrix;
+          clearInterval(handle);
+        }
+        totalTime += freq;
+      };
+      var handle = setInterval(handler, freq);
+      handler();
     },
 
     /**
@@ -103,12 +162,10 @@ define([
     _createPrimitive: function() {
       var thePrimitive,
           geometry = this._createGeometry(),
-          modelMatrix = this._updateModelMatrix(),
           color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
           instance = new GeometryInstance({
             id: this.getId().replace('mesh', ''),
             geometry: geometry,
-            modelMatrix: modelMatrix,
             attributes: {
               color: color
             }
@@ -141,7 +198,6 @@ define([
             values: this._positions
           })
         });
-
         var geometry = new Geometry({
           attributes: attributes,
           indices: this._indices,
@@ -156,16 +212,16 @@ define([
       return this._geometry;
     },
 
-    _updateModelMatrix: function() {
+    _initModelMatrix: function() {
       // TODO(aramk) Only update if necessary.
       if (!(this._rotation instanceof Vertex)) {
         this._rotation = new Vertex(0, 0, 0);
       }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
+      var modelMatrix = Matrix4.IDENTITY.clone();
       if (this.isDirty('entity') || this.isDirty('model')) {
         // The matrix to apply transformations on.
-        var modelMatrix = Matrix4.IDENTITY.clone();
         // Apply rotation, translation and scale transformations.
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
@@ -175,9 +231,9 @@ define([
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
-        this._modelMatrix = modelMatrix;
+        // this._modelMatrix = modelMatrix;
       }
-      return this._modelMatrix;
+      return modelMatrix;
     },
 
     /**
@@ -207,7 +263,8 @@ define([
       for (var i = 0; i < this._positions.length; i += 3) {
         cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
       }
-      var modelMatrix = this._updateModelMatrix();
+      // var modelMatrix = this._updateModelMatrix();
+      var modelMatrix = this._getModelMatrix();
       return cartesians.map(function(position) {
         var transformedCartesian = Matrix4.multiplyByPoint(modelMatrix, position, new Cartesian3());
         return this._renderManager.geoPointFromCartesian(transformedCartesian);
@@ -245,7 +302,129 @@ define([
     remove: function() {
       this._super();
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-    }
+    },
+
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
+
+    // TODO(aramk) These methods are Cesium specific and can be shared across all Atlas-Cesium
+    // subclasses of models - anything that uses a primitive. For this we need mixins to allow
+    // inheriting these as well as their Atlas superclasses.
+
+    translate: function(translation) {
+      var centroid = this.getCentroid();
+      var target = centroid.translate(translation);
+      this._transformModelMatrix(this._translateMatrix(centroid, target));
+      this._super(translation);
+    },
+
+    scale: function(scale) {
+      var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
+      var scaleMatrix = Matrix4.fromScale(scaleCartesian);
+      this._transformModelMatrix(this._transformOrigin(scaleMatrix));
+      this._super(scale);
+    },
+
+    rotate: function(rotation) {
+      // var rotation = this.getRotation().translate(rotation);
+      this._transformModelMatrix(this._calcRotateMatrix(rotation));
+      this._super(rotation);
+    },
+
+    /**
+     * @param {atlas.model.Vertex} rotation
+     * @private
+     */
+    _calcRotateMatrix: function(rotation) {
+      // TODO(aramk) Support rotation in all axes.
+      var rotMatrix = Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
+      return this._transformOrigin(rotMatrix);
+    },
+
+    /**
+     * Used to apply a transformation matrix to the given entity relative to its position, scale and
+     * rotation after construction.
+     * @param {Matrix4} matrix
+     * @returns {Matrix4} The transformation matrix for applying the given matrix as a
+     * transformation after normalising the existing position, scale and rotation to the origin at
+     * the centre of the earth and back.
+     * @private
+     */
+    _transformOrigin: function(matrix) {
+      var centroid = this.getCentroid();
+      var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
+      // This transforms from the centre of the earth to the surface at the given position and
+      // aligns the east and north as the x and y axes. The z is the vector from the centre of the
+      // earth to the surface location and points upward from the earth - it's the normal vector
+      // for the surface of the earth at that location.
+      var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
+      // Since our existing position after construction is NOT the centre of the earth, we must
+      // reverse the above transformation and move the geometry back to the origin, apply the
+      // given matrix transformation, then apply the transformation again.
+      var invOriginMatrix = Matrix4.inverseTransformation(originMatrix, Matrix4.IDENTITY.clone());
+      var modelMatrix = Matrix4.multiply(
+          matrix,
+          invOriginMatrix,
+          Matrix4.IDENTITY.clone());
+      return Matrix4.multiply(originMatrix, modelMatrix, modelMatrix);
+    },
+
+    /**
+     * @param {Matrix4} modelMatrix
+     * @private
+     */
+    _setModelMatrix: function(modelMatrix) {
+      this._modelMatrix = modelMatrix;
+      this.setDirty('modelMatrix');
+    },
+
+    /**
+     * @returns {Matrix4}
+     * @private
+     */
+    _getModelMatrix: function() {
+      // Avoids storing data that may not be used for all polygons.
+      if (!this._modelMatrix) {
+        this._modelMatrix = Matrix4.IDENTITY.clone();
+      }
+      return this._modelMatrix;
+    },
+
+    /**
+     * Applies the given transformation matrix to the existing model matrix.
+     * @param {Matrix4} modelMatrix
+     * @private
+     */
+    _transformModelMatrix: function(modelMatrix) {
+      var oldModelMatrix = this._getModelMatrix();
+      var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
+      this._setModelMatrix(newModelMatrix);
+    },
+
+    /**
+     * @param {atlas.model.GeoPoint} source
+     * @param {atlas.model.GeoPoint} target
+     * @returns {Matrix4} The transformation matrix for moving from the given source to the given
+     * target.
+     * @private
+     */
+    _translateMatrix: function(source, target) {
+      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
+      return Matrix4.fromTranslation(diffCartesian);
+    },
+
+    _onTransform: function() {
+      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
+      // Cesium.
+      this.setDirty('modelMatrix');
+      this._invalidateGeometry();
+      this._update();
+    },
+
   });
 
   return Mesh;
