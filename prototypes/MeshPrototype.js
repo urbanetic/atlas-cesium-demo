@@ -17,6 +17,7 @@ define([
       this.atlas = atlas;
       var entityManager = atlas._managers.entity;
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
+        c3ml.show = false;
         console.log('c3ml', c3ml);
         c3ml.geoLocation = [145.253159238, -37.81175024725, 0];
         atlas.publish('entity/show/bulk', {features: [c3ml]});
@@ -48,8 +49,12 @@ define([
 
         setTimeout(function() {
 //          mesh.setElevation(10);
+          console.log('showing');
           mesh.translate(new GeoPoint(0, 0, 10));
-          mesh.show();
+          atlas.publish('entity/show', {
+            id: id
+          });
+          //mesh.show();
         }, 4000);
 
       });

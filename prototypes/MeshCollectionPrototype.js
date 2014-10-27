@@ -69,16 +69,16 @@ define([
 //              centroidHandle.show();
             });
 
-//            var modes = Objects.values(Feature.DisplayMode);
-//            var nextIndex = 0;
+            var modes = Objects.values(Feature.DisplayMode);
+            var nextIndex = 0;
             setInterval(function() {
-//              nextIndex = (nextIndex + 1) % modes.length;
-//              var mode = modes[nextIndex];
-//              console.log('mode', mode);
-//              feature.setDisplayMode(mode);
+              nextIndex = (nextIndex + 1) % modes.length;
+              var mode = modes[nextIndex];
+              console.log('mode', mode);
+              feature.setDisplayMode(mode);
               console.debug('translate');
               feature.translate(new GeoPoint(0.0001, 0.0001));
-            }, 4000);
+            }, 3000);
           }
         });
       });

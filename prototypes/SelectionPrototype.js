@@ -15,6 +15,10 @@ define([
       atlas.publish('entity/select', {
         ids: ids
       });
+
+      atlas.subscribe('entity/selection/change', function () {
+        console.log('entity/selection/change', arguments);
+      });
     }
 
   });
