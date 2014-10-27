@@ -1,8 +1,9 @@
 define([
   'atlas/lib/utility/Class',
   'atlas/model/GeoPoint',
-  'atlas/model/Vertex'
-], function(Class, GeoPoint, Vertex) {
+  'atlas/model/Vertex',
+  'atlas-cesium/model/Polygon'
+], function(Class, GeoPoint, Vertex, Polygon) {
   return Class.extend({
 
     atlas: null,
@@ -16,7 +17,6 @@ define([
 
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
         c3ml.show = false;
-        console.log('c3ml', c3ml);
         c3ml.geoLocation = feature.getCentroid().toArray();
         atlas.publish('entity/show/bulk', {
           features: [c3ml]
@@ -26,17 +26,58 @@ define([
         var mesh = meshFeature.getForm();
 
         feature.setForm('mesh', mesh);
-        feature.translate(new GeoPoint(0.003, 0.003));
-        feature.setRotation(new Vertex(0, 0, 90));
-        feature.setScale(new Vertex(1.5, 1.5, 4));
+        feature.setDisplayMode('mesh');
 
-        var modeOffset = 0;
-        var modes = ['footprint', 'extrusion', 'mesh'];
+        var vertices = mesh._getFootprintVertices();
+        var polygon = new Polygon('poly123', {
+          vertices: vertices,
+          show: true
+        }, feature._bindDependencies({show: true}));
+        // atlas.publish('entity/show', {
+        //   id: 'poly123',
+
+        // });
+
+        // TODO(aramk) Rotation is not set on the mesh if changed on the feature?
+        mesh.translate(new GeoPoint(0.003, 0.003));
+        // mesh.rotate(new Vertex(0, 0, 15));
+        // mesh.setRotation(new Vertex(0, 0, 15));
+
+        polygon.translate(new GeoPoint(0.003, 0.003));
+        // polygon.rotate(new Vertex(0, 0, 15));
+        // polygon.setRotation(new Vertex(0, 0, 15));
+
         setInterval(function() {
-          var mode = modes[modeOffset % modes.length];
-          feature.setDisplayMode(mode);
-          modeOffset++;
-        }, 3000);
+          polygon.rotate(new Vertex(0, 0, 15));
+          feature.rotate(new Vertex(0, 0, 15));
+        }, 1000);
+
+        // feature.setScale(new Vertex(1.5, 1.5, 4));
+
+        // var modeOffset = 0;
+        // var modes = ['footprint', 'extrusion', 'mesh'];
+        // setInterval(function() {
+        //   var mode = modes[modeOffset % modes.length];
+        //   console.log('mode: ' + mode);
+        //   feature.setDisplayMode(mode);
+        //   modeOffset++;
+        // }, 3000);
+
+        // setInterval(function () {
+        //   console.log('transforming');
+        //   feature.rotate(new Vertex(0, 0, 15));
+        // }, 3000);        
+
+        // setTimeout(function () {
+        //   console.log('transforming');
+        //   feature.translate(new GeoPoint(0.003, 0.003));
+        // }, 3000);
+
+        atlas.publish('camera/zoomTo', {
+          // position: feature.getCentroid()
+          position: polygon.getCentroid()
+        });
+
       });
     }
 
