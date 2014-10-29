@@ -355,34 +355,36 @@ define([
       this._super(scale);
     },
 
-    rotate: function(rotation) {
-      // var rotation = this.getRotation().translate(rotation);
-      this._transformModelMatrix(this._calcRotateMatrix(rotation));
+    rotate: function(rotation, centroid) {
+      centroid = centroid || this.getCentroid();
+      this._transformModelMatrix(this._calcRotateMatrix(rotation, centroid));
       this._super(rotation);
     },
 
     /**
      * @param {atlas.model.Vertex} rotation
+     * @param {atlas.model.GeoPoint} [centroid]
      * @private
      */
-    _calcRotateMatrix: function(rotation) {
+    _calcRotateMatrix: function(rotation, centroid) {
       // TODO(aramk) Support rotation in all axes.
       var rotMatrix = Matrix4.fromRotationTranslation(
           Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._transformOrigin(rotMatrix);
+      return this._transformOrigin(rotMatrix, centroid);
     },
 
     /**
      * Used to apply a transformation matrix to the given entity relative to its position, scale and
      * rotation after construction.
      * @param {Matrix4} matrix
+     * @param {atlas.model.GeoPoint} [centroid]
      * @returns {Matrix4} The transformation matrix for applying the given matrix as a
      * transformation after normalising the existing position, scale and rotation to the origin at
      * the centre of the earth and back.
      * @private
      */
-    _transformOrigin: function(matrix) {
-      var centroid = this.getCentroid();
+    _transformOrigin: function(matrix, centroid) {
+      centroid = centroid || this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
