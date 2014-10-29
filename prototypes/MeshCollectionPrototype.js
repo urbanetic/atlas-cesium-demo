@@ -8,10 +8,11 @@ define([
   'atlas/model/GeoPoint',
   'atlas/model/Style',
   'atlas/model/Colour',
+  'atlas/model/Vertex',
   'atlas-cesium/model/Handle',
   'jquery'
 ], function(ConvexHullGrahamScan, Class, Objects, GeoEntity, Collection, Feature, GeoPoint, Style,
-            Colour, Handle, $) {
+            Colour, Vertex, Handle, $) {
 
   console.log('ConvexHullGrahamScan', ConvexHullGrahamScan);
 
@@ -69,6 +70,8 @@ define([
 //              centroidHandle.show();
             });
 
+            // feature.setDisplayMode('mesh');
+
             var modes = Objects.values(Feature.DisplayMode);
             var nextIndex = 0;
             setInterval(function() {
@@ -78,6 +81,7 @@ define([
               feature.setDisplayMode(mode);
               console.debug('translate');
               feature.translate(new GeoPoint(0.0001, 0.0001));
+              // feature.rotate(new Vertex(0, 0, 15));
             }, 3000);
           }
         });

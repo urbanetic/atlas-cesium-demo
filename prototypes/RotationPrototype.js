@@ -39,17 +39,21 @@ define([
         // });
 
         // TODO(aramk) Rotation is not set on the mesh if changed on the feature?
-        mesh.translate(new GeoPoint(0.003, 0.003));
+        // mesh.translate(new GeoPoint(0.003, 0.003));
         // mesh.rotate(new Vertex(0, 0, 15));
         // mesh.setRotation(new Vertex(0, 0, 15));
 
-        polygon.translate(new GeoPoint(0.003, 0.003));
+        // polygon.translate(new GeoPoint(0.003, 0.003));
         // polygon.rotate(new Vertex(0, 0, 15));
         // polygon.setRotation(new Vertex(0, 0, 15));
 
+
+        feature.scale(new Vertex(0.5, 0.5, 0.5));
         setInterval(function() {
-          polygon.rotate(new Vertex(0, 0, 15));
-          feature.rotate(new Vertex(0, 0, 15));
+          [polygon, feature].forEach(function (entity) {
+            entity.rotate(new Vertex(0, 0, 15));
+            entity.translate(new GeoPoint(0.00005, 0.00005));
+          });
         }, 1000);
 
         // feature.setScale(new Vertex(1.5, 1.5, 4));

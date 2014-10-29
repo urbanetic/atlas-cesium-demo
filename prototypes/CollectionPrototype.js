@@ -1,8 +1,9 @@
 define([
   'atlas/lib/utility/Class',
   'atlas/model/Collection',
-  'atlas/model/Colour'
-], function(Class, Collection, Colour) {
+  'atlas/model/Colour',
+  'atlas/model/Vertex'
+], function(Class, Collection, Colour, Vertex) {
   return Class.extend({
 
     atlas: null,
@@ -21,9 +22,11 @@ define([
       var args = feature._bindDependencies({show: true});
       var collection = new Collection('c1', {entities: featureIds}, args);
 
-      var a = feature.isRenderable();
-      var b = feature.getForm();
-      console.log(a, b);
+      // Rotating a collection should rotate around the collection's centroid rather than that of
+      // each individual component.
+      setInterval(function () {
+        collection.rotate(new Vertex(0, 0, 15));
+      }, 1000);
 
     }
 
