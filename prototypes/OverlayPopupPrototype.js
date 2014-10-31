@@ -1,24 +1,28 @@
 define([
+  'atlas/dom/DomUtil',
   'atlas/lib/utility/Class',
   'atlas/model/Colour',
   'atlas/dom/Overlay'
-], function(Class, Colour, Overlay) {
+], function(DomUtil, Class, Colour, Overlay) {
   return Class.extend({
 
     atlas: null,
 
     _init: function(atlas) {
       this.atlas = atlas;
-      var domNode = atlas._managers.dom.getDom();
+      var atlasDomNode = atlas._managers.dom.getDom();
 
-      // atlas.subscribe('entity/selection/change', function (args) {
-      //   console.log('selection', args);
-      // });
+      $(function() {
+        $('#cesium').css({
+          'margin-left': '100px',
+          'margin-top': '100px'
+        });
+      });
 
       var currentOverlay,
         width = 300,
         height = 100,
-        yBuffer = 10,
+        yBuffer = 20,
         renderManager = atlas._managers.render;
       atlas.subscribe('entity/select', function(args) {
         var id = args.ids[0];
@@ -47,13 +51,14 @@ define([
         currentOverlay && currentOverlay.remove();
         currentOverlay = new Overlay({
           content: 'Overlay',
-          parent: domNode,
+          parent: atlasDomNode,
           position: position,
           dimensions: {
             height: height,
             width: width
           }
         });
+        DomUtil.constrainPositionWithin(currentOverlay.getDom(), atlasDomNode);
         // TODO(aramk) Ensure the overlay is within the bounds of the window.
         console.log('select', currentOverlay, entity);
       });
