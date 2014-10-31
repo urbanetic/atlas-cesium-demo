@@ -109,17 +109,20 @@
           './prototypes/ProjectionPrototype',
           './prototypes/CollectionPrototype',
           './prototypes/SelectionPrototype',
+          './prototypes/PolygonTransformPrototype',
+          './prototypes/OverlayPopupPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
                     MeshCollectionPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    CollectionPrototype, SelectionPrototype, Log) {
+                    CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
+                    OverlayPopupPrototype, Log) {
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
-//          new DrawPrototype(cesiumAtlas);
+         // new DrawPrototype(cesiumAtlas);
 //          new TranslatePrototype(cesiumAtlas);
-         new RotationPrototype(cesiumAtlas);
+         // new RotationPrototype(cesiumAtlas);
 //          new ScalePrototype(cesiumAtlas);
 //          new MeshPrototype(cesiumAtlas);
 //          new MeshPrototype2(cesiumAtlas);
@@ -133,6 +136,8 @@
 //          new ProjectionPrototype(cesiumAtlas);
          // new CollectionPrototype(cesiumAtlas);
          // new SelectionPrototype(cesiumAtlas);
+         // new PolygonTransformPrototype(cesiumAtlas);
+         new OverlayPopupPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);

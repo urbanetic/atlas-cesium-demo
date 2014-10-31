@@ -14,8 +14,6 @@ define([
 ], function(ConvexHullGrahamScan, Class, Objects, GeoEntity, Collection, Feature, GeoPoint, Style,
             Colour, Vertex, Handle, $) {
 
-  console.log('ConvexHullGrahamScan', ConvexHullGrahamScan);
-
   return Class.extend({
 
     atlas: null,
