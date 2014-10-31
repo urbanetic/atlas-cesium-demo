@@ -369,7 +369,7 @@ define([
      */
     screenCoordsFromGeoPoint: function(point) {
       var position = this.cartesianFromGeoPoint(point);
-      var cartesian = SceneTransforms.wgs84ToDrawingBufferCoordinates(this.getScene(), position);
+      var cartesian = SceneTransforms.wgs84ToWindowCoordinates(this.getScene(), position);
       return new Vertex(cartesian);
     },
 
