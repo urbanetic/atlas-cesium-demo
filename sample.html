@@ -98,6 +98,7 @@
           './prototypes/ScalePrototype',
           './prototypes/MeshPrototype',
           './prototypes/MeshPrototype2',
+          './prototypes/MeshPrototype3',
           './prototypes/MeshCollectionPrototype',
           './prototypes/LinePrototype',
           './prototypes/GeocoderPrototype',
@@ -112,11 +113,11 @@
           './prototypes/OverlayPopupPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
-                    RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
-                    MeshCollectionPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
-                    RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
-                    OverlayPopupPrototype, Log) {
+                    RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
+                    MeshPrototype3, MeshCollectionPrototype, LinePrototype, GeocoderPrototype, 
+                    InputPrototype, RenderPrototype, StylePrototype, EventPrototype, 
+                    ProjectionPrototype, CollectionPrototype, SelectionPrototype, 
+                    PolygonTransformPrototype, OverlayPopupPrototype, Log) {
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
          // new DrawPrototype(cesiumAtlas);
@@ -125,6 +126,7 @@
 //          new ScalePrototype(cesiumAtlas);
 //          new MeshPrototype(cesiumAtlas);
 //          new MeshPrototype2(cesiumAtlas);
+         new MeshPrototype3(cesiumAtlas);
          // new MeshCollectionPrototype(cesiumAtlas);
 //          new LinePrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
@@ -136,7 +138,7 @@
          // new CollectionPrototype(cesiumAtlas);
          // new SelectionPrototype(cesiumAtlas);
          // new PolygonTransformPrototype(cesiumAtlas);
-         new OverlayPopupPrototype(cesiumAtlas);
+         // new OverlayPopupPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);
