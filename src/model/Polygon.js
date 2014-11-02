@@ -499,8 +499,9 @@ define([
      * before any changes on the vertices take place.
      */
     _copyOrigVertices: function () {
+      this._initOrigVertices();
       if (this._origVertices === this._vertices) {
-        this._origVertices = Setter.clone(this._vertices);
+        this._origVertices = Setter.cloneDeep(this._vertices);
       }
       return this._origVertices;
     },
