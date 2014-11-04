@@ -344,6 +344,7 @@ define([
       var pickedPrimitives = this.getScene().drillPick(screenCoords);
       var pickedIds = [];
       pickedPrimitives.forEach(function(p) {
+        // NOTE: This is the geometry ID assigned in the model implementations.
         pickedIds.push(p.id);
       });
       return pickedIds;

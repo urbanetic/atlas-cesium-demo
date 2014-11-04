@@ -164,7 +164,7 @@ define([
           geometry = this._createGeometry(),
           color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
           instance = new GeometryInstance({
-            id: this.getId().replace('mesh', ''),
+            id: this.getId(),
             geometry: geometry,
             attributes: {
               color: color
@@ -243,8 +243,7 @@ define([
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
         if (!this._appearance) {
-          this._appearance =
-              this._primitive.getGeometryInstanceAttributes(this.getId().replace('mesh', ''));
+          this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
         }
         this._appearance.color =
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));

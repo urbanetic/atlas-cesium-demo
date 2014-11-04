@@ -275,7 +275,7 @@ define([
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
-      var geometryId = this.getId().replace('polygon', '');
+      var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
