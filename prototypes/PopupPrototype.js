@@ -1,9 +1,8 @@
 define([
   'atlas/dom/DomUtil',
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
   'atlas/dom/Overlay'
-], function(DomUtil, Class, Colour, Overlay) {
+], function(DomUtil, Class, Overlay) {
   return Class.extend({
 
     atlas: null,
@@ -18,6 +17,8 @@ define([
           'margin-top': '100px'
         });
       });
+
+      // This prototype is now atlas.dom.Popup.
 
       var currentOverlay,
         width = 300,

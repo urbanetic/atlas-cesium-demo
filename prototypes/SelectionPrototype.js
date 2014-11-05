@@ -23,6 +23,10 @@ define([
       atlas.subscribe('entity/select', function () {
         console.log('entity/select', arguments);
       });
+
+      atlas.subscribe('entity/deselect', function () {
+        console.log('entity/deselect', arguments);
+      });
     }
 
   });
