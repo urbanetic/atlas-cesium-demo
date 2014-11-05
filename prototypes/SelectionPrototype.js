@@ -19,6 +19,10 @@ define([
       atlas.subscribe('entity/selection/change', function () {
         console.log('entity/selection/change', arguments);
       });
+
+      atlas.subscribe('entity/select', function () {
+        console.log('entity/select', arguments);
+      });
     }
 
   });
