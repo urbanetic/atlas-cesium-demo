@@ -17,29 +17,12 @@ define([
    * The facade of the atlas-cesium implementation.
    * @class atlas-cesium.core.CesiumAtlas
    */
-  CesiumAtlas = Atlas.extend(/** @lends atlas-cesium.core.CesiumAtlas# */{
+  CesiumAtlas = Atlas.extend( /** @lends atlas-cesium.core.CesiumAtlas# */ {
 
-    _init: function() {
+    _initManagers: function() {
       this._super();
-
-      this.setManager(new RenderManager(this._managers));
-      this.setManager(new DomManager(this._managers));
-      this.setManager(new InputManager(this._managers));
-      this.setManager(new CameraManager(this._managers));
-
-      /**
-       * Contains a map of event name to EventHandler object.
-       * @type {Object}
-       * @private
-       */
-      this._eventHandlers = {};
-    },
-
-    _setup: function() {
-      this._super();
-      this._managers.camera.setup();
-      this._managers.edit.setup();
-      this._managers.render.setup();
+      [CameraManager, DomManager, EntityManager, InputManager, RenderManager].forEach(
+        this.addManagerClass, this);
     },
 
     /**
