@@ -19,15 +19,49 @@ define([
         });
       });
 
-      var currentOverlay,
-        width = 300,
-        height = 100,
-        yBuffer = 20,
-        renderManager = atlas._managers.render;
-      atlas.subscribe('entity/select', function(args) {
+      var entityManager = atlas._managers.entity;
 
-        
-        
+      var features = entityManager.getFeatures();
+      features.forEach(function(feature) {
+        atlas.publish('popup/onSelection', {
+          entity: feature,
+          content: function(args) {
+            var entity = args.entity;
+            return '<div>A brief description of the entity.</div>' + 
+            '<div>Area: ' + entity.getArea() + '</div>';
+          },
+          title: function(args) {
+            var entity = args.entity;
+            return 'Entity: ' + entity.getId();
+          },
+          onCreate: function(popup) {
+
+          }
+        });
+        // var featurePopup;
+        // var initPopup = function() {
+        //   if (featurePopup) return;
+        //   atlas.publish('popup/create', {
+        //     entity: feature,
+        //     content: 'Test',
+        //     dimensions: {
+        //       width: 300,
+        //       height: 200
+        //     },
+        //     callback: function(popup) {
+        //       featurePopup = popup;
+        //     }
+        //   });
+        // };
+        // feature.addEventListener('entity/select', function(event) {
+        //   initPopup();
+        //   console.error('popup select');
+        //   featurePopup.show();
+        // }, {ignoreBubbled: true});
+        // feature.addEventListener('entity/deselect', function(event) {
+        //   console.error('popup deselect');
+        //   featurePopup.hide();
+        // }, {ignoreBubbled: true});
       });
 
     }
