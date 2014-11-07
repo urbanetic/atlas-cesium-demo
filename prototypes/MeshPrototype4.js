@@ -64,6 +64,22 @@ define([
           console.log('entity/dblclick', arguments);
         });
 
+        atlas.publish('popup/onSelection', {
+          entity: feature,
+          content: function(args) {
+            var entity = args.entity;
+            return '<div>A brief description of the entity.</div>' + 
+            '<div>Area: ' + entity.getArea() + '</div>';
+          },
+          title: function(args) {
+            var entity = args.entity;
+            return 'Entity: ' + entity.getId();
+          },
+          onCreate: function(popup) {
+
+          }
+        });
+
       });
 
     }
