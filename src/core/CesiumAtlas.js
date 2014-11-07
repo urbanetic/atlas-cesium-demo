@@ -22,18 +22,7 @@ define([
     _initManagers: function() {
       this._super();
       [CameraManager, DomManager, EntityManager, InputManager, RenderManager].forEach(
-        this.addManagerClass, this);
-    },
-
-    /**
-     * Attaches the CesiumAtlas instance to a particular DOM element.
-     * @param {String|HTMLElement} elem - The DOM element to attach to.
-     */
-    attachTo: function(elem) {
-      var dom = typeof elem === 'string' ? document.getElementById(elem) : elem;
-      this._managers.dom.setDom(dom, true);
-      // Hook up the InputManager to the selected DOM element.
-      this._managers.input.setup(dom);
+        this.setManagerClass, this);
     }
 
   });
