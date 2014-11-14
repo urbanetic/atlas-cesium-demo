@@ -1,4 +1,5 @@
 define([
+  'atlas/lib/utility/Setter',
   // Base class
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
@@ -19,10 +20,10 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3, GeometryInstance,
-            PolygonGeometry, PolygonOutlineGeometry, ColorGeometryInstanceAttribute, VertexFormat,
-            Matrix3, Matrix4, Transforms, Primitive, Material, PerInstanceColorAppearance,
-            EllipsoidSurfaceAppearance) {
+], function(Setter, PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3,
+            GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
+            ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
+            Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -86,6 +87,14 @@ define([
      */
     _modelMatrix: null,
 
+    /**
+     * A copy of the original vertices which are used when constructing the primitives. The model
+     * matrix is then applied, ensuring the final vertices of the primitives are equal to the actual
+     * vertices.
+     * @type {Array.<atlas.model.GeoPoint>}
+     */
+    _origVertices: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -93,6 +102,12 @@ define([
     // -------------------------------------------
     // CONSTRUCTION
     // -------------------------------------------
+
+    // _init: function() {
+    //   this._super.apply(this, arguments);
+    //   // Use copy-on-write for vertices to reduce memory usage.
+    //   this._origVertices = this._vertices;
+    // },
 
     /**
      * Builds the geometry and appearance data required to render the Polygon in
@@ -186,18 +201,12 @@ define([
         }
       }
       this._addPrimitives();
-      // Update model matrix after primitives are visible and ready.
       var modelMatrix = this._modelMatrix;
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
         // If the model has been redrawn, then we don't want to apply the existing matrix, since
         // the transformations have been applied to the underlying vertices and transforming them
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
-        if (isModelDirty) {
-          // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
-          modelMatrix = this._calcRotateMatrix(this.getRotation());
-          this._setModelMatrix(modelMatrix);
-        }
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
           primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
         }, this);
@@ -266,23 +275,22 @@ define([
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
-      var geometryId = this.getId().replace('polygon', '');
+      var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      // Generate new cartesians if the vertices have changed.
-      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
-        if (this._vertices.length === 0) {
-          return;
-        }
-        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(this._vertices);
-        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(this._vertices);
-      }
       var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
       var shouldCreateOutlineGeometry = borderColor && (isModelDirty || !this._outlineGeometry);
       if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
         return;
       }
-
+      var vertices = this._initOrigVertices();
+      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
+        if (vertices.length === 0) {
+          return;
+        }
+        this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
+        this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
+      }
       // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
       var elevation = this._minTerrainElevation + this._elevation +
           this._zIndex * this._zIndexOffset;
@@ -342,6 +350,7 @@ define([
     // inheriting these as well as their Atlas superclasses.
 
     translate: function(translation) {
+      this._copyOrigVertices();
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
       this._transformModelMatrix(this._translateMatrix(centroid, target));
@@ -349,40 +358,44 @@ define([
     },
 
     scale: function(scale) {
+      this._copyOrigVertices();
       var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
       var scaleMatrix = Matrix4.fromScale(scaleCartesian);
       this._transformModelMatrix(this._transformOrigin(scaleMatrix));
       this._super(scale);
     },
 
-    rotate: function(rotation) {
-      this._rotation = this.getRotation().translate(rotation);
-      this._transformModelMatrix(this._calcRotateMatrix(this._rotation));
+    rotate: function(rotation, centroid) {
+      this._copyOrigVertices();
+      centroid = centroid || this.getCentroid();
+      this._transformModelMatrix(this._calcRotateMatrix(rotation, centroid));
       this._super(rotation);
     },
 
     /**
      * @param {atlas.model.Vertex} rotation
+     * @param {atlas.model.GeoPoint} [centroid]
      * @private
      */
-    _calcRotateMatrix: function(rotation) {
+    _calcRotateMatrix: function(rotation, centroid) {
       // TODO(aramk) Support rotation in all axes.
       var rotMatrix = Matrix4.fromRotationTranslation(
           Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._transformOrigin(rotMatrix);
+      return this._transformOrigin(rotMatrix, centroid);
     },
 
     /**
      * Used to apply a transformation matrix to the given entity relative to its position, scale and
      * rotation after construction.
      * @param {Matrix4} matrix
+     * @param {atlas.model.GeoPoint} [centroid]
      * @returns {Matrix4} The transformation matrix for applying the given matrix as a
      * transformation after normalising the existing position, scale and rotation to the origin at
      * the centre of the earth and back.
      * @private
      */
-    _transformOrigin: function(matrix) {
-      var centroid = this.getCentroid();
+    _transformOrigin: function(matrix, centroid) {
+      centroid = centroid || this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
@@ -447,8 +460,8 @@ define([
     },
 
     _onTransform: function() {
-      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
-      // Cesium.
+      // Avoids superclass from setting "model" to dirty when transforming since we use the matrix
+      // transformations in Cesium.
       this.setDirty('modelMatrix');
       this._invalidateGeometry();
       this._update();
@@ -468,6 +481,29 @@ define([
     remove: function() {
       this._super();
       this._removePrimitives();
+    },
+
+    /**
+     * Sets the {@link #._origVertices} as a reference to the current vertices. This should be
+     * called before any code that uses it.
+     */
+    _initOrigVertices: function () {
+      if (!this._origVertices) {
+        this._origVertices = this._vertices;
+      }
+      return this._origVertices;
+    },
+
+    /**
+     * Sets the {@link #._origVertices} as a copy of the existing vertices. This should be called
+     * before any changes on the vertices take place.
+     */
+    _copyOrigVertices: function () {
+      this._initOrigVertices();
+      if (this._origVertices === this._vertices) {
+        this._origVertices = Setter.cloneDeep(this._vertices);
+      }
+      return this._origVertices;
     },
 
     _getCesiumColors: function() {

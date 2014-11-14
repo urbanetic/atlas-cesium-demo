@@ -344,6 +344,7 @@ define([
       var pickedPrimitives = this.getScene().drillPick(screenCoords);
       var pickedIds = [];
       pickedPrimitives.forEach(function(p) {
+        // NOTE: This is the geometry ID assigned in the model implementations.
         pickedIds.push(p.id);
       });
       return pickedIds;
@@ -369,7 +370,7 @@ define([
      */
     screenCoordsFromGeoPoint: function(point) {
       var position = this.cartesianFromGeoPoint(point);
-      var cartesian = SceneTransforms.wgs84ToDrawingBufferCoordinates(this.getScene(), position);
+      var cartesian = SceneTransforms.wgs84ToWindowCoordinates(this.getScene(), position);
       return new Vertex(cartesian);
     },
 
