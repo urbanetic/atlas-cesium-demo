@@ -1,9 +1,17 @@
 {
   "name": "atlas-cesium",
-  "version": "0.0.0",
+  "version": "0.7.0-beta",
   "description": "An AGI Cesium <cesiumjs.org> implementation of the Atlas rendering API.",
-  "author": "Brendan Studds <brendan.studds@gmail.com>",
-  "private": "true",
+  "contributors": [
+    {
+      "name": "Brendan Studds",
+      "email": "brendan.studds@gmail.com"
+    },
+    {
+      "name": "Aram Kocharyan",
+      "email": "akarmenia@gmail.com"
+    }
+  ],
   "license": "MIT",
   "directories": {
     "doc": "docs",
