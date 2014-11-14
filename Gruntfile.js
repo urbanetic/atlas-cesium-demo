@@ -239,7 +239,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('fix-build-style', 'Fix the Cesium style import', function() {
-    replaceFile(STYLE_BUILD_FILE_PATH, function(data) {
+    writeFile(STYLE_BUILD_FILE_PATH, function(data) {
       return data.replace("@import '../lib/cesium", "@import '../cesium");
     });
   });
@@ -321,9 +321,11 @@ module.exports = function(grunt) {
     return fs.readFileSync(file, {encoding: 'utf-8'});
   }
 
-  function replaceFile(file, callback) {
-    var data = readFile(file);
-    fs.writeFileSync(file, callback(data));
+  function writeFile(file, data) {
+    if (typeof data === 'function') {
+      data = data(readFile(file));
+    }
+    fs.writeFileSync(file, data);
   }
 
   function _prefixPath(dir, args) {
