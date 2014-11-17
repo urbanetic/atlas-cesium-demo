@@ -2,7 +2,7 @@
   "dependencies": [
     [
       "aramk:requirejs",
-      "2.1.15"
+      "2.1.15_1"
     ],
     [
       "meteor",
