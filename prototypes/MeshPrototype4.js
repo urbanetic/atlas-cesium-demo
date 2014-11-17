@@ -64,6 +64,7 @@ define([
           console.log('entity/dblclick', arguments);
         });
 
+        // Set up popup for the feature to show for both the mesh and the polygon.
         atlas.publish('popup/onSelection', {
           entity: feature,
           content: function(args) {
@@ -76,7 +77,6 @@ define([
             return 'Entity: ' + entity.getId();
           },
           onCreate: function(popup) {
-
           }
         });
 

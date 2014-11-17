@@ -68,9 +68,10 @@ define([
 //              centroidHandle.show();
             });
 
-            // feature.setDisplayMode('mesh');
+            feature.setDisplayMode('mesh');
 
-            var modes = Objects.values(Feature.DisplayMode);
+            // Switch between all modes.
+            var modes = ['footprint', 'extrusion', 'mesh'];
             var nextIndex = 0;
             setInterval(function() {
               nextIndex = (nextIndex + 1) % modes.length;
@@ -81,6 +82,22 @@ define([
               feature.translate(new GeoPoint(0.0001, 0.0001));
               // feature.rotate(new Vertex(0, 0, 15));
             }, 3000);
+
+            // Set up popup for the feature to show for both the mesh and the polygon.
+            atlas.publish('popup/onSelection', {
+              entity: feature,
+              content: function(args) {
+                var entity = args.entity;
+                return '<div>A brief description of the entity.</div>' + 
+                '<div>Area: ' + entity.getArea() + '</div>';
+              },
+              title: function(args) {
+                var entity = args.entity;
+                return 'Entity: ' + entity.getId();
+              },
+              onCreate: function(popup) {
+              }
+            });
           }
         });
       });

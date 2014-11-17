@@ -38,30 +38,6 @@ define([
 
           }
         });
-        // var featurePopup;
-        // var initPopup = function() {
-        //   if (featurePopup) return;
-        //   atlas.publish('popup/create', {
-        //     entity: feature,
-        //     content: 'Test',
-        //     dimensions: {
-        //       width: 300,
-        //       height: 200
-        //     },
-        //     callback: function(popup) {
-        //       featurePopup = popup;
-        //     }
-        //   });
-        // };
-        // feature.addEventListener('entity/select', function(event) {
-        //   initPopup();
-        //   console.error('popup select');
-        //   featurePopup.show();
-        // }, {ignoreBubbled: true});
-        // feature.addEventListener('entity/deselect', function(event) {
-        //   console.error('popup deselect');
-        //   featurePopup.hide();
-        // }, {ignoreBubbled: true});
       });
 
     }
