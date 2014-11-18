@@ -75,7 +75,7 @@ define([
           this._renderManager.getPrimitives().remove(this._primitive);
         }
         this._primitive = this._createPrimitive();
-        this._renderManager.getPrimitives().add(this._primitive);
+        this._primitive && this._renderManager.getPrimitives().add(this._primitive);
       } else if (this.isDirty('style')) {
         this._updateAppearance();
       }
@@ -83,13 +83,16 @@ define([
     },
 
     /**
-     * Updates the geometry data as required.
+     * Creates the geometry data as required.
      * @returns {GeometryInstance}
      * @private
      */
-    _updateGeometry: function() {
+    _createGeometry: function() {
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+          this.isDirty('model');
+      var shouldCreateGeometry = isModelDirty || !this._geometry;
       // Generate new cartesians if the vertices have changed.
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
+      if (shouldCreateGeometry) {
         Log.debug('updating geometry for entity ' + this.getId());
         // Remove duplicate vertices which cause Cesium to break (4 identical, consecutive vertices
         // cause the renderer to crash).
@@ -100,6 +103,9 @@ define([
             return !this._vertices[i - 1].equals(this._vertices[i]);
           }
         }, this);
+        if (vertices.length < 2) {
+          return;
+        }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
@@ -149,17 +155,15 @@ define([
      * @private
      */
     _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style')) {
+      if (this.isDirty('entity') || this.isDirty('style') || !this._appearance) {
         Log.debug('updating appearance for entity ' + this.getId());
-        if (!this._appearance) {
-          if (this._isPolyline()) {
-            this._appearance = new PolylineColorAppearance();
-          } else {
-            this._appearance = new PerInstanceColorAppearance({
-              closed: true,
-              translucent: false
-            });
-          }
+        if (this._isPolyline()) {
+          this._appearance = new PolylineColorAppearance();
+        } else {
+          this._appearance = new PerInstanceColorAppearance({
+            closed: true,
+            translucent: false
+          });
         }
       }
       return this._appearance;
@@ -170,7 +174,9 @@ define([
     },
 
     _updateVisibility: function(visible) {
-      if (this._primitive) this._primitive.show = visible;
+      if (this._primitive) {
+        this._primitive.show = visible
+      }
     },
 
     /**
@@ -203,7 +209,8 @@ define([
     _createPrimitive: function() {
       Log.debug('creating primitive for entity', this.getId());
       // TODO(aramk) _geometry isn't actually set.
-      this._geometry = this._updateGeometry();
+      this._geometry = this._createGeometry();
+      if (!this._geometry) return;
       this._appearance = this._updateAppearance();
       return new Primitive({
         geometryInstances: this.getGeometry(),

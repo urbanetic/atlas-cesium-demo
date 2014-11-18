@@ -285,7 +285,7 @@ define([
       }
       var vertices = this._initOrigVertices();
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
-        if (vertices.length === 0) {
+        if (vertices.length < 3) {
           return;
         }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
