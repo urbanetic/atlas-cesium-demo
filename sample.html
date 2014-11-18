@@ -94,6 +94,7 @@
           './prototypes/CameraPrototype',
           './prototypes/EditPrototype',
           './prototypes/DrawPrototype',
+          './prototypes/LineDrawPrototype',
           './prototypes/TranslatePrototype',
           './prototypes/RotationPrototype',
           './prototypes/ScalePrototype',
@@ -115,7 +116,7 @@
           './prototypes/PopupPrototype',
           './prototypes/PopupPrototype2',
           'atlas/lib/utility/Log'
-        ], function(CameraPrototype, EditPrototype, DrawPrototype, TranslatePrototype,
+        ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
                     MeshPrototype3, MeshPrototype4, MeshCollectionPrototype, LinePrototype, 
                     GeocoderPrototype, InputPrototype, RenderPrototype, StylePrototype, 
@@ -124,6 +125,7 @@
 //          new CameraPrototype(cesiumAtlas);
 //          new EditPrototype(cesiumAtlas);
          // new DrawPrototype(cesiumAtlas);
+         new LineDrawPrototype(cesiumAtlas);
 //          new TranslatePrototype(cesiumAtlas);
          // new RotationPrototype(cesiumAtlas);
 //          new ScalePrototype(cesiumAtlas);
@@ -131,7 +133,7 @@
 //          new MeshPrototype2(cesiumAtlas);
          // new MeshPrototype3(cesiumAtlas);
          // new MeshPrototype4(cesiumAtlas);
-         new MeshCollectionPrototype(cesiumAtlas);
+         // new MeshCollectionPrototype(cesiumAtlas);
 //          new LinePrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
 //          new InputPrototype(cesiumAtlas);
