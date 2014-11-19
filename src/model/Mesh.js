@@ -119,7 +119,6 @@ define([
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
         // if (isModelDirty) {
-        //   // TODO(aramk) Rotation transformation doesn't affect vertices yet in Atlas, so only apply
         //   modelMatrix = this._calcRotateMatrix(this.getRotation());
         //   this._setModelMatrix(modelMatrix);
         // }
@@ -259,25 +258,16 @@ define([
     _calcVertices: function() {
       // Remove elevation from positions array.
       var cartesians = [];
+      // Uses x,y coordinates from the 1D array of positions.
       for (var i = 0; i < this._positions.length; i += 3) {
         cartesians.push(new Cartesian3(this._positions[i], this._positions[i + 1]));
       }
-      // var modelMatrix = this._updateModelMatrix();
       var modelMatrix = this._getModelMatrix();
       return cartesians.map(function(position) {
         var transformedCartesian = Matrix4.multiplyByPoint(modelMatrix, position, new Cartesian3());
         return this._renderManager.geoPointFromCartesian(transformedCartesian);
       }, this);
     },
-
-//  TODO(aramk) This is disabled for now since Mesh doesn't support reusing primitives and
-//  applying a differnet model matrix like Polygon can.
-//    _onTransform: function() {
-//      // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
-//      // Cesium.
-//      this.setDirty('modelMatrix');
-//      this._update();
-//    },
 
     /**
      * @returns {Array.<atlas.model.GeoPoint>} The vertices forming a footprint for this mesh
@@ -314,46 +304,62 @@ define([
     translate: function(translation) {
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
-      this._transformModelMatrix(this._translateMatrix(centroid, target));
+      this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
     },
 
     scale: function(scale) {
       var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
       var scaleMatrix = Matrix4.fromScale(scaleCartesian);
-      this._transformModelMatrix(this._transformOrigin(scaleMatrix));
+      this._calcTranslateMatrix(this._calcTransformOriginMatrix(scaleMatrix));
       this._super(scale);
     },
 
     rotate: function(rotation, centroid) {
       centroid = centroid || this.getCentroid();
-      this._transformModelMatrix(this._calcRotateMatrix(rotation, centroid));
+      this._calcTranslateMatrix(this._calcRotateMatrix(rotation, centroid));
       this._super(rotation);
     },
 
     /**
+     * Applies the given transformation matrix to the existing model matrix.
+     * @param {Matrix4} modelMatrix
+     * @private
+     */
+    _calcTranslateMatrix: function(modelMatrix) {
+      var oldModelMatrix = this._getModelMatrix();
+      // Matrix4.IDENTITY is a reference to an immutable identity matrix so we need to clone it.
+      var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
+      this._setModelMatrix(newModelMatrix);
+    },
+
+    /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid]
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * transformation.
+     * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
+     * given point.
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
       // TODO(aramk) Support rotation in all axes.
       var rotMatrix = Matrix4.fromRotationTranslation(
           Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._transformOrigin(rotMatrix, centroid);
+      return this._calcTransformOriginMatrix(rotMatrix, centroid);
     },
 
     /**
      * Used to apply a transformation matrix to the given entity relative to its position, scale and
      * rotation after construction.
      * @param {Matrix4} matrix
-     * @param {atlas.model.GeoPoint} [centroid]
+     * @param {atlas.model.GeoPoint} [centroid] The point to use as the starting point for the
+     * transformation.
      * @returns {Matrix4} The transformation matrix for applying the given matrix as a
      * transformation after normalising the existing position, scale and rotation to the origin at
      * the centre of the earth and back.
      * @private
      */
-    _transformOrigin: function(matrix, centroid) {
+    _calcTransformOriginMatrix: function(matrix, centroid) {
       centroid = centroid || this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
@@ -391,17 +397,6 @@ define([
         this._modelMatrix = Matrix4.IDENTITY.clone();
       }
       return this._modelMatrix;
-    },
-
-    /**
-     * Applies the given transformation matrix to the existing model matrix.
-     * @param {Matrix4} modelMatrix
-     * @private
-     */
-    _transformModelMatrix: function(modelMatrix) {
-      var oldModelMatrix = this._getModelMatrix();
-      var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
-      this._setModelMatrix(newModelMatrix);
     },
 
     /**
