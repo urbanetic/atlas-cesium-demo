@@ -70,7 +70,9 @@ define([
     // -------------------------------------------
 
     _build: function() {
-      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+        this.isDirty('model');
+      if (!this._primitive || isModelDirty) {
         if (this._primitive) {
           this._renderManager.getPrimitives().remove(this._primitive);
         }
@@ -89,7 +91,7 @@ define([
      */
     _createGeometry: function() {
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
-          this.isDirty('model');
+        this.isDirty('model');
       var shouldCreateGeometry = isModelDirty || !this._geometry;
       // Generate new cartesians if the vertices have changed.
       if (shouldCreateGeometry) {
