@@ -2,8 +2,9 @@ define([
   'atlas/dom/DomUtil',
   'atlas/lib/utility/Class',
   'atlas/dom/PopupManager',
-  'atlas/dom/Popup'
-], function(DomUtil, Class, PopupManager, Popup) {
+  'atlas/dom/Popup',
+  'atlas/events/Event'
+], function(DomUtil, Class, PopupManager, Popup, Event) {
   return Class.extend({
 
     atlas: null,
@@ -39,6 +40,23 @@ define([
           }
         });
       });
+
+      // Removing the entity should remove the popup.
+      // var someFeature = features[0];
+      // setTimeout(function() {
+      //   var event = new Event(someFeature, 'entity/select', {ids: [someFeature.getId()]});
+      //   someFeature.dispatchEvent(event);
+      //   setTimeout(function() {
+      //     someFeature.remove();
+      //   }, 2000);
+      // }, 2000);
+
+      // Only one popup should appear at once.
+      setTimeout(function() {
+        features.forEach(function(feature) {
+          feature.setSelected(true);
+        });
+      }, 2000);
 
     }
 

@@ -17,7 +17,7 @@ define([
       });
 
 //      var count = 0;
-      // var drawMode = function() {
+      var registerDraw = function() {
         console.error('entity/draw', arguments);
         atlas.publish('entity/draw', {
           displayMode: 'line',
@@ -33,20 +33,28 @@ define([
             console.error('create', arguments);
             var feature = args.feature;
             var id = feature.getId();
-            setTimeout(function() {
-              console.log('edit/enable');
-              atlas.publish('edit/enable', {ids: [id]});
-            }, 1000);
-//            setTimeout(drawMode, 3000);
+            feature.getForm().setWidth(10);
+            // registerDraw();
+            atlas.subscribe('entity/dblclick', function(args) {
+              // var selectedEntity = altas._managers.entity.getById(args.id);
+              // selectedEntity
+              atlas.publish('edit/enable', {ids: [args.id]});
+            });
+            // setTimeout(function() {
+            //   console.log('edit/enable');
+            //   atlas.publish('edit/enable', {ids: [id]});
+            // }, 1000);
+//            setTimeout(registerDraw, 3000);
           },
           cancel: function(args) {
             console.error('cancel', arguments);
-            setTimeout(drawMode, 3000);
+            setTimeout(registerDraw, 3000);
           }
         });
-      // };
+      };
+      registerDraw();
 
-      // setTimeout(drawMode, 1000);
+      // setTimeout(registerDraw, 1000);
 
     }
 
