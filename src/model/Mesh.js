@@ -79,10 +79,24 @@ define([
      */
     _modelMatrix: null,
 
+    /**
+     * The original centroid before any transformations.
+     * @type {atlas.model.GeoPoint}
+     */
+    _origCentroid: null,
+
+    /**
+     * Whether the model matrix has been fully initialiased and the model is ready for rendering.
+     * @type {Boolean}
+     */
+    _modelMatrixReady: null,
+
     _init: function () {
+      this._modelMatrixReady = false;
       this._super.apply(this, arguments);
       // TODO(aramk): This overwrites all the matrix transformations in subclass.
       this._setModelMatrix(this._initModelMatrix());
+      this._modelMatrixReady = true;
     },
 
     _updateVisibility: function(visible) {
@@ -96,8 +110,7 @@ define([
     _build: function() {
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      if (!this._primitive || this.isDirty('entity') || this.isDirty('vertices') ||
-          this.isDirty('model')) {
+      if (!this._primitive || isModelDirty) {
         if (this._primitive) {
           this._renderManager.getPrimitives().remove(this._primitive);
         }
@@ -306,6 +319,28 @@ define([
       var target = centroid.translate(translation);
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
+      // Ignore the intitial translation which centres the mesh at the given geoLocation.
+      if (this._modelMatrixReady) {
+        if (!this._origCentroid) {
+          this._origCentroid = centroid;
+        }
+        var origCentroidDiff = target.subtract(this._origCentroid);
+        var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
+          origCentroidDiff.latitude >= 1;
+        if (isTranslatedBeyondSensitivity) {
+          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+          // where the original normal to the globe's surface is retained as the rotation when
+          // translating, causing issues if the new normal is sufficiently different.
+          this.setDirty('model');
+          // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
+          // for translation is minimal, reducing the issue described above.
+          var centroidGeoLocationDiff = this._geoLocation.subtract(centroid);
+          this._geoLocation = this._geoLocation.translate(origCentroidDiff);
+          this._resetModelMatrix();
+          this._origCentroid = null;
+          this._update();
+        }
+      }
     },
 
     scale: function(scale) {
@@ -397,6 +432,10 @@ define([
         this._modelMatrix = Matrix4.IDENTITY.clone();
       }
       return this._modelMatrix;
+    },
+
+    _resetModelMatrix: function() {
+      this._setModelMatrix(this._initModelMatrix());
     },
 
     /**

@@ -95,6 +95,12 @@ define([
      */
     _origVertices: null,
 
+    /**
+     * The original centroid before any transformations.
+     * @type {atlas.model.GeoPoint}
+     */
+    _origCentroid: null,
+
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
@@ -353,8 +359,20 @@ define([
       this._copyOrigVertices();
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
+      var origCentroidDiff = target.subtract(this._origCentroid);
+      var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
+        origCentroidDiff.latitude >= 1;
       this._transformModelMatrix(this._calcTranslateMatrix(centroid, target));
       this._super(translation);
+      if (isTranslatedBeyondSensitivity) {
+        // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+        // where the original normal to the globe's surface is retained as the rotation when
+        // translating, causing issues if the new normal is sufficiently different.
+        this._resetModelMatrix();
+        this._resetOrigVertices();
+        this.setDirty('model');
+        this._update();
+      }
     },
 
     scale: function(scale) {
@@ -452,6 +470,11 @@ define([
       return this._modelMatrix;
     },
 
+    _resetModelMatrix: function() {
+      this._modelMatrix = null;
+      this._getModelMatrix();
+    },
+
     /**
      * Applies the given transformation matrix to the existing model matrix.
      * @param {Matrix4} modelMatrix
@@ -494,6 +517,7 @@ define([
     _initOrigVertices: function () {
       if (!this._origVertices) {
         this._origVertices = this._vertices;
+        this._origCentroid = this.getCentroid();
       }
       return this._origVertices;
     },
@@ -508,6 +532,11 @@ define([
         this._origVertices = Setter.cloneDeep(this._vertices);
       }
       return this._origVertices;
+    },
+
+    _resetOrigVertices: function () {
+      this._origVertices = this._origCentroid = null;
+      this._initOrigVertices();
     },
 
     _getCesiumColors: function() {
