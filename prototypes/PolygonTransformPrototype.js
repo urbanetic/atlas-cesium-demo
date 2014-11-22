@@ -21,9 +21,22 @@ define([
           show: true
         }, feature._bindDependencies({show: true}));
 
-      setTimeout(function () {
-        console.log('centroid', polygon.getCentroid());
-        polygon.setCentroid(polygon.getCentroid());
+      // setTimeout(function () {
+      //   console.log('centroid', polygon.getCentroid());
+      //   polygon.setCentroid(polygon.getCentroid());
+      // }, 3000);
+
+      // Translate it far away to check if the rotation is still fixed to the old global surface
+      // normal rather than the new one.
+      var newCentroid = new GeoPoint([115.8602151, -31.9441179, 0.0]);
+      polygon.setCentroid(newCentroid);
+      atlas.publish('camera/zoomTo', {position: newCentroid});
+
+      // Ensure subsequent translations use matrix transformations if they are sufficiently small.
+      setTimeout(function() {
+        setInterval(function() {
+          polygon.translate(new GeoPoint(0.0001, 0.0001));
+        }, 2000);
       }, 3000);
 
       atlas.publish('camera/zoomTo', {
