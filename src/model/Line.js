@@ -102,7 +102,7 @@ define([
             geometryInstances: this._geometry,
             appearance: this._appearance
           });
-        } else if (isStyleDirty && this._appearance) {
+        } else if (isStyleDirty && this._primitive) {
           var timeout = 3000;
           var duration = 0;
           var freq = 100;
@@ -265,7 +265,7 @@ define([
      */
     remove: function() {
       this._super();
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
+      this._removePrimitives();
     },
 
     // -------------------------------------------
