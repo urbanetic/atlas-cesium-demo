@@ -2,6 +2,7 @@ define([
   'atlas/model/Line',
   'atlas-cesium/model/Colour',
   'atlas-cesium/model/Handle',
+  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -12,7 +13,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError'
-], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry, PolylineGeometry,
+], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
             PolylineColorAppearance, Log, DeveloperError) {
   /**
@@ -65,36 +66,89 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The ID of the handler used for updating styles. Only one handler should be running. Any
+     * existing handler should be cancelled.
+     * @type {Number}
+     */
+    _updateStyleHandle: null,
+
     // -------------------------------------------
-    // MODIFIERS
+    // CONSTRUCTION
     // -------------------------------------------
 
     _build: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
-      if (!this._primitive || isModelDirty) {
-        if (this._primitive) {
-          this._renderManager.getPrimitives().remove(this._primitive);
-        }
-        this._primitive = this._createPrimitive();
-        this._primitive && this._renderManager.getPrimitives().add(this._primitive);
-      } else if (this.isDirty('style')) {
-        this._updateAppearance();
+      var isStyleDirty = this.isDirty('style');
+      var cancelStyleUpdate = function() {
+        clearInterval(this._updateStyleHandle);
+        this._updateStyleHandle = null;
+      }.bind(this);
+      if (isModelDirty) {
+        this._removePrimitives();
       }
+      this._createGeometry();
+      this._createAppearance();
+      if (isModelDirty || isStyleDirty) {
+        // Cancel any existing handler for updating to avoid race conditions.
+        cancelStyleUpdate();
+      }
+      if (fillColor) {
+        if ((isModelDirty || !this._primitive) && this._geometry) {
+          this._primitive = new Primitive({
+            geometryInstances: this._geometry,
+            appearance: this._appearance
+          });
+        } else if (isStyleDirty && this._appearance) {
+          var timeout = 3000;
+          var duration = 0;
+          var freq = 100;
+          var setHandle = function() {
+            this._updateStyleHandle = setInterval(updateStyle, freq);
+          }.bind(this);
+          var isReady = function() {
+            return this._primitive.ready;
+          }.bind(this);
+          var updateStyle = function() {
+            if (isReady()) {
+              var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+              geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+              cancelStyleUpdate();
+            }
+            duration += freq;
+            duration >= timeout && cancelStyleUpdate();
+          }.bind(this);
+          // Only delay the update if necessary.
+          if (isReady()) {
+            updateStyle();
+          } else {
+            setHandle()
+          }
+        }
+      }
+      this._addPrimitives();
       this._super();
     },
 
     /**
      * Creates the geometry data as required.
-     * @returns {GeometryInstance}
      * @private
      */
     _createGeometry: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
-      var shouldCreateGeometry = isModelDirty || !this._geometry;
+      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
+      if (!shouldCreateGeometry) {
+        return;
+      }
       // Generate new cartesians if the vertices have changed.
-      if (shouldCreateGeometry) {
+      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         Log.debug('updating geometry for entity ' + this.getId());
         // Remove duplicate vertices which cause Cesium to break (4 identical, consecutive vertices
         // cause the renderer to crash).
@@ -111,10 +165,6 @@ define([
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
-
-      // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      // TODO(bpstudds): Add support for different colours per line segment.
-
       // Generate geometry data.
       var reWidth = /(\d+)(px)?/i;
       var widthMatches = this._width.toString().match(reWidth);
@@ -130,35 +180,31 @@ define([
         positions: this._cartesians,
         width: width
       };
-      // Allow colour as fill or border, since it's just a line.
-      var colour = this._style.getFillColour() || this._style.getBorderColour();
-
       // PolylineGeometry has line widths in pixels. CorridorGeometry has line widths in metres.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
-        geometryArgs.colors = this._cartesians.map(function() {
-          return colour;
-        }, this);
         geometryArgs.colorsPerVertex = false;
         instanceArgs.geometry = new PolylineGeometry(geometryArgs);
       } else {
         geometryArgs.vertexFormat = PerInstanceColorAppearance.VERTEX_FORMAT;
         geometryArgs.cornerType = CornerType.ROUNDED;
-        instanceArgs.attributes = {
-          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(colour))
-        };
         instanceArgs.geometry = new CorridorGeometry(geometryArgs);
       }
-      return new GeometryInstance(instanceArgs);
+      instanceArgs.attributes = {
+        color: ColorGeometryInstanceAttribute.fromColor(fillColor)
+      };
+      this._geometry = new GeometryInstance(instanceArgs);
     },
 
     /**
      * Updates the appearance data.
      * @private
      */
-    _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style') || !this._appearance) {
-        Log.debug('updating appearance for entity ' + this.getId());
+    _createAppearance: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var isStyleDirty = this.isDirty('style');
+      if ((isStyleDirty || !this._appearance) && fillColor) {
         if (this._isPolyline()) {
           this._appearance = new PolylineColorAppearance();
         } else {
@@ -168,11 +214,44 @@ define([
           });
         }
       }
-      return this._appearance;
     },
 
-    _isPolyline: function() {
-      return this._geometry.geometry instanceof PolylineGeometry;
+    createHandle: function(vertex, index) {
+      // TODO(aramk) Use a factory to use the right handle class.
+      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
+    },
+
+    _createEntityHandle: function() {
+      // Line doesn't need a handle on itself.
+      return false;
+    },
+
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
+
+    /**
+     * Adds the primitives to the scene.
+     * @private
+     */
+    _addPrimitives: function() {
+      var primitives = this._renderManager.getPrimitives();
+      this._primitive && primitives.add(this._primitive);
+    },
+
+    /**
+     * Removes the primitives from the scene.
+     * @private
+     */
+    _removePrimitives: function() {
+      // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
+      // them for now.
+      var primitives = this._renderManager.getPrimitives();
+      if (this._primitive) {
+        this._primitive.show = false;
+        this._primitive = null;
+        this._geometry = null;
+      }
     },
 
     _updateVisibility: function(visible) {
@@ -189,45 +268,20 @@ define([
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
     },
 
-    setStyle: function(style) {
-      this._super(style);
-      // Force a redraw of the model to ensure color change takes affect, since the
-      // ColorGeometryInstanceAttribute is bound per instance.
-      this.setDirty('model');
-      this.isVisible() && this.show();
-    },
-
-    modifyStyle: function(newStyle) {
-      // Force a redraw of the model to ensure color change takes affect, since the
-      // ColorGeometryInstanceAttribute is bound per instance.
-      this.setDirty('model');
-      return this._super(newStyle);
-    },
-
     // -------------------------------------------
-    // CONSTRUCTION
+    // GETTERS & SETTERS
     // -------------------------------------------
 
-    _createPrimitive: function() {
-      Log.debug('creating primitive for entity', this.getId());
-      // TODO(aramk) _geometry isn't actually set.
-      this._geometry = this._createGeometry();
-      if (!this._geometry) return;
-      this._appearance = this._updateAppearance();
-      return new Primitive({
-        geometryInstances: this.getGeometry(),
-        appearance: this.getAppearance()
-      });
+    /**
+     * @return {Boolean} Whether the geometry is a {@link PolylineGeometry}.
+     */
+    _isPolyline: function() {
+      return this._geometry && this._geometry.geometry instanceof PolylineGeometry;
     },
 
-    createHandle: function(vertex, index) {
-      // TODO(aramk) Use a factory to use the right handle class.
-      return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
-    },
-
-    _createEntityHandle: function() {
-      // Line doesn't need a handle on itself.
-      return false;
+    _getCesiumColors: function() {
+      var style = this.getStyle();
+      return Style.toCesiumColors(style);
     }
 
   });
