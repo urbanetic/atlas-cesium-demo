@@ -7,8 +7,12 @@
         "coverage",
         "docs",
         "atlas-cesium/lib",
-        "dist"
+        "dist",
+        ".idea",
+        ".sonar",
+        "node_modules"
       ]
     }
   ]
 }
+
