@@ -1,5 +1,6 @@
 define([
   'atlas/lib/utility/Setter',
+  'atlas/lib/Q',
   // Base class
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
@@ -20,7 +21,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3,
+], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3,
             GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
             ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
             Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
@@ -74,11 +75,10 @@ define([
     _minTerrainElevation: 0.0,
 
     /**
-     * The ID of the handler used for updating styles. Only one handler should be running. Any
-     * existing handler should be cancelled.
-     * @type {Number}
+     * The deferred promise for updating primitive styles.
+     * @type {Deferred}
      */
-    _updateStyleHandle: null,
+    _updateStyleDf: null,
 
     /**
      * The model matrix applied after primitives are rendered. This is used to perform transient
@@ -126,19 +126,15 @@ define([
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
-      var cancelStyleUpdate = function() {
-        clearInterval(this._updateStyleHandle);
-        this._updateStyleHandle = null;
-      }.bind(this);
       var scene = this._renderManager.getScene();
       if (isModelDirty) {
         this._removePrimitives();
       }
       this._createGeometry();
-      if (isModelDirty || isStyleDirty) {
-        // Cancel any existing handler for updating to avoid race conditions.
-        cancelStyleUpdate();
-      }
+      // if (isModelDirty || isStyleDirty) {
+      //   // Cancel any existing handler for updating to avoid race conditions.
+      //   cancelStyleUpdate();
+      // }
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
@@ -179,31 +175,14 @@ define([
             })
           });
         } else if (isStyleDirty && this._outlinePrimitive) {
-          var timeout = 3000;
-          var duration = 0;
-          var freq = 100;
-          var setHandle = function() {
-            this._updateStyleHandle = setInterval(updateStyle, freq);
-          }.bind(this);
-          var isReady = function() {
-            return this._outlinePrimitive.ready;
-          }.bind(this);
-          var updateStyle = function() {
-            if (isReady()) {
-              var outlineGeometryAtts =
+          this._updateStyleDf && this._updateStyleDf.reject();
+          this._updateStyleDf = this._whenPrimitiveReady(this._outlinePrimitive);
+          this._updateStyleDf.promise.then(function() {
+            var outlineGeometryAtts =
                   this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
               outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-              cancelStyleUpdate();
-            }
-            duration += freq;
-            duration >= timeout && cancelStyleUpdate();
-          }.bind(this);
-          // Only delay the update if necessary.
-          if (isReady()) {
-            updateStyle();
-          } else {
-            setHandle()
-          }
+            this._updateStyleDf = null;
+          }.bind(this));
         }
       }
       this._addPrimitives();
@@ -214,34 +193,22 @@ define([
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
-          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+          if (primitive) {
+            this._whenPrimitiveReady(primitive).promise.then(function() {
+              primitive.modelMatrix = modelMatrix;
+            });
+          }
         }, this);
       }
       this._super();
     },
 
-    /**
-     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
-     * Before this point, setting has no effect and is ignored when the primitive is eventually
-     * ready.
-     * @param primitive
-     * @param modelMatrix
-     * @private
-     */
-    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
-      var timeout = 60000;
-      var freq = 200;
-      var totalTime = 0;
-      var handler = function() {
-        if (totalTime >= timeout || primitive.ready) {
-          primitive.modelMatrix = modelMatrix;
-          clearInterval(handle);
-        }
-        totalTime += freq;
-      };
-      var handle = setInterval(handler, freq);
-      handler();
-    },
+    // _isReady: function() {
+    //   var promises = [];
+    //   this._primitive && promises.push(this._whenPrimitiveReady(this._primitive));
+    //   this._outlinePrimitive && promises.push(this._whenPrimitiveReady(this._outlinePrimitive));
+    //   return Q.all(promises);
+    // },
 
     /**
      * Adds the primitives to the scene.
@@ -345,6 +312,25 @@ define([
     createHandle: function(vertex, index) {
       // TODO(aramk) Use a factory to use the right handle class.
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
+    },
+
+    _whenPrimitiveReady: function(primitive) {
+      var df = new Q.defer();
+      if (primitive.ready) {
+        df.resolve();
+      } else {
+        var timeout = 60000;
+        var freq = 200;
+        var totalTime = 0;
+        var handle = setInterval(function() {
+          if (totalTime >= timeout || primitive.ready) {
+            clearInterval(handle);
+            df.resolve();
+          }
+          totalTime += freq;
+        }, freq);
+      }
+      return df;
     },
 
     // -------------------------------------------

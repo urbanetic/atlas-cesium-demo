@@ -1,9 +1,10 @@
 define([
+  'atlas/lib/Q',
+  'atlas/model/GeoPoint',
+  'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/WKT',
   'atlas/util/ConvexHullFactory',
-  'atlas/model/GeoPoint',
-  'atlas/model/Vertex',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
@@ -24,7 +25,7 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(AtlasMath, WKT, ConvexHullFactory, GeoPoint, Vertex, BoundingSphere,
+], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
@@ -91,6 +92,12 @@ define([
      */
     _modelMatrixReady: null,
 
+    /**
+     * The deferred promise for updating primitive styles.
+     * @type {Deferred}
+     */
+    _updateStyleDf: null,
+
     _init: function () {
       this._modelMatrixReady = false;
       this._super.apply(this, arguments);
@@ -136,32 +143,13 @@ define([
         //   this._setModelMatrix(modelMatrix);
         // }
         [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
-          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+          if (primitive) {
+            this._whenPrimitiveReady(primitive).promise.then(function() {
+              primitive.modelMatrix = modelMatrix;
+            });
+          }
         }, this);
       }
-    },
-
-    /**
-     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
-     * Before this point, setting has no effect and is ignored when the primitive is eventually
-     * ready.
-     * @param primitive
-     * @param modelMatrix
-     * @private
-     */
-    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
-      var timeout = 60000;
-      var freq = 200;
-      var totalTime = 0;
-      var handler = function() {
-        if (totalTime >= timeout || primitive.ready) {
-          primitive.modelMatrix = modelMatrix;
-          clearInterval(handle);
-        }
-        totalTime += freq;
-      };
-      var handle = setInterval(handler, freq);
-      handler();
     },
 
     /**
@@ -254,13 +242,36 @@ define([
      */
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
-        if (!this._appearance) {
-          this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
-        }
-        this._appearance.color =
+        this._updateStyleDf && this._updateStyleDf.reject();
+        this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
+        this._updateStyleDf.promise.then(function() {
+          if (!this._appearance) {
+            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
+          }
+          this._appearance.color =
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
+          this._updateStyleDf = null;
+        }.bind(this));
       }
-      return this._appearance;
+    },
+
+    _whenPrimitiveReady: function(primitive) {
+      var df = new Q.defer();
+      if (primitive.ready) {
+        df.resolve();
+      } else {
+        var timeout = 60000;
+        var freq = 200;
+        var totalTime = 0;
+        var handle = setInterval(function() {
+          if (totalTime >= timeout || primitive.ready) {
+            clearInterval(handle);
+            df.resolve();
+          }
+          totalTime += freq;
+        }, freq);
+      }
+      return df;
     },
 
     /**
