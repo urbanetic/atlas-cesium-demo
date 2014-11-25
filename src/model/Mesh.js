@@ -101,8 +101,6 @@ define([
     _init: function () {
       this._modelMatrixReady = false;
       this._super.apply(this, arguments);
-      // TODO(aramk): This overwrites all the matrix transformations in subclass.
-      this._setModelMatrix(this._initModelMatrix());
       this._modelMatrixReady = true;
     },
 
@@ -128,20 +126,8 @@ define([
       }
 
       // Update model matrix after primitives are visible and ready.
-      var modelMatrix = this._modelMatrix;
-      // var modelMatrix = this._initModelMatrix();
-      // console.log('expected', modelMatrix);
-      // console.log('  actual', this._modelMatrix);
-
+      var modelMatrix = this._getModelMatrix();
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
-        // If the model has been redrawn, then we don't want to apply the existing matrix, since
-        // the transformations have been applied to the underlying vertices and transforming them
-        // again with the matrix would apply the transformation twice. We use the model matrix only
-        // for transformations between rebuilds for performance, so it's safe to remove it.
-        // if (isModelDirty) {
-        //   modelMatrix = this._calcRotateMatrix(this.getRotation());
-        //   this._setModelMatrix(modelMatrix);
-        // }
         [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
           if (primitive) {
             this._whenPrimitiveReady(primitive).promise.then(function() {
@@ -440,7 +426,7 @@ define([
     _getModelMatrix: function() {
       // Avoids storing data that may not be used for all polygons.
       if (!this._modelMatrix) {
-        this._modelMatrix = Matrix4.IDENTITY.clone();
+        this._resetModelMatrix();
       }
       return this._modelMatrix;
     },
