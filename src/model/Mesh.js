@@ -199,10 +199,6 @@ define([
     },
 
     _initModelMatrix: function() {
-      // TODO(aramk) Only update if necessary.
-      if (!(this._rotation instanceof Vertex)) {
-        this._rotation = new Vertex(0, 0, 0);
-      }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
       var modelMatrix = Matrix4.IDENTITY.clone();
@@ -211,12 +207,12 @@ define([
         // Apply rotation, translation and scale transformations.
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
-            Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
+            Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
             new Cartesian3(0, 0, 0));
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
-        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+        Matrix4.multiplyByScale(modelMatrix, this.getScale(), modelMatrix);
         // this._modelMatrix = modelMatrix;
       }
       return modelMatrix;
