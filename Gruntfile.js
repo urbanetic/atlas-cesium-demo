@@ -26,6 +26,7 @@ module.exports = function(grunt) {
   var STYLE_FILE = MODULE_NAME + '.less';
   var STYLE_BUILD_FILE = MODULE_NAME + '.min.css';
   var STYLE_BUILD_FILE_PATH = path.join(RESOURCES_BUILD_PATH, STYLE_BUILD_FILE);
+  var LCOV_REPORT_PATH = 'coverage/lcov.dat';
 
   // Define config for copy:resources.
   var resourceCopy = [];
@@ -191,6 +192,30 @@ module.exports = function(grunt) {
           }
         ]
       }
+    },
+
+    karma: {
+      options: {
+        configFile: 'test/karma.conf.js',
+        runnerPort: 9876,
+      },
+      unit: {
+        browsers: ['Chrome', 'Firefox']
+      },
+      continuous: {
+        singleRun: true,
+        browsers: ['PhantomJS']
+      }
+    },
+
+    sed: {
+      // The karma coverage outputs source file names (SF) as "./atlas/src/..."
+      // Sonar-runner expects source file names to be "src/..."
+      fixCoverageOutput: {
+        path: LCOV_REPORT_PATH,
+        pattern: './atlas-cesium/src',
+        replacement: 'src'
+      }
     }
   });
 
@@ -272,6 +297,8 @@ module.exports = function(grunt) {
     })
   });
   grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
+
+  grunt.registerTask('test', 'Runs unit tests', ['force:karma:unit', 'sed:fixCoverageOutput']);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // AUXILIARY
