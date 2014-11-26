@@ -353,7 +353,7 @@ define([
       this._copyOrigVertices();
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
-      this._transformModelMatrix(this._translateMatrix(centroid, target));
+      this._transformModelMatrix(this._calcTranslateMatrix(centroid, target));
       this._super(translation);
     },
 
@@ -361,7 +361,7 @@ define([
       this._copyOrigVertices();
       var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
       var scaleMatrix = Matrix4.fromScale(scaleCartesian);
-      this._transformModelMatrix(this._transformOrigin(scaleMatrix));
+      this._transformModelMatrix(this._calcTransformOriginMatrix(scaleMatrix));
       this._super(scale);
     },
 
@@ -373,28 +373,46 @@ define([
     },
 
     /**
+     * @param {atlas.model.GeoPoint} source
+     * @param {atlas.model.GeoPoint} target
+     * @returns {Matrix4} The transformation matrix for moving from the given source to the given
+     * target.
+     * @private
+     */
+    _calcTranslateMatrix: function(source, target) {
+      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
+      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
+      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
+      return Matrix4.fromTranslation(diffCartesian);
+    },
+
+    /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid]
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * transformation.
+     * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
+     * given point.
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
       // TODO(aramk) Support rotation in all axes.
       var rotMatrix = Matrix4.fromRotationTranslation(
           Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._transformOrigin(rotMatrix, centroid);
+      return this._calcTransformOriginMatrix(rotMatrix, centroid);
     },
 
     /**
      * Used to apply a transformation matrix to the given entity relative to its position, scale and
      * rotation after construction.
      * @param {Matrix4} matrix
-     * @param {atlas.model.GeoPoint} [centroid]
+     * @param {atlas.model.GeoPoint} [centroid] The point to use as the starting point for the
+     * transformation.
      * @returns {Matrix4} The transformation matrix for applying the given matrix as a
      * transformation after normalising the existing position, scale and rotation to the origin at
      * the centre of the earth and back.
      * @private
      */
-    _transformOrigin: function(matrix, centroid) {
+    _calcTransformOriginMatrix: function(matrix, centroid) {
       centroid = centroid || this.getCentroid();
       var centroidCartesian = this._renderManager.cartesianFromGeoPoint(centroid);
       // This transforms from the centre of the earth to the surface at the given position and
@@ -443,20 +461,6 @@ define([
       var oldModelMatrix = this._getModelMatrix();
       var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
       this._setModelMatrix(newModelMatrix);
-    },
-
-    /**
-     * @param {atlas.model.GeoPoint} source
-     * @param {atlas.model.GeoPoint} target
-     * @returns {Matrix4} The transformation matrix for moving from the given source to the given
-     * target.
-     * @private
-     */
-    _translateMatrix: function(source, target) {
-      var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
-      var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
-      var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
-      return Matrix4.fromTranslation(diffCartesian);
     },
 
     _onTransform: function() {
