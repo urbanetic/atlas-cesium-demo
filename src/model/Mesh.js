@@ -5,6 +5,7 @@ define([
   'atlas/util/AtlasMath',
   'atlas/util/WKT',
   'atlas/util/ConvexHullFactory',
+  'atlas/util/Timers',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
@@ -25,7 +26,7 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, BoundingSphere,
+], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
@@ -234,22 +235,9 @@ define([
     },
 
     _whenPrimitiveReady: function(primitive) {
-      var df = new Q.defer();
-      if (primitive.ready) {
-        df.resolve();
-      } else {
-        var timeout = 60000;
-        var freq = 200;
-        var totalTime = 0;
-        var handle = setInterval(function() {
-          if (totalTime >= timeout || primitive.ready) {
-            clearInterval(handle);
-            df.resolve();
-          }
-          totalTime += freq;
-        }, freq);
-      }
-      return df;
+      return Timers.waitUntil(function() {
+        return primitive.ready;
+      });
     },
 
     /**

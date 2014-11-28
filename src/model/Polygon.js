@@ -6,6 +6,7 @@ define([
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
+  'atlas/util/Timers',
   'atlas-cesium/model/Handle',
   'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
@@ -21,7 +22,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3,
+], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Style, Cartesian3,
             GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
             ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
             Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
@@ -305,22 +306,9 @@ define([
     },
 
     _whenPrimitiveReady: function(primitive) {
-      var df = new Q.defer();
-      if (primitive.ready) {
-        df.resolve();
-      } else {
-        var timeout = 60000;
-        var freq = 200;
-        var totalTime = 0;
-        var handle = setInterval(function() {
-          if (totalTime >= timeout || primitive.ready) {
-            clearInterval(handle);
-            df.resolve();
-          }
-          totalTime += freq;
-        }, freq);
-      }
-      return df;
+      return Timers.waitUntil(function() {
+        return primitive.ready;
+      });
     },
 
     /**

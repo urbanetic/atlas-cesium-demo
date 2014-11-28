@@ -12,10 +12,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
-  'atlas/util/DeveloperError'
+  'atlas/util/DeveloperError',
+  'atlas/util/Timers'
 ], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
-            PolylineColorAppearance, Log, DeveloperError) {
+            PolylineColorAppearance, Log, DeveloperError, Timers) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -67,11 +68,11 @@ define([
     _minTerrainElevation: 0.0,
 
     /**
-     * The ID of the handler used for updating styles. Only one handler should be running. Any
-     * existing handler should be cancelled.
-     * @type {Number}
+     * The deferred promise for updating primitive styles. This operation should be mutually
+     * exclusive.
+     * @type {Deferred}
      */
-    _updateStyleHandle: null,
+    _updateStyleDf: null,
 
     // -------------------------------------------
     // CONSTRUCTION
@@ -83,19 +84,11 @@ define([
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
-      var cancelStyleUpdate = function() {
-        clearInterval(this._updateStyleHandle);
-        this._updateStyleHandle = null;
-      }.bind(this);
       if (isModelDirty) {
         this._removePrimitives();
       }
       this._createGeometry();
       this._createAppearance();
-      if (isModelDirty || isStyleDirty) {
-        // Cancel any existing handler for updating to avoid race conditions.
-        cancelStyleUpdate();
-      }
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           this._primitive = new Primitive({
@@ -103,30 +96,12 @@ define([
             appearance: this._appearance
           });
         } else if (isStyleDirty && this._primitive) {
-          var timeout = 3000;
-          var duration = 0;
-          var freq = 100;
-          var setHandle = function() {
-            this._updateStyleHandle = setInterval(updateStyle, freq);
-          }.bind(this);
-          var isReady = function() {
-            return this._primitive.ready;
-          }.bind(this);
-          var updateStyle = function() {
-            if (isReady()) {
+          this._updateStyleDf && this._updateStyleDf.reject();
+          this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
+          this._updateStyleDf.promise.then(function() {
               var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
               geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
-              cancelStyleUpdate();
-            }
-            duration += freq;
-            duration >= timeout && cancelStyleUpdate();
-          }.bind(this);
-          // Only delay the update if necessary.
-          if (isReady()) {
-            updateStyle();
-          } else {
-            setHandle()
-          }
+          }.bind(this));
         }
       }
       this._addPrimitives();
@@ -214,6 +189,12 @@ define([
           });
         }
       }
+    },
+
+    _whenPrimitiveReady: function(primitive) {
+      return Timers.waitUntil(function() {
+        return primitive.ready;
+      });
     },
 
     createHandle: function(vertex, index) {
