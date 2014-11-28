@@ -75,17 +75,18 @@ define([
     _minTerrainElevation: 0.0,
 
     /**
-     * The deferred promise for updating primitive styles.
-     * @type {Deferred}
-     */
-    _updateStyleDf: null,
-
-    /**
      * The model matrix applied after primitives are rendered. This is used to perform transient
      * transformations which are faster than rebuilding the primitives.
      * @type {Matrix4}
      */
     _modelMatrix: null,
+
+    /**
+     * The deferred promise for updating primitive styles. This operation should be mutually
+     * exclusive.
+     * @type {Deferred}
+     */
+    _updateStyleDf: null,
 
     /**
      * A copy of the original vertices which are used when constructing the primitives. The model
@@ -193,22 +194,11 @@ define([
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
-          if (primitive) {
-            this._whenPrimitiveReady(primitive).promise.then(function() {
-              primitive.modelMatrix = modelMatrix;
-            });
-          }
+          primitive && this._updateModelMatrix(primitive, modelMatrix);
         }, this);
       }
       this._super();
     },
-
-    // _isReady: function() {
-    //   var promises = [];
-    //   this._primitive && promises.push(this._whenPrimitiveReady(this._primitive));
-    //   this._outlinePrimitive && promises.push(this._whenPrimitiveReady(this._outlinePrimitive));
-    //   return Q.all(promises);
-    // },
 
     /**
      * Adds the primitives to the scene.
@@ -331,6 +321,23 @@ define([
         }, freq);
       }
       return df;
+    },
+
+    /**
+     * Updates the model matrix of the given primitive when it is ready to accept the change.
+     * This operation is mutually exclusive and will cancel exisiting requests.
+     * @param  {Primitive} primitive
+     * @param  {Matrix4} modelMatrix
+     * @return {Promise}
+     */
+    _updateModelMatrix: function(primitive, modelMatrix) {
+      var df = primitive._updateModelMatrixDf;
+      df && df.reject();
+      df = primitive._updateModelMatrixDf = this._whenPrimitiveReady(primitive);
+      df.promise.then(function() {
+        primitive.modelMatrix = modelMatrix;
+      });
+      return df.promise;
     },
 
     // -------------------------------------------

@@ -93,7 +93,8 @@ define([
     _modelMatrixReady: null,
 
     /**
-     * The deferred promise for updating primitive styles.
+     * The deferred promise for updating primitive styles. This operation should be mutually
+     * exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
@@ -109,8 +110,7 @@ define([
     },
 
     /**
-     * Builds the geometry and appearance data required to render the Polygon in
-     * Cesium.
+     * Builds the geometry and appearance data required to render.
      */
     _build: function() {
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
@@ -129,11 +129,7 @@ define([
       var modelMatrix = this._getModelMatrix();
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
         [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
-          if (primitive) {
-            this._whenPrimitiveReady(primitive).promise.then(function() {
-              primitive.modelMatrix = modelMatrix;
-            });
-          }
+          primitive && this._updateModelMatrix(primitive, modelMatrix);
         }, this);
       }
     },
@@ -254,6 +250,23 @@ define([
         }, freq);
       }
       return df;
+    },
+
+    /**
+     * Updates the model matrix of the given primitive when it is ready to accept the change.
+     * This operation is mutually exclusive and will cancel exisiting requests.
+     * @param  {Primitive} primitive
+     * @param  {Matrix4} modelMatrix
+     * @return {Promise}
+     */
+    _updateModelMatrix: function(primitive, modelMatrix) {
+      var df = primitive._updateModelMatrixDf;
+      df && df.reject();
+      df = primitive._updateModelMatrixDf = this._whenPrimitiveReady(primitive);
+      df.promise.then(function() {
+        primitive.modelMatrix = modelMatrix;
+      });
+      return df.promise;
     },
 
     /**
