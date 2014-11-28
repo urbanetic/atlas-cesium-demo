@@ -43,6 +43,8 @@ define([
             feature.setForm(Feature.DisplayMode.MESH, collection);
             feature.setDisplayMode(Feature.DisplayMode.MESH);
             collection.setCentroid(c3mlPoint);
+            collection.setRotation(new Vertex(0, 0, 30));
+            collection.setElevation(15);
 
             // collection.translate(diff);
 
@@ -50,7 +52,6 @@ define([
             var centroidHandle = new Handle(feature._bindDependencies({target: centroid, owner: collection}));
             centroidHandle.show();
 
-            collection.setElevation(15);
             var entityCount = 0;
             collection.getEntities().forEach(function(entity) {
               var centroid = entity.getCentroid();
@@ -80,6 +81,7 @@ define([
             setTimeout(function() {
               setInterval(function() {
                 feature.translate(new GeoPoint(0.0001, 0.0001));
+                feature.rotate(new Vertex(0, 0, 15));
               }, 2000);
             }, 3000);
 

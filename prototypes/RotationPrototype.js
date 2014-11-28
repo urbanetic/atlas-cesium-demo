@@ -15,6 +15,12 @@ define([
       var features = entityManager.getFeatures();
       var feature = features[0];
 
+      // setInterval(function() {
+      //   features.forEach(function(feature) {
+      //     feature.rotate(new Vertex(0, 0, 15));
+      //   });
+      // }, 200);
+
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
         c3ml.show = false;
         c3ml.geoLocation = feature.getCentroid().toArray();
@@ -47,7 +53,7 @@ define([
         // polygon.rotate(new Vertex(0, 0, 15));
         // polygon.setRotation(new Vertex(0, 0, 15));
 
-
+        polygon.scale(new Vertex(0.5, 0.5, 0.5));
         feature.scale(new Vertex(0.5, 0.5, 0.5));
         setInterval(function() {
           [polygon, feature].forEach(function (entity) {
