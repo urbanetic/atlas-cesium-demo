@@ -68,8 +68,8 @@ define([
     _minTerrainElevation: 0.0,
 
     /**
-     * The deferred promise for updating primitive styles. This operation should be mutually
-     * exclusive.
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
@@ -172,7 +172,7 @@ define([
     },
 
     /**
-     * Updates the appearance data.
+     * Creates the appearance data.
      * @private
      */
     _createAppearance: function() {
@@ -191,6 +191,11 @@ define([
       }
     },
 
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
     _whenPrimitiveReady: function(primitive) {
       return Timers.waitUntil(function() {
         return primitive.ready;
@@ -227,7 +232,6 @@ define([
     _removePrimitives: function() {
       // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
       // them for now.
-      var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
         this._primitive.show = false;
         this._primitive = null;
@@ -254,7 +258,8 @@ define([
     // -------------------------------------------
 
     /**
-     * @return {Boolean} Whether the geometry is a {@link PolylineGeometry}.
+     * @return {Boolean} Whether the geometry is a {@link PolylineGeometry} as opposed to a
+     * {@link CorridorGeometry} or not existing.
      */
     _isPolyline: function() {
       return this._geometry && this._geometry.geometry instanceof PolylineGeometry;

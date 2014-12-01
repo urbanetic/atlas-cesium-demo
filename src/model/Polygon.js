@@ -83,8 +83,8 @@ define([
     _modelMatrix: null,
 
     /**
-     * The deferred promise for updating primitive styles. This operation should be mutually
-     * exclusive.
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
@@ -98,7 +98,8 @@ define([
     _origVertices: null,
 
     /**
-     * The original centroid before any transformations.
+     * The original centroid before any translation transformations. Reset each time the translation
+     * transformations are reset.
      * @type {atlas.model.GeoPoint}
      */
     _origCentroid: null,
@@ -218,7 +219,6 @@ define([
     _removePrimitives: function() {
       // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
       // them for now.
-      var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
         this._primitive.show = false;
         this._primitive = null;
@@ -305,6 +305,11 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
     _whenPrimitiveReady: function(primitive) {
       return Timers.waitUntil(function() {
         return primitive.ready;

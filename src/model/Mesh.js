@@ -82,7 +82,8 @@ define([
     _modelMatrix: null,
 
     /**
-     * The original centroid before any transformations.
+     * The original centroid before any translation transformations. Reset each time the translation
+     * transformations are reset.
      * @type {atlas.model.GeoPoint}
      */
     _origCentroid: null,
@@ -94,8 +95,8 @@ define([
     _modelMatrixReady: null,
 
     /**
-     * The deferred promise for updating primitive styles. This operation should be mutually
-     * exclusive.
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
@@ -234,6 +235,11 @@ define([
       }
     },
 
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
     _whenPrimitiveReady: function(primitive) {
       return Timers.waitUntil(function() {
         return primitive.ready;
