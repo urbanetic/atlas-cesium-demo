@@ -18,13 +18,13 @@ module.exports = function(config) {
       {pattern: 'atlas/lib/**/*.js', included: false},
       {pattern: 'atlas-cesium/src/**/*.js', included: false},
       {pattern: 'atlas-cesium/lib/**/*.js', included: false},
-      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false},
-//      {pattern: 'atlas-cesium/lib/cesium/Source/**/*.js', included: false}
+      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false}
+      // {pattern: 'atlas-cesium/lib/cesium/Source/**/*.js', included: false}
     ],
 
     // list of files to exclude
     exclude: [
-//      'atlas-cesium/lib/cesium/**/*',
+      // 'atlas-cesium/lib/cesium/**/*',
       'atlas-cesium/lib/cesium/Apps/**/*',
       'atlas-cesium/lib/cesium/Build/**/*',
       'atlas-cesium/lib/cesium/Documentation/**/*',
@@ -34,29 +34,32 @@ module.exports = function(config) {
       'atlas-cesium/lib/cesium/Tools/**/*',
       // Used locally to keep various other versions of Cesium.
       'atlas-cesium/lib/cesium_*/**/*',
-//      'atlas-cesium/lib/cesium_b25/**/*',
-//      'atlas-cesium/lib/cesium_b27/**/*',
-//      'atlas-cesium/lib/cesium_b30/**/*',
+      // 'atlas-cesium/lib/cesium_b25/**/*',
+      // 'atlas-cesium/lib/cesium_b27/**/*',
+      // 'atlas-cesium/lib/cesium_b30/**/*',
       '../docs/*',
       '../docs/**/*'
     ],
 
     // Pre-process for code coverage
-//    preprocessors: {
-//      'atlas-cesium/src/**/*.js': 'coverage'
-//    },
+    preprocessors: {
+      'atlas-cesium/src/**/*.js': 'coverage'
+    },
 
     coverageReporter: {
-      type: 'lcov',
-      dir: 'atlas-cesium/coverage/'
+      dir: 'atlas-cesium/coverage/',
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcovonly', subdir: '.', file: 'lcov.dat' }
+      ]
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'gowl', 'coverage'
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
     // web server port
-    port: 9876,
+    port: 9874,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
@@ -76,13 +79,13 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    //browsers: ['Firefox'],
+    browsers: ['Firefox'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: true
   });
 };
