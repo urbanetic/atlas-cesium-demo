@@ -134,10 +134,6 @@ define([
         this._removePrimitives();
       }
       this._createGeometry();
-      // if (isModelDirty || isStyleDirty) {
-      //   // Cancel any existing handler for updating to avoid race conditions.
-      //   cancelStyleUpdate();
-      // }
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {

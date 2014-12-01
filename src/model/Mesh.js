@@ -257,10 +257,9 @@ define([
       var df = primitive._updateModelMatrixDf;
       df && df.reject();
       df = primitive._updateModelMatrixDf = this._whenPrimitiveReady(primitive);
-      df.promise.then(function() {
+      return df.promise.then(function() {
         primitive.modelMatrix = modelMatrix;
       });
-      return df.promise;
     },
 
     /**
