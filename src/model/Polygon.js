@@ -1,10 +1,12 @@
 define([
   'atlas/lib/utility/Setter',
+  'atlas/lib/Q',
   // Base class
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
+  'atlas/util/Timers',
   'atlas-cesium/model/Handle',
   'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
@@ -20,7 +22,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, PolygonCore, GeoPoint, Vertex, AtlasMath, Handle, Style, Cartesian3,
+], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Style, Cartesian3,
             GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
             ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
             Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
@@ -74,18 +76,18 @@ define([
     _minTerrainElevation: 0.0,
 
     /**
-     * The ID of the handler used for updating styles. Only one handler should be running. Any
-     * existing handler should be cancelled.
-     * @type {Number}
-     */
-    _updateStyleHandle: null,
-
-    /**
      * The model matrix applied after primitives are rendered. This is used to perform transient
      * transformations which are faster than rebuilding the primitives.
      * @type {Matrix4}
      */
     _modelMatrix: null,
+
+    /**
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
+     * @type {Deferred}
+     */
+    _updateStyleDf: null,
 
     /**
      * A copy of the original vertices which are used when constructing the primitives. The model
@@ -94,6 +96,13 @@ define([
      * @type {Array.<atlas.model.GeoPoint>}
      */
     _origVertices: null,
+
+    /**
+     * The original centroid before any translation transformations. Reset each time the translation
+     * transformations are reset.
+     * @type {atlas.model.GeoPoint}
+     */
+    _origCentroid: null,
 
     // -------------------------------------------
     // GETTERS AND SETTERS
@@ -120,19 +129,15 @@ define([
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
-      var cancelStyleUpdate = function() {
-        clearInterval(this._updateStyleHandle);
-        this._updateStyleHandle = null;
-      }.bind(this);
       var scene = this._renderManager.getScene();
       if (isModelDirty) {
         this._removePrimitives();
       }
       this._createGeometry();
-      if (isModelDirty || isStyleDirty) {
-        // Cancel any existing handler for updating to avoid race conditions.
-        cancelStyleUpdate();
-      }
+      // if (isModelDirty || isStyleDirty) {
+      //   // Cancel any existing handler for updating to avoid race conditions.
+      //   cancelStyleUpdate();
+      // }
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
@@ -173,31 +178,14 @@ define([
             })
           });
         } else if (isStyleDirty && this._outlinePrimitive) {
-          var timeout = 3000;
-          var duration = 0;
-          var freq = 100;
-          var setHandle = function() {
-            this._updateStyleHandle = setInterval(updateStyle, freq);
-          }.bind(this);
-          var isReady = function() {
-            return this._outlinePrimitive.ready;
-          }.bind(this);
-          var updateStyle = function() {
-            if (isReady()) {
-              var outlineGeometryAtts =
+          this._updateStyleDf && this._updateStyleDf.reject();
+          this._updateStyleDf = this._whenPrimitiveReady(this._outlinePrimitive);
+          this._updateStyleDf.promise.then(function() {
+            var outlineGeometryAtts =
                   this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
               outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
-              cancelStyleUpdate();
-            }
-            duration += freq;
-            duration >= timeout && cancelStyleUpdate();
-          }.bind(this);
-          // Only delay the update if necessary.
-          if (isReady()) {
-            updateStyle();
-          } else {
-            setHandle()
-          }
+            this._updateStyleDf = null;
+          }.bind(this));
         }
       }
       this._addPrimitives();
@@ -208,33 +196,10 @@ define([
         // again with the matrix would apply the transformation twice. We use the model matrix only
         // for transformations between rebuilds for performance, so it's safe to remove it.
         [this._primitive, this._outlinePrimitive].forEach(function(primitive) {
-          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+          primitive && this._updateModelMatrix(primitive, modelMatrix);
         }, this);
       }
       this._super();
-    },
-
-    /**
-     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
-     * Before this point, setting has no effect and is ignored when the primitive is eventually
-     * ready.
-     * @param primitive
-     * @param modelMatrix
-     * @private
-     */
-    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
-      var timeout = 60000;
-      var freq = 200;
-      var totalTime = 0;
-      var handler = function() {
-        if (totalTime >= timeout || primitive.ready) {
-          primitive.modelMatrix = modelMatrix;
-          clearInterval(handle);
-        }
-        totalTime += freq;
-      };
-      var handle = setInterval(handler, freq);
-      handler();
     },
 
     /**
@@ -254,7 +219,6 @@ define([
     _removePrimitives: function() {
       // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
       // them for now.
-      var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
         this._primitive.show = false;
         this._primitive = null;
@@ -285,7 +249,7 @@ define([
       }
       var vertices = this._initOrigVertices();
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
-        if (vertices.length === 0) {
+        if (vertices.length < 3) {
           return;
         }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
@@ -341,6 +305,34 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
+    _whenPrimitiveReady: function(primitive) {
+      return Timers.waitUntil(function() {
+        return primitive.ready;
+      });
+    },
+
+    /**
+     * Updates the model matrix of the given primitive when it is ready to accept the change.
+     * This operation is mutually exclusive and will cancel exisiting requests.
+     * @param  {Primitive} primitive
+     * @param  {Matrix4} modelMatrix
+     * @return {Promise}
+     */
+    _updateModelMatrix: function(primitive, modelMatrix) {
+      var df = primitive._updateModelMatrixDf;
+      df && df.reject();
+      df = primitive._updateModelMatrixDf = this._whenPrimitiveReady(primitive);
+      df.promise.then(function() {
+        primitive.modelMatrix = modelMatrix;
+      });
+      return df.promise;
+    },
+
     // -------------------------------------------
     // MODIFIERS
     // -------------------------------------------
@@ -353,8 +345,20 @@ define([
       this._copyOrigVertices();
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
+      var origCentroidDiff = target.subtract(this._origCentroid);
+      var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
+        origCentroidDiff.latitude >= 1;
       this._transformModelMatrix(this._calcTranslateMatrix(centroid, target));
       this._super(translation);
+      if (isTranslatedBeyondSensitivity) {
+        // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+        // where the original normal to the globe's surface is retained as the rotation when
+        // translating, causing issues if the new normal is sufficiently different.
+        this._resetModelMatrix();
+        this._resetOrigVertices();
+        this.setDirty('model');
+        this._update();
+      }
     },
 
     scale: function(scale) {
@@ -452,6 +456,11 @@ define([
       return this._modelMatrix;
     },
 
+    _resetModelMatrix: function() {
+      this._modelMatrix = null;
+      this._getModelMatrix();
+    },
+
     /**
      * Applies the given transformation matrix to the existing model matrix.
      * @param {Matrix4} modelMatrix
@@ -494,6 +503,7 @@ define([
     _initOrigVertices: function () {
       if (!this._origVertices) {
         this._origVertices = this._vertices;
+        this._origCentroid = this.getCentroid();
       }
       return this._origVertices;
     },
@@ -508,6 +518,11 @@ define([
         this._origVertices = Setter.cloneDeep(this._vertices);
       }
       return this._origVertices;
+    },
+
+    _resetOrigVertices: function () {
+      this._origVertices = this._origCentroid = null;
+      this._initOrigVertices();
     },
 
     _getCesiumColors: function() {

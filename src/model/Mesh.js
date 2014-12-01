@@ -1,9 +1,11 @@
 define([
+  'atlas/lib/Q',
+  'atlas/model/GeoPoint',
+  'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/WKT',
   'atlas/util/ConvexHullFactory',
-  'atlas/model/GeoPoint',
-  'atlas/model/Vertex',
+  'atlas/util/Timers',
   // Cesium includes
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
@@ -24,7 +26,7 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(AtlasMath, WKT, ConvexHullFactory, GeoPoint, Vertex, BoundingSphere,
+], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
@@ -79,10 +81,30 @@ define([
      */
     _modelMatrix: null,
 
+    /**
+     * The original centroid before any translation transformations. Reset each time the translation
+     * transformations are reset.
+     * @type {atlas.model.GeoPoint}
+     */
+    _origCentroid: null,
+
+    /**
+     * Whether the model matrix has been fully initialiased and the model is ready for rendering.
+     * @type {Boolean}
+     */
+    _modelMatrixReady: null,
+
+    /**
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
+     * @type {Deferred}
+     */
+    _updateStyleDf: null,
+
     _init: function () {
+      this._modelMatrixReady = false;
       this._super.apply(this, arguments);
-      // TODO(aramk): This overwrites all the matrix transformations in subclass.
-      this._setModelMatrix(this._initModelMatrix());
+      this._modelMatrixReady = true;
     },
 
     _updateVisibility: function(visible) {
@@ -90,14 +112,12 @@ define([
     },
 
     /**
-     * Builds the geometry and appearance data required to render the Polygon in
-     * Cesium.
+     * Builds the geometry and appearance data required to render.
      */
     _build: function() {
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      if (!this._primitive || this.isDirty('entity') || this.isDirty('vertices') ||
-          this.isDirty('model')) {
+      if (!this._primitive || isModelDirty) {
         if (this._primitive) {
           this._renderManager.getPrimitives().remove(this._primitive);
         }
@@ -108,47 +128,12 @@ define([
       }
 
       // Update model matrix after primitives are visible and ready.
-      var modelMatrix = this._modelMatrix;
-      // var modelMatrix = this._initModelMatrix();
-      // console.log('expected', modelMatrix);
-      // console.log('  actual', this._modelMatrix);
-
+      var modelMatrix = this._getModelMatrix();
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
-        // If the model has been redrawn, then we don't want to apply the existing matrix, since
-        // the transformations have been applied to the underlying vertices and transforming them
-        // again with the matrix would apply the transformation twice. We use the model matrix only
-        // for transformations between rebuilds for performance, so it's safe to remove it.
-        // if (isModelDirty) {
-        //   modelMatrix = this._calcRotateMatrix(this.getRotation());
-        //   this._setModelMatrix(modelMatrix);
-        // }
         [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
-          primitive && this._delaySetPrimitiveModelMatrix(primitive, modelMatrix);
+          primitive && this._updateModelMatrix(primitive, modelMatrix);
         }, this);
       }
-    },
-
-    /**
-     * Delays setting the given model matrix on the given primitive until it is ready for rendering.
-     * Before this point, setting has no effect and is ignored when the primitive is eventually
-     * ready.
-     * @param primitive
-     * @param modelMatrix
-     * @private
-     */
-    _delaySetPrimitiveModelMatrix: function(primitive, modelMatrix) {
-      var timeout = 60000;
-      var freq = 200;
-      var totalTime = 0;
-      var handler = function() {
-        if (totalTime >= timeout || primitive.ready) {
-          primitive.modelMatrix = modelMatrix;
-          clearInterval(handle);
-        }
-        totalTime += freq;
-      };
-      var handle = setInterval(handler, freq);
-      handler();
     },
 
     /**
@@ -212,10 +197,6 @@ define([
     },
 
     _initModelMatrix: function() {
-      // TODO(aramk) Only update if necessary.
-      if (!(this._rotation instanceof Vertex)) {
-        this._rotation = new Vertex(0, 0, 0);
-      }
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
       var modelMatrix = Matrix4.IDENTITY.clone();
@@ -224,12 +205,12 @@ define([
         // Apply rotation, translation and scale transformations.
         var rotationTranslation = Matrix4.fromRotationTranslation(
             // Input angle must be in radians.
-            Matrix3.fromRotationZ(AtlasMath.toRadians(this._rotation.z)),
+            Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
             new Cartesian3(0, 0, 0));
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
-        Matrix4.multiplyByScale(modelMatrix, this._scale, modelMatrix);
+        Matrix4.multiplyByScale(modelMatrix, this.getScale(), modelMatrix);
         // this._modelMatrix = modelMatrix;
       }
       return modelMatrix;
@@ -241,13 +222,45 @@ define([
      */
     _updateAppearance: function() {
       if (this.isDirty('entity') || this.isDirty('style')) {
-        if (!this._appearance) {
-          this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
-        }
-        this._appearance.color =
+        this._updateStyleDf && this._updateStyleDf.reject();
+        this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
+        this._updateStyleDf.promise.then(function() {
+          if (!this._appearance) {
+            this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
+          }
+          this._appearance.color =
             ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
+          this._updateStyleDf = null;
+        }.bind(this));
       }
-      return this._appearance;
+    },
+
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
+    _whenPrimitiveReady: function(primitive) {
+      return Timers.waitUntil(function() {
+        return primitive.ready;
+      });
+    },
+
+    /**
+     * Updates the model matrix of the given primitive when it is ready to accept the change.
+     * This operation is mutually exclusive and will cancel exisiting requests.
+     * @param  {Primitive} primitive
+     * @param  {Matrix4} modelMatrix
+     * @return {Promise}
+     */
+    _updateModelMatrix: function(primitive, modelMatrix) {
+      var df = primitive._updateModelMatrixDf;
+      df && df.reject();
+      df = primitive._updateModelMatrixDf = this._whenPrimitiveReady(primitive);
+      df.promise.then(function() {
+        primitive.modelMatrix = modelMatrix;
+      });
+      return df.promise;
     },
 
     /**
@@ -306,6 +319,28 @@ define([
       var target = centroid.translate(translation);
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
+      // Ignore the intitial translation which centres the mesh at the given geoLocation.
+      if (this._modelMatrixReady) {
+        if (!this._origCentroid) {
+          this._origCentroid = centroid;
+        }
+        var origCentroidDiff = target.subtract(this._origCentroid);
+        var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
+          origCentroidDiff.latitude >= 1;
+        if (isTranslatedBeyondSensitivity) {
+          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+          // where the original normal to the globe's surface is retained as the rotation when
+          // translating, causing issues if the new normal is sufficiently different.
+          this.setDirty('model');
+          // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
+          // for translation is minimal, reducing the issue described above.
+          var centroidGeoLocationDiff = this._geoLocation.subtract(centroid);
+          this._geoLocation = this._geoLocation.translate(origCentroidDiff);
+          this._resetModelMatrix();
+          this._origCentroid = null;
+          this._update();
+        }
+      }
     },
 
     scale: function(scale) {
@@ -394,9 +429,13 @@ define([
     _getModelMatrix: function() {
       // Avoids storing data that may not be used for all polygons.
       if (!this._modelMatrix) {
-        this._modelMatrix = Matrix4.IDENTITY.clone();
+        this._resetModelMatrix();
       }
       return this._modelMatrix;
+    },
+
+    _resetModelMatrix: function() {
+      this._setModelMatrix(this._initModelMatrix());
     },
 
     /**
