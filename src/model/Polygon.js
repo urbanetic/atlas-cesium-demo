@@ -256,13 +256,12 @@ define([
           this._zIndex * this._zIndexOffset;
       var height = (this._showAsExtrusion ? this._height : 0);
       var holes = [];
-      if (this._holes) {
-        for (var i in this._holes) {
-          var hole = this._holes[i];
-          var cartesians = this._renderManager.cartesianArrayFromGeoPointArray(hole.coordinates);
-          holes.push({positions: cartesians});
+      this._holes && this._holes.forEach(function(holeArray) {
+        if (holeArray.length > 0) {
+          var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
+          holes.push({positions: positions});
         }
-      }
+      });
       // Generate geometry data.
       var polygonHierarchy = {
         positions: this._cartesians,
