@@ -2,6 +2,7 @@ define([
   'atlas/model/Line',
   'atlas-cesium/model/Colour',
   'atlas-cesium/model/Handle',
+  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -11,10 +12,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
-  'atlas/util/DeveloperError'
-], function(LineCore, Colour, Handle, GeometryInstance, CorridorGeometry, PolylineGeometry,
+  'atlas/util/DeveloperError',
+  'atlas/util/Timers'
+], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
-            PolylineColorAppearance, Log, DeveloperError) {
+            PolylineColorAppearance, Log, DeveloperError, Timers) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -65,31 +67,63 @@ define([
      */
     _minTerrainElevation: 0.0,
 
+    /**
+     * The deferred promise for updating primitive styles. This operation should be mutually
+     * exclusive.
+     * @type {Deferred}
+     */
+    _updateStyleDf: null,
+
     // -------------------------------------------
-    // MODIFIERS
+    // CONSTRUCTION
     // -------------------------------------------
 
     _build: function() {
-      if (!this._primitive || this.isDirty('vertices') || this.isDirty('model')) {
-        if (this._primitive) {
-          this._renderManager.getPrimitives().remove(this._primitive);
-        }
-        this._primitive = this._createPrimitive();
-        this._renderManager.getPrimitives().add(this._primitive);
-      } else if (this.isDirty('style')) {
-        this._updateAppearance();
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+        this.isDirty('model');
+      var isStyleDirty = this.isDirty('style');
+      if (isModelDirty) {
+        this._removePrimitives();
       }
+      this._createGeometry();
+      this._createAppearance();
+      if (fillColor) {
+        if ((isModelDirty || !this._primitive) && this._geometry) {
+          this._primitive = new Primitive({
+            geometryInstances: this._geometry,
+            appearance: this._appearance
+          });
+        } else if (isStyleDirty && this._primitive) {
+          this._updateStyleDf && this._updateStyleDf.reject();
+          this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
+          this._updateStyleDf.promise.then(function() {
+              var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+              geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+          }.bind(this));
+        }
+      }
+      this._addPrimitives();
       this._super();
     },
 
     /**
-     * Updates the geometry data as required.
-     * @returns {GeometryInstance}
+     * Creates the geometry data as required.
      * @private
      */
-    _updateGeometry: function() {
+    _createGeometry: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var geometryId = this.getId();
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+        this.isDirty('model');
+      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
+      if (!shouldCreateGeometry) {
+        return;
+      }
       // Generate new cartesians if the vertices have changed.
-      if (this.isDirty('entity') || this.isDirty('vertices') || this.isDirty('model')) {
+      if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         Log.debug('updating geometry for entity ' + this.getId());
         // Remove duplicate vertices which cause Cesium to break (4 identical, consecutive vertices
         // cause the renderer to crash).
@@ -100,13 +134,12 @@ define([
             return !this._vertices[i - 1].equals(this._vertices[i]);
           }
         }, this);
+        if (vertices.length < 2) {
+          return;
+        }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
-
-      // TODO(aramk) The zIndex is currently absolute, not relative to the parent or using bins.
-      // TODO(bpstudds): Add support for different colours per line segment.
-
       // Generate geometry data.
       var reWidth = /(\d+)(px)?/i;
       var widthMatches = this._width.toString().match(reWidth);
@@ -122,92 +155,45 @@ define([
         positions: this._cartesians,
         width: width
       };
-      // Allow colour as fill or border, since it's just a line.
-      var colour = this._style.getFillColour() || this._style.getBorderColour();
-
       // PolylineGeometry has line widths in pixels. CorridorGeometry has line widths in metres.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
-        geometryArgs.colors = this._cartesians.map(function() {
-          return colour;
-        }, this);
         geometryArgs.colorsPerVertex = false;
         instanceArgs.geometry = new PolylineGeometry(geometryArgs);
       } else {
         geometryArgs.vertexFormat = PerInstanceColorAppearance.VERTEX_FORMAT;
         geometryArgs.cornerType = CornerType.ROUNDED;
-        instanceArgs.attributes = {
-          color: ColorGeometryInstanceAttribute.fromColor(Colour.toCesiumColor(colour))
-        };
         instanceArgs.geometry = new CorridorGeometry(geometryArgs);
       }
-      return new GeometryInstance(instanceArgs);
+      instanceArgs.attributes = {
+        color: ColorGeometryInstanceAttribute.fromColor(fillColor)
+      };
+      this._geometry = new GeometryInstance(instanceArgs);
     },
 
     /**
      * Updates the appearance data.
      * @private
      */
-    _updateAppearance: function() {
-      if (this.isDirty('entity') || this.isDirty('style')) {
-        Log.debug('updating appearance for entity ' + this.getId());
-        if (!this._appearance) {
-          if (this._isPolyline()) {
-            this._appearance = new PolylineColorAppearance();
-          } else {
-            this._appearance = new PerInstanceColorAppearance({
-              closed: true,
-              translucent: false
-            });
-          }
+    _createAppearance: function() {
+      var cesiumColors = this._getCesiumColors();
+      var fillColor = cesiumColors.fill;
+      var isStyleDirty = this.isDirty('style');
+      if ((isStyleDirty || !this._appearance) && fillColor) {
+        if (this._isPolyline()) {
+          this._appearance = new PolylineColorAppearance();
+        } else {
+          this._appearance = new PerInstanceColorAppearance({
+            closed: true,
+            translucent: false
+          });
         }
       }
-      return this._appearance;
     },
 
-    _isPolyline: function() {
-      return this._geometry.geometry instanceof PolylineGeometry;
-    },
-
-    _updateVisibility: function(visible) {
-      if (this._primitive) this._primitive.show = visible;
-    },
-
-    /**
-     * Function to permanently remove the Polygon from the scene (vs. hiding it).
-     */
-    remove: function() {
-      this._super();
-      this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
-    },
-
-    setStyle: function(style) {
-      this._super(style);
-      // Force a redraw of the model to ensure color change takes affect, since the
-      // ColorGeometryInstanceAttribute is bound per instance.
-      this.setDirty('model');
-      this.isVisible() && this.show();
-    },
-
-    modifyStyle: function(newStyle) {
-      // Force a redraw of the model to ensure color change takes affect, since the
-      // ColorGeometryInstanceAttribute is bound per instance.
-      this.setDirty('model');
-      return this._super(newStyle);
-    },
-
-    // -------------------------------------------
-    // CONSTRUCTION
-    // -------------------------------------------
-
-    _createPrimitive: function() {
-      Log.debug('creating primitive for entity', this.getId());
-      // TODO(aramk) _geometry isn't actually set.
-      this._geometry = this._updateGeometry();
-      this._appearance = this._updateAppearance();
-      return new Primitive({
-        geometryInstances: this.getGeometry(),
-        appearance: this.getAppearance()
+    _whenPrimitiveReady: function(primitive) {
+      return Timers.waitUntil(function() {
+        return primitive.ready;
       });
     },
 
@@ -219,6 +205,64 @@ define([
     _createEntityHandle: function() {
       // Line doesn't need a handle on itself.
       return false;
+    },
+
+    // -------------------------------------------
+    // MODIFIERS
+    // -------------------------------------------
+
+    /**
+     * Adds the primitives to the scene.
+     * @private
+     */
+    _addPrimitives: function() {
+      var primitives = this._renderManager.getPrimitives();
+      this._primitive && primitives.add(this._primitive);
+    },
+
+    /**
+     * Removes the primitives from the scene.
+     * @private
+     */
+    _removePrimitives: function() {
+      // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
+      // them for now.
+      var primitives = this._renderManager.getPrimitives();
+      if (this._primitive) {
+        this._primitive.show = false;
+        this._primitive = null;
+        this._geometry = null;
+      }
+    },
+
+    _updateVisibility: function(visible) {
+      if (this._primitive) {
+        this._primitive.show = visible
+      }
+    },
+
+    /**
+     * Function to permanently remove the Polygon from the scene (vs. hiding it).
+     */
+    remove: function() {
+      this._super();
+      this._removePrimitives();
+    },
+
+    // -------------------------------------------
+    // GETTERS & SETTERS
+    // -------------------------------------------
+
+    /**
+     * @return {Boolean} Whether the geometry is a {@link PolylineGeometry}.
+     */
+    _isPolyline: function() {
+      return this._geometry && this._geometry.geometry instanceof PolylineGeometry;
+    },
+
+    _getCesiumColors: function() {
+      var style = this.getStyle();
+      return Style.toCesiumColors(style);
     }
 
   });
