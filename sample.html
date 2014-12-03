@@ -11,8 +11,9 @@
   <link rel="stylesheet/less" href="atlas/resources/atlas.less">
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
   <style>
-    html, body {
+    html, body, #cesium {
       margin: 0;
+      height: 100%;
     }
   </style>
   <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
@@ -25,7 +26,6 @@
     require.config({
       baseUrl: '',
       packages: [
-
         { name: 'atlas', location: 'atlas/src'},
         { name: 'atlas/lib', location: 'atlas/lib'},
         { name: 'atlas/lib/utility', location: 'atlas/lib/utility/src'},
@@ -50,6 +50,7 @@
       cesiumAtlas.attachTo('cesium');
 
       cesiumAtlas.publish('debugMode', true);
+      window.atlas = cesiumAtlas;
 
       var i = 0;
       var args = {};
@@ -67,7 +68,7 @@
 
       testWKT.forEach(function(wkt) {
         var styleArgs = {};
-        Setter.mixin(styleArgs, toAtlasStyleArgs('#ff0', 1, 'fill'));
+        Setter.mixin(styleArgs, toAtlasStyleArgs('#ccc', 1, 'fill'));
         Setter.mixin(styleArgs, toAtlasStyleArgs('#000', 1, 'border'));
         var id = args.id = i++;
         args.polygon = {
@@ -93,26 +94,59 @@
           './prototypes/CameraPrototype',
           './prototypes/EditPrototype',
           './prototypes/DrawPrototype',
+          './prototypes/LineDrawPrototype',
+          './prototypes/TranslatePrototype',
+          './prototypes/RotationPrototype',
+          './prototypes/ScalePrototype',
           './prototypes/MeshPrototype',
+          './prototypes/MeshPrototype2',
+          './prototypes/MeshPrototype3',
+          './prototypes/MeshPrototype4',
+          './prototypes/MeshCollectionPrototype',
+          './prototypes/LinePrototype',
           './prototypes/GeocoderPrototype',
           './prototypes/InputPrototype',
           './prototypes/RenderPrototype',
           './prototypes/StylePrototype',
           './prototypes/EventPrototype',
-//          './prototypes/ProjectionPrototype'
-        ], function(CameraPrototype, EditPrototype, DrawPrototype, MeshPrototype, GeocoderPrototype,
-                    InputPrototype, RenderPrototype, StylePrototype, EventPrototype,
-                    ProjectionPrototype) {
+          './prototypes/ProjectionPrototype',
+          './prototypes/CollectionPrototype',
+          './prototypes/SelectionPrototype',
+          './prototypes/PolygonTransformPrototype',
+          './prototypes/PopupPrototype',
+          './prototypes/PopupPrototype2',
+          'atlas/lib/utility/Log'
+        ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
+                    RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
+                    MeshPrototype3, MeshPrototype4, MeshCollectionPrototype, LinePrototype, 
+                    GeocoderPrototype, InputPrototype, RenderPrototype, StylePrototype, 
+                    EventPrototype, ProjectionPrototype, CollectionPrototype, SelectionPrototype, 
+                    PolygonTransformPrototype, PopupPrototype, PopupPrototype2, Log) {
 //          new CameraPrototype(cesiumAtlas);
-          new EditPrototype(cesiumAtlas);
-//          new DrawPrototype(cesiumAtlas);
-//          new MeshPrototype(cesiumAtlas);
+//          new EditPrototype(cesiumAtlas);
+         // new DrawPrototype(cesiumAtlas);
+         // new LineDrawPrototype(cesiumAtlas);
+//          new TranslatePrototype(cesiumAtlas);
+         // new RotationPrototype(cesiumAtlas);
+         // new ScalePrototype(cesiumAtlas);
+         // new MeshPrototype(cesiumAtlas);
+         // new MeshPrototype2(cesiumAtlas);
+         // new MeshPrototype3(cesiumAtlas);
+         // new MeshPrototype4(cesiumAtlas);
+         new MeshCollectionPrototype(cesiumAtlas);
+         // new LinePrototype(cesiumAtlas);
 //          new GeocoderPrototype(cesiumAtlas);
 //          new InputPrototype(cesiumAtlas);
 //          new RenderPrototype(cesiumAtlas);
 //          new StylePrototype(cesiumAtlas);
 //          new EventPrototype(cesiumAtlas);
 //          new ProjectionPrototype(cesiumAtlas);
+         // new CollectionPrototype(cesiumAtlas);
+         // new SelectionPrototype(cesiumAtlas);
+         // new PolygonTransformPrototype(cesiumAtlas);
+         // new PopupPrototype(cesiumAtlas);
+         // new PopupPrototype2(cesiumAtlas);
+          Log.setLevel('debug');
         });
       }, 2000);
 

@@ -1,11 +1,12 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Vertex',
+  'atlas/model/Collection',
   'atlas/model/GeoPoint',
+  'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/camera/Camera',
   'atlas-cesium/cesium/Source/Core/Cartesian3'
-], function(Class, Vertex, GeoPoint, AtlasMath, Camera, Cartesian3) {
+], function(Class, Collection, GeoPoint, Vertex, AtlasMath, Camera, Cartesian3) {
   return Class.extend({
 
     atlas: null,
@@ -15,7 +16,7 @@ define([
 
       var cameraManager = atlas._managers.camera,
           renderManager = atlas._managers.render,
-          camera = cameraManager._camera,
+          camera = cameraManager.getCurrentCamera(),
           cesiumCamera = renderManager.getCesiumCamera(),
           ellipsoid = renderManager.getEllipsoid();
 
@@ -32,11 +33,6 @@ define([
 //      var degrees = new Vertex(AtlasMath.toDegrees(cartographic.latitude),
 //          AtlasMath.toDegrees(cartographic.longitude), cartographic.height);
 //      console.error('pos', cartesian, cartographic, degrees);
-
-//      setInterval(function() {
-//
-//
-//      }, 3000);
 
       // Point camera towards a location.
 
@@ -74,22 +70,22 @@ define([
 
       // Move between bookmarks.
 
-      var posIndex = 0;
-      var defaultPosition = Camera.DEFAULT_POSITION();
-      var pos2 = Camera.DEFAULT_POSITION();
-      pos2.latitude += 1;
-//      // TODO(aramk) Save direction instead?
-      var args = [
-        {position: defaultPosition, duration: 3000, orientation: {tilt: 90}, path: 'linear'},
-        {position: pos2, duration: 2000, orientation: {tilt: 45, bearing: 45}, path: 'sinusoidal'}
-      ];
-      setInterval(function() {
-        posIndex = posIndex % args.length;
-        var arg = args[posIndex];
-        arg._temp = true;
-        camera.zoomTo(arg);
-        posIndex++;
-      }, 5000);
+//      var posIndex = 0;
+//      var defaultPosition = Camera.DEFAULT_POSITION();
+//      var pos2 = Camera.DEFAULT_POSITION();
+//      pos2.latitude += 1;
+////      // TODO(aramk) Save direction instead?
+//      var args = [
+//        {position: defaultPosition, duration: 3000, orientation: {tilt: 90}, path: 'linear'},
+//        {position: pos2, duration: 2000, orientation: {tilt: 45, bearing: 45}, path: 'sinusoidal'}
+//      ];
+//      setInterval(function() {
+//        posIndex = posIndex % args.length;
+//        var arg = args[posIndex];
+//        arg._temp = true;
+//        camera.zoomTo(arg);
+//        posIndex++;
+//      }, 5000);
 
       // Move the camera in a straight path.
 
@@ -97,6 +93,28 @@ define([
 //        camera.zoomTo({position: pos2, duration: 5000, orientation: {tilt: 45, bearing: 45}});
 //      }, 8000);
 
+      // Move the camera to a bounding box around all entities.
+
+      var entityManager = atlas._managers.entity;
+      var features = entityManager.getFeatures();
+      var feature = features[0];
+
+      var featureIds = features.map(function(feature) {
+        return feature.getId();
+      });
+      // TODO(aramk) Use dependendency injection or allow adding collections from entity manager.
+      // This is a hack!
+      var args = feature._bindDependencies({show: true});
+      var collection = new Collection('c1', {entities: featureIds}, args);
+
+      var boundingBox = collection.getBoundingBox();
+      console.log('boundingBox', boundingBox);
+      boundingBox = boundingBox.scale(1.5);
+      console.log('boundingBox', boundingBox);
+
+      camera.zoomTo({
+        rectangle: boundingBox
+      });
     }
 
   });

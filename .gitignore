@@ -1,3 +1,5 @@
+*.sublime-workspace
+
 # KML files
 src/data/layers
 
