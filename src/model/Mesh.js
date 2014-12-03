@@ -39,16 +39,17 @@ define([
    * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an
    * [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every
    * triangle vertex to ensure shading works correctly.
-   * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements
+   * @param {Array.<Number>} [meshData.positions] - A 1D array of position data, every 3 elements
    * forming a vertex, ie a (x, y, z) coordinate tuple in model space.
-   * @param {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh.
+   * @param {Array.<Number>} [meshData.triangles] - A 1D array of the triangles forming the mesh.
    * Every 3 elements forming a new triangle with counter-clockwise winding order.
    * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
    * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
    * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
    * [red, green, blue, alpha] formatted array.
-   * @param {Array.<Number>} [meshData.scale] - The scale of the Mesh.
-   * @param {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
+   * @param {Number} [meshData.uniformScale] - The uniform scale of the Mesh.
+   * @param {atlas.model.Vertex} [meshData.scale] - The non-uniform scale of the Mesh.
+   * @param {Array.<Number>} [meshData.rotation=Matrix.IDENTITY] - The rotation of the Mesh.
    * @param {Object} args - Required and optional arguments to construct the Mesh object.
    * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and
    * <code>args</code> are provided as arguments)
@@ -88,7 +89,7 @@ define([
     _origCentroid: null,
 
     /**
-     * Whether the model matrix has been fully initialiased and the model is ready for rendering.
+     * Whether the model matrix has been fully initialised and the model is ready for rendering.
      * @type {Boolean}
      */
     _modelMatrixReady: null,
@@ -195,6 +196,11 @@ define([
       return this._geometry;
     },
 
+    /**
+     * Initialises the Mesh's model matrix based on the current geoLocation, scale and rotation of
+     * the Mesh.
+     * @return {Matrix4} The initialised model matrix.
+     */
     _initModelMatrix: function() {
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
@@ -242,9 +248,9 @@ define([
 
     /**
      * Updates the model matrix of the given primitive when it is ready to accept the change.
-     * This operation is mutually exclusive and will cancel exisiting requests.
-     * @param  {Primitive} primitive
-     * @param  {Matrix4} modelMatrix
+     * This operation is mutually exclusive and will cancel existing requests.
+     * @param {Primitive} primitive
+     * @param {Matrix4} modelMatrix
      * @return {Promise}
      */
     _updateModelMatrix: function(primitive, modelMatrix) {
@@ -282,12 +288,14 @@ define([
      * @private
      */
     _getFootprintVertices: function() {
+      // TODO(bpstudds): This function is not compatible with GLTF.
       return ConvexHullFactory.getInstance().fromVertices(this._calcVertices());
     },
 
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
     // for now.
     getOpenLayersGeometry: function() {
+      // TODO(bpstudds): This function is not compatible with GLTF.
       var vertices = this._getFootprintVertices();
       return WKT.getInstance().openLayersPolygonFromGeoPoints(vertices);
     },
@@ -313,7 +321,7 @@ define([
       var target = centroid.translate(translation);
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
-      // Ignore the intitial translation which centres the mesh at the given geoLocation.
+      // Ignore the initial translation which centres the mesh at the given geoLocation.
       if (this._modelMatrixReady) {
         if (!this._origCentroid) {
           this._origCentroid = centroid;
@@ -364,7 +372,7 @@ define([
 
     /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the
      * transformation.
      * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
      * given point.
