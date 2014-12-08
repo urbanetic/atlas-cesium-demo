@@ -61,16 +61,20 @@ define([
     },
 
     _calculateVertices: function() {
-      throw new Error('Function not supported by GltfMesh');
+      throw new Error('Function _calculateVertices not supported by GltfMesh');
     },
 
     _getFootprintVertices: function() {
-      throw new Error('Function not supported by GltfMesh');
+      throw new Error('Function _getFootprintVertices not supported by GltfMesh');
     },
 
     getOpenLayersGeometry: function() {
-      throw new Error('Function not supported by GltfMesh');
+      throw new Error('Function _getOpenLayersGeometry not supported by GltfMesh');
     },
+
+    getCentroid: function() {
+      return this._geoLocation;
+    }
 
   });
 
