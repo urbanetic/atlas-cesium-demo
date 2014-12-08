@@ -7,6 +7,7 @@ define([
   'atlas/util/ConvexHullFactory',
   'atlas/util/Timers',
   // Cesium includes
+  'atlas-cesium/cesium/Source/Cesium',
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Color',
@@ -26,7 +27,7 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, BoundingSphere,
+], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
@@ -213,12 +214,25 @@ define([
             Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
             new Cartesian3(0, 0, 0));
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
-        Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+        Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this.getScale(), modelMatrix);
         // this._modelMatrix = modelMatrix;
       }
       return modelMatrix;
+    },
+
+    /**
+     * Generates the correct matrix transformation to use based on the version of Cesium used.
+     * @param  {atlas.model.GeoPoint} location - The location for the transform
+     * @return {Matrix4} The transformation matrix.
+     */
+    _transformLocation: function(location) {
+      if (Cesium.VERSION < 1.2) {
+        return Transforms.northEastDownToFixedFrame(location);
+      } else {
+        return Transforms.eastNorthUpToFixedFrame(location);
+      }
     },
 
     /**
@@ -403,7 +417,7 @@ define([
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
       // earth to the surface location and points upward from the earth - it's the normal vector
       // for the surface of the earth at that location.
-      var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
+      var originMatrix = this._transformLocation(centroidCartesian);
       // Since our existing position after construction is NOT the centre of the earth, we must
       // reverse the above transformation and move the geometry back to the origin, apply the
       // given matrix transformation, then apply the transformation again.
