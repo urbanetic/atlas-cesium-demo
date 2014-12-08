@@ -1,7 +1,10 @@
 define([
   'atlas/lib/Q',
+  'atlas/lib/utility/Setter',
+  'atlas/model/GeoPoint',
+  'atlas-cesium/cesium/Source/Scene/Model',
   'atlas-cesium/model/Mesh'
-], function(Q, Mesh) {
+], function(Q, Setter, GeoPoint, CesiumModel, Mesh) {
 
   /**
    * @typedef {atlas-cesium.model.GltfMesh}
@@ -11,20 +14,34 @@ define([
 
   GltfMesh = Mesh.extend( /** @lends atlas-cesium.model.GltfMesh# */ {
 
+    /**
+     * The base URL that URLs with the GLTF data are relative to.
+     * @type {String}
+     */
+    _baseUrl: null,
+
+    _init: function(id, meshData, args) {
+      this._super(id, meshData, args);
+
+      this._baseUrl = Setter.def(meshData.baseUrl, '');
+      this._centroid = new GeoPoint(this._geoLocation);
+    },
+
     _createPrimitive: function() {
       var thePrimitive,
           args = {
             id: this.getId(),
+            baseUrl: this._baseUrl,
             modelMatrix: this._getModelMatrix(),
             scale: this._uniformScale
           };
 
       if (this._gltf) {
         args.gltf = this._gltf;
-        return new Model(args);
+        return new CesiumModel(args);
       } else if (this._gltfUrl) {
         args.url = this._gltfUrl;
-        return Model.fromUrl(args);
+        return CesiumModel.fromGltf(args);
       }
 
       throw new Error('Tried to create GLTF Mesh without specifying GLTF JSON or URL.');

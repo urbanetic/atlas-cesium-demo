@@ -18,6 +18,7 @@ module.exports = function(config) {
       {pattern: 'atlas/lib/**/*.js', included: false},
       {pattern: 'atlas-cesium/src/**/*.js', included: false},
       {pattern: 'atlas-cesium/lib/**/*.js', included: false},
+      {pattern: 'atlas-cesium/lib/**/*.png', included: false},
       {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false}
       // {pattern: 'atlas-cesium/lib/cesium/Source/**/*.js', included: false}
     ],

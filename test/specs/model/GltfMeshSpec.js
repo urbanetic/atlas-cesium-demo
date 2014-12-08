@@ -1,7 +1,7 @@
 define([
-  'jasmine-async',
+  'atlas-cesium/render/RenderManager',
   'atlas-cesium/model/GltfMesh'
-], function(JasmineAsync, GltfMesh) {
+], function(RenderManager, GltfMesh) {
 
   var mesh,
       meshData,
@@ -14,7 +14,7 @@ define([
         gltf: {}
       };
       args = {
-        renderManager: {},
+        renderManager: new RenderManager({}),
         eventManager: {}
       };
     });
@@ -33,6 +33,22 @@ define([
       mesh = new GltfMesh('id', meshData, args);
       expect(mesh).not.toBe(undefined);
       expect(mesh.getId()).toEqual('id');
+    });
+
+    // TODO(bpstudds): Can this be tested without mocking a heap of Cesium components.
+    xit('can construct a primitive', function() {
+      meshData.gltfUrl = './assets/duck.gltf';
+      mesh = new GltfMesh('id', meshData, args);
+      mesh._createPrimitive();
+    });
+
+    // TODO(bpstudds): Can this be tested without starting a Cesium instance?
+    xit('should eventually be ready', function(done) {
+      meshData.gltfUrl = './assets/duck.gltf';
+      mesh = new GltfMesh('id', meshData, args);
+      mesh._whenPrimitiveReady().promise.then(function() {
+        done();
+      });
     });
 
   })
