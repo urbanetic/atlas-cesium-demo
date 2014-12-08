@@ -83,8 +83,8 @@ define([
     _modelMatrix: null,
 
     /**
-     * The deferred promise for updating primitive styles. This operation should be mutually
-     * exclusive.
+     * The deferred promise for updating primitive styles, which is a asynchronous and should be
+     * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
@@ -98,7 +98,8 @@ define([
     _origVertices: null,
 
     /**
-     * The original centroid before any transformations.
+     * The original centroid before any translation transformations. Reset each time the translation
+     * transformations are reset.
      * @type {atlas.model.GeoPoint}
      */
     _origCentroid: null,
@@ -133,10 +134,6 @@ define([
         this._removePrimitives();
       }
       this._createGeometry();
-      // if (isModelDirty || isStyleDirty) {
-      //   // Cancel any existing handler for updating to avoid race conditions.
-      //   cancelStyleUpdate();
-      // }
       if (fillColor) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
@@ -218,7 +215,6 @@ define([
     _removePrimitives: function() {
       // TODO(aramk) Removing the primitives causes a crash with "primitive was destroyed". Hiding
       // them for now.
-      var primitives = this._renderManager.getPrimitives();
       if (this._primitive) {
         this._primitive.show = false;
         this._primitive = null;
@@ -260,13 +256,12 @@ define([
           this._zIndex * this._zIndexOffset;
       var height = (this._showAsExtrusion ? this._height : 0);
       var holes = [];
-      if (this._holes) {
-        for (var i in this._holes) {
-          var hole = this._holes[i];
-          var cartesians = this._renderManager.cartesianArrayFromGeoPointArray(hole.coordinates);
-          holes.push({positions: cartesians});
+      this._holes && this._holes.forEach(function(holeArray) {
+        if (holeArray.length > 0) {
+          var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
+          holes.push({positions: positions});
         }
-      }
+      });
       // Generate geometry data.
       var polygonHierarchy = {
         positions: this._cartesians,
@@ -305,6 +300,11 @@ define([
       return new Handle(this._bindDependencies({target: vertex, index: index, owner: this}));
     },
 
+    /**
+     * @param {Primitive} primitive
+     * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
+     * for rendering or modifiying.
+     */
     _whenPrimitiveReady: function(primitive) {
       return Timers.waitUntil(function() {
         return primitive.ready;
