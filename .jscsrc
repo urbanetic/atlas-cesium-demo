@@ -1,0 +1,27 @@
+{
+  "preset": "google",
+  "excludeFiles": [
+    "node_modules/**",
+    "lib/**",
+    "test/**"
+  ],
+  "disallowMixedSpacesAndTabs": true,
+  "disallowMultipleLineStrings": true,
+  "disallowSpaceAfterKeywords": [
+    "function"
+  ],
+  /* Overriding Google preset. */
+  "maximumLineLength": 100,
+   "requireCurlyBraces": [
+    //"if",
+    "else",
+    "for",
+    "while",
+    "do",
+    "try",
+    "catch"
+  ],
+  "disallowKeywords": [
+    "console"
+  ]
+}
