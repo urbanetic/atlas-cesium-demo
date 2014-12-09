@@ -28,8 +28,8 @@ define([
     },
 
     _createPrimitive: function() {
-      var thePrimitive,
-          args = {
+      var thePrimitive;
+      var args = {
             id: this.getId(),
             baseUrl: this._baseUrl,
             modelMatrix: this._getModelMatrix(),
@@ -50,14 +50,6 @@ define([
     _updateAppearance: function() {
       // Overridden to be no-op as it is called automatically by  Mesh._build. Apart from the call
       // to this function, the logic in Mesh._build is needed here and should not be replicated. DRY
-    },
-
-    _whenPrimitiveReady: function() {
-      var df = Q.defer();
-      this._primitive && this._primitive.readyToRender.addEventListener(function(model) {
-        df.resolve();
-      });
-      return df;
     },
 
     _calculateVertices: function() {
