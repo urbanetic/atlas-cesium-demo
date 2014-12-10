@@ -44,15 +44,6 @@
         </optics>
       </camera>
     </library_cameras>
-    <library_lights>
-      <light id="directionalLightShape1-lib" name="directionalLightShape1">
-        <technique_common>
-          <directional>
-            <color>1 1 1</color>
-          </directional>
-        </technique_common>
-      </light>
-    </library_lights>
     <library_images>
       <image id="file2" name="file2" depth="1">
         <init_from>duckCM.png</init_from>
@@ -182,13 +173,6 @@
           <rotate sid="rotateY">0 1 0 -223.2</rotate>
           <rotate sid="rotateX">1 0 0 -38.4</rotate>
           <instance_camera url="#cameraShape1"/>
-        </node>
-        <node id="directionalLight1" name="directionalLight1">
-          <translate sid="translate">148.654 183.672 -292.179</translate>
-          <rotate sid="rotateZ">0 0 1 -12.8709</rotate>
-          <rotate sid="rotateY">0 1 0 -191.679</rotate>
-          <rotate sid="rotateX">1 0 0 -45.6358</rotate>
-          <instance_light url="#directionalLightShape1-lib"/>
         </node>
       </visual_scene>
     </library_visual_scenes>
