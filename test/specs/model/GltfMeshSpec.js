@@ -3,9 +3,9 @@ define([
   'atlas-cesium/model/GltfMesh'
 ], function(RenderManager, GltfMesh) {
 
-  var mesh,
-      meshData,
-      args;
+  var mesh;
+  var meshData;
+  var args;
 
   describe('A GltfMesh', function() {
 
@@ -51,5 +51,5 @@ define([
       });
     });
 
-  })
+  });
 });

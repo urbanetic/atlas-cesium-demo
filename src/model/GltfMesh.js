@@ -28,7 +28,6 @@ define([
     },
 
     _createPrimitive: function() {
-      var thePrimitive;
       var args = {
             id: this.getId(),
             baseUrl: this._baseUrl,
