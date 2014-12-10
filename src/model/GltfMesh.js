@@ -12,6 +12,17 @@ define([
    */
   var GltfMesh;
 
+  /**
+   * GltfMesh represents a Model defined by Khronos Group GLTF runtime assest format. @see
+   *     {@link https://github.com/KhronosGroup/glTF} for the specification. A Collada to GLTF
+   *     converter is available.
+   *
+   * @see {@link atlas.model.Mesh}
+   * @see {@link atlas.model.GeoEntity}
+   *
+   * @class atlas-cesium.model.GltfMesh
+   * @extends atlas-cesium.model.Mesh
+   */
   GltfMesh = Mesh.extend( /** @lends atlas-cesium.model.GltfMesh# */ {
 
     /**
