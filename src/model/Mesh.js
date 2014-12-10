@@ -103,7 +103,7 @@ define([
      */
     _updateStyleDf: null,
 
-    _init: function () {
+    _init: function() {
       this._modelMatrixReady = false;
       this._super.apply(this, arguments);
       this._modelMatrixReady = true;
@@ -132,9 +132,7 @@ define([
       // Update model matrix after primitives are visible and ready.
       var modelMatrix = this._getModelMatrix();
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
-        [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
-          primitive && this._updateModelMatrix(primitive, modelMatrix);
-        }, this);
+        this._primitive && this._updateModelMatrix(this._primitive, modelMatrix);
       }
     },
 
@@ -146,10 +144,10 @@ define([
      * @private
      */
     _createPrimitive: function() {
-      var thePrimitive,
-          geometry = this._createGeometry(),
-          color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
-          instance = new GeometryInstance({
+      var thePrimitive;
+      var geometry = this._createGeometry();
+      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour());
+      var instance = new GeometryInstance({
             id: this.getId(),
             geometry: geometry,
             attributes: {
@@ -249,7 +247,8 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
+              ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
+                  this._style.getFillColour()));
           this._updateStyleDf = null;
         }.bind(this));
       }
@@ -355,7 +354,6 @@ define([
           this.setDirty('model');
           // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
           // for translation is minimal, reducing the issue described above.
-          var centroidGeoLocationDiff = this._geoLocation.subtract(centroid);
           this._geoLocation = this._geoLocation.translate(origCentroidDiff);
           this._resetModelMatrix();
           this._origCentroid = null;
@@ -485,4 +483,3 @@ define([
 
   return Mesh;
 });
-
