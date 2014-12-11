@@ -179,7 +179,11 @@ define([
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var isStyleDirty = this.isDirty('style');
-      if ((isStyleDirty || !this._appearance) && fillColor) {
+      // If the width is set from pixels to metres, the appearance must be changed to match the new
+      // primitive.
+      var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
+        this.isDirty('model');
+      if ((isStyleDirty || isModelDirty || !this._appearance) && fillColor) {
         if (this._isPolyline()) {
           this._appearance = new PolylineColorAppearance();
         } else {
