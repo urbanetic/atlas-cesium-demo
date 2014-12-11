@@ -40,11 +40,11 @@ define([
 
     _createPrimitive: function() {
       var args = {
-            id: this.getId(),
-            baseUrl: this._baseUrl,
-            modelMatrix: this._getModelMatrix(),
-            scale: this._uniformScale
-          };
+        id: this.getId(),
+        baseUrl: this._baseUrl,
+        modelMatrix: this._getModelMatrix(),
+        scale: this._uniformScale
+      };
 
       if (this._gltf) {
         args.gltf = this._gltf;
@@ -52,13 +52,13 @@ define([
       } else if (this._gltfUrl) {
         args.url = this._gltfUrl;
         return CesiumModel.fromGltf(args);
+      } else {
+        throw new Error('Tried to create GLTF Mesh without specifying GLTF JSON or URL.');
       }
-
-      throw new Error('Tried to create GLTF Mesh without specifying GLTF JSON or URL.');
     },
 
     _updateAppearance: function() {
-      // Overridden to be no-op as it is called automatically by  Mesh._build. Apart from the call
+      // Overridden to be no-op as it is called automatically by Mesh._build. Apart from the call
       // to this function, the logic in Mesh._build is needed here and should not be replicated. DRY
     },
 
