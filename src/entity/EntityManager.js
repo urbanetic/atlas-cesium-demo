@@ -1,4 +1,5 @@
 define([
+  'atlas/model/Collection',
   'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
@@ -9,7 +10,8 @@ define([
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function (GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Polygon, Mesh, EntityManagerCore) {
+], function (Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Polygon, Mesh,
+    EntityManagerCore) {
 
   /**
    * @typedef atlas-cesium.entity.EntityManager
@@ -32,7 +34,8 @@ define([
       Image: Image,
       Line: Line,
       Mesh: Mesh,
-      Polygon: Polygon
+      Polygon: Polygon,
+      Collection: Collection
     },
 
     /**
