@@ -7,6 +7,7 @@ define([
   'atlas/util/ConvexHullFactory',
   'atlas/util/Timers',
   // Cesium includes
+  'atlas-cesium/cesium/Source/Cesium',
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Color',
@@ -26,7 +27,7 @@ define([
   'atlas-cesium/model/Colour',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, BoundingSphere,
+], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
             Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
@@ -39,16 +40,17 @@ define([
    * @param {Array.<Number>} meshData.geoLocation - The location of the Mesh in an
    * [latitude, longitude, elevation] formatted array. Unique positions need to be defined for every
    * triangle vertex to ensure shading works correctly.
-   * @param {Array.<Number>} meshData.positions - A 1D array of position data, every 3 elements
+   * @param {Array.<Number>} [meshData.positions] - A 1D array of position data, every 3 elements
    * forming a vertex, ie a (x, y, z) coordinate tuple in model space.
-   * @param {Array.<Number>} meshData.triangles - A 1D array of the triangles forming the mesh.
+   * @param {Array.<Number>} [meshData.triangles] - A 1D array of the triangles forming the mesh.
    * Every 3 elements forming a new triangle with counter-clockwise winding order.
    * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
    * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
    * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
    * [red, green, blue, alpha] formatted array.
-   * @param {Array.<Number>} [meshData.scale] - The scale of the Mesh.
-   * @param {Array.<Number>} [meshData.rotation] - The rotation of the Mesh.
+   * @param {Number} [meshData.uniformScale] - The uniform scale of the Mesh.
+   * @param {atlas.model.Vertex} [meshData.scale] - The non-uniform scale of the Mesh.
+   * @param {Array.<Number>} [meshData.rotation=Matrix.IDENTITY] - The rotation of the Mesh.
    * @param {Object} args - Required and optional arguments to construct the Mesh object.
    * @param {String} args.id - The ID of the GeoEntity. (Optional if both <code>id</code> and
    * <code>args</code> are provided as arguments)
@@ -89,7 +91,7 @@ define([
     _origCentroid: null,
 
     /**
-     * Whether the model matrix has been fully initialiased and the model is ready for rendering.
+     * Whether the model matrix has been fully initialised and the model is ready for rendering.
      * @type {Boolean}
      */
     _modelMatrixReady: null,
@@ -101,7 +103,7 @@ define([
      */
     _updateStyleDf: null,
 
-    _init: function () {
+    _init: function() {
       this._modelMatrixReady = false;
       this._super.apply(this, arguments);
       this._modelMatrixReady = true;
@@ -130,9 +132,7 @@ define([
       // Update model matrix after primitives are visible and ready.
       var modelMatrix = this._getModelMatrix();
       if ((isModelDirty || this.isDirty('modelMatrix')) && modelMatrix) {
-        [this._primitive/*, this._outlinePrimitive*/].forEach(function(primitive) {
-          primitive && this._updateModelMatrix(primitive, modelMatrix);
-        }, this);
+        this._primitive && this._updateModelMatrix(this._primitive, modelMatrix);
       }
     },
 
@@ -144,10 +144,10 @@ define([
      * @private
      */
     _createPrimitive: function() {
-      var thePrimitive,
-          geometry = this._createGeometry(),
-          color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour()),
-          instance = new GeometryInstance({
+      var thePrimitive;
+      var geometry = this._createGeometry();
+      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour());
+      var instance = new GeometryInstance({
             id: this.getId(),
             geometry: geometry,
             attributes: {
@@ -196,6 +196,11 @@ define([
       return this._geometry;
     },
 
+    /**
+     * Initialises the Mesh's model matrix based on the current geoLocation, scale and rotation of
+     * the Mesh.
+     * @return {Matrix4} The initialised model matrix.
+     */
     _initModelMatrix: function() {
       // Construct rotation and translation transformation matrix.
       // TODO(bpstudds): Only rotation about the vertical axis is implemented.
@@ -208,12 +213,25 @@ define([
             Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
             new Cartesian3(0, 0, 0));
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
-        Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
+        Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this.getScale(), modelMatrix);
         // this._modelMatrix = modelMatrix;
       }
       return modelMatrix;
+    },
+
+    /**
+     * Generates the correct matrix transformation to use based on the version of Cesium used.
+     * @param  {atlas.model.GeoPoint} location - The location for the transform
+     * @return {Matrix4} The transformation matrix.
+     */
+    _transformLocation: function(location) {
+      if (Cesium.VERSION < 1.2) {
+        return Transforms.northEastDownToFixedFrame(location);
+      } else {
+        return Transforms.eastNorthUpToFixedFrame(location);
+      }
     },
 
     /**
@@ -229,7 +247,8 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-            ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(this._style.getFillColour()));
+              ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
+                  this._style.getFillColour()));
           this._updateStyleDf = null;
         }.bind(this));
       }
@@ -248,9 +267,9 @@ define([
 
     /**
      * Updates the model matrix of the given primitive when it is ready to accept the change.
-     * This operation is mutually exclusive and will cancel exisiting requests.
-     * @param  {Primitive} primitive
-     * @param  {Matrix4} modelMatrix
+     * This operation is mutually exclusive and will cancel existing requests.
+     * @param {Primitive} primitive
+     * @param {Matrix4} modelMatrix
      * @return {Promise}
      */
     _updateModelMatrix: function(primitive, modelMatrix) {
@@ -287,12 +306,14 @@ define([
      * @private
      */
     _getFootprintVertices: function() {
+      // TODO(bpstudds): This function is not compatible with GLTF.
       return ConvexHullFactory.getInstance().fromVertices(this._calcVertices());
     },
 
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
     // for now.
     getOpenLayersGeometry: function() {
+      // TODO(bpstudds): This function is not compatible with GLTF.
       var vertices = this._getFootprintVertices();
       return WKT.getInstance().openLayersPolygonFromGeoPoints(vertices);
     },
@@ -318,7 +339,7 @@ define([
       var target = centroid.translate(translation);
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
-      // Ignore the intitial translation which centres the mesh at the given geoLocation.
+      // Ignore the initial translation which centres the mesh at the given geoLocation.
       if (this._modelMatrixReady) {
         if (!this._origCentroid) {
           this._origCentroid = centroid;
@@ -333,7 +354,6 @@ define([
           this.setDirty('model');
           // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
           // for translation is minimal, reducing the issue described above.
-          var centroidGeoLocationDiff = this._geoLocation.subtract(centroid);
           this._geoLocation = this._geoLocation.translate(origCentroidDiff);
           this._resetModelMatrix();
           this._origCentroid = null;
@@ -369,7 +389,7 @@ define([
 
     /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the
      * transformation.
      * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
      * given point.
@@ -400,7 +420,7 @@ define([
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
       // earth to the surface location and points upward from the earth - it's the normal vector
       // for the surface of the earth at that location.
-      var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
+      var originMatrix = this._transformLocation(centroidCartesian);
       // Since our existing position after construction is NOT the centre of the earth, we must
       // reverse the above transformation and move the geometry back to the origin, apply the
       // given matrix transformation, then apply the transformation again.
@@ -463,4 +483,3 @@ define([
 
   return Mesh;
 });
-

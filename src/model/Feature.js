@@ -1,12 +1,13 @@
 define([
   'atlas-cesium/model/Ellipse',
+  'atlas-cesium/model/GltfMesh',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Mesh',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Image',
   // Base class
   'atlas/model/Feature'
-], function(Ellipse, Line, Mesh, Polygon, Image, Feature) {
+], function(Ellipse, GltfMesh, Line, Mesh, Polygon, Image, Feature) {
   /**
    * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
@@ -33,7 +34,7 @@ define([
    */
   return Feature.extend(/** @lends atlas-cesium.model.Feature# */ {
     _init: function(id, args) {
-      // TODO(aramk) This construction should either be in both Feature classes, or in EntityManager only.
+      // TODO(bpstudds) Replace this with a factory.
       if (args.line) {
         args.line = new Line(id + 'line', args.line, args);
       }
@@ -44,7 +45,14 @@ define([
         args.polygon = new Polygon(id + 'polygon', args.polygon, args);
       }
       if (args.mesh) {
-        args.mesh = new Mesh(id + 'mesh', args.mesh, args);
+        var MeshConstructor;
+        // Check for GLTF mesh, otherwise assume C3ML mesh.
+        if (args.mesh.gltf || args.mesh.gltfUrl) {
+          MeshConstructor = GltfMesh;
+        } else {
+          MeshConstructor = Mesh;
+        }
+        args.mesh = new MeshConstructor(id + 'mesh', args.mesh, args);
       }
       if (args.image) {
         args.image = new Image(id + 'image', args.image, args);
