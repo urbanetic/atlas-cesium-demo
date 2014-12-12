@@ -402,10 +402,8 @@ define([
       var cartographics = [],
           ellipsoid = this.getEllipsoid();
       for (var i = 0; i < vertices.length; i++) {
-        cartographics.push(Cartographic.fromDegrees(
-                /*longitude*/ vertices[i].x,
-                /*latitude*/  vertices[i].y)
-        );
+        var vertex = vertices[i];
+        cartographics.push(Cartographic.fromDegrees(vertex.x, vertex.y, vertex.z));
       }
       return ellipsoid.cartographicArrayToCartesianArray(cartographics);
     },

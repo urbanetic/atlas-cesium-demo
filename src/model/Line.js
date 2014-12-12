@@ -146,13 +146,15 @@ define([
         if (vertices.length < 2) {
           return;
         }
-        // if (isPixels && hasElevation) {
-        //   vertices = vertices.map(function(vertex) {
-        //     vertex = vertex.clone();
-        //     vertex.elevation = elevation;
-        //     return vertex;
-        //   });
-        // }
+        // CorridorGeometry doesn't accept height specified in the vertices, so only perform this
+        // for PolylineGeometry.
+        if (isPixels && hasElevation) {
+          vertices = vertices.map(function(vertex) {
+            vertex = vertex.clone();
+            vertex.elevation = elevation;
+            return vertex;
+          });
+        }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
@@ -164,12 +166,9 @@ define([
         positions: this._cartesians,
         width: width
       };
-      if (hasElevation) {
-        // if (isPixels) {
-        //   geometryArgs.followSurface = false;
-        // } else {
+      // CorridorGeometry needs a height setting for elevation.
+      if (!isPixels && hasElevation) {
         geometryArgs.height = elevation;
-        // }
       }
       // PolylineGeometry has line widths in pixels. CorridorGeometry has line widths in metres.
       if (isPixels) {

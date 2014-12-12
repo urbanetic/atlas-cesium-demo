@@ -470,8 +470,8 @@ define([
     _onTransform: function() {
       // Avoids superclass from setting "model" to dirty when transforming since we use the matrix
       // transformations in Cesium.
-      this.setDirty('modelMatrix');
       this._invalidateGeometry();
+      this.setDirty('modelMatrix');
       this._update();
     },
 
