@@ -3,13 +3,14 @@ define([
   'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/Feature',
+  'atlas-cesium/model/GltfMesh',
   'atlas-cesium/model/Image',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function(Collection, GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh,
+], function(Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Polygon, Mesh,
     EntityManagerCore) {
 
   /**
@@ -29,6 +30,7 @@ define([
     _entityTypes: {
       Ellipse: Ellipse,
       Feature: Feature,
+      GltfMesh: GltfMesh,
       Image: Image,
       Line: Line,
       Mesh: Mesh,
@@ -39,7 +41,8 @@ define([
     /**
      * Returns the GeoEntities that intersect the given screen coordinates.
      * @param {atlas.model.Vertex} point - The screen coordinates.
-     * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen coordinates.
+     * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen
+     * coordinates.
      */
     getAt: function(point) {
       // Get the Entities at the given screen coordinates.
