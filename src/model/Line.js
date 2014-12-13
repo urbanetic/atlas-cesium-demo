@@ -127,10 +127,10 @@ define([
       if (!widthMatches) {
         throw new DeveloperError('Invalid line width: ' + this._width);
       }
-      var width = parseFloat(widthMatches[1]),
-        elevation = this._elevation,
-        hasElevation = elevation > 0,
-        isPixels = !!widthMatches[2];
+      var width = parseFloat(widthMatches[1]);
+      var elevation = this._elevation;
+      var hasElevation = elevation > 0;
+      var isPixels = !!widthMatches[2];
       // Generate new cartesians if the vertices have changed.
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         Log.debug('updating geometry for entity ' + this.getId());
