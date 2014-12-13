@@ -3,7 +3,7 @@ define([
   'dam/TestCase',
   /* Code under test */
   //'../core/CesiumAtlas'
-], function (doh, TestCase, CesiumAtlas) {
+], function(doh, TestCase, CesiumAtlas) {
 
   /* Test globals go here */
   var cesiumAtlas;
@@ -14,7 +14,7 @@ define([
 
     name: 'atlas-cesium/CesiumAtlas',
 
-    setUp: function () {
+    setUp: function() {
       // summary:
       cesiumAtlas = new CesiumAtlas();
     },

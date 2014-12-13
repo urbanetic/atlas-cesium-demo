@@ -28,7 +28,7 @@ define([
       mesh = null;
     });
 
-//    it('can be constructed into a footprint polygon', function () {
+//    it('can be constructed into a footprint polygon', function() {
 //      var geometry = mesh.getOpenLayersGeometry();
 //      console.log('geometry', geometry);
 //    });

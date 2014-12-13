@@ -16,7 +16,7 @@ define([
 ], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
             /*EllipsoidSurfaceAppearance,*/ Material, MaterialAppearance, CesiumColour, ImageCore, Log) {
 
-  //var Image = function (id, vertices, args) {
+  //var Image = function(id, vertices, args) {
   var Image = ImageCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
@@ -171,7 +171,7 @@ define([
       }
     },
 
-    _updateVisibility: function (visible) {
+    _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
     },
 

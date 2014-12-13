@@ -5,7 +5,7 @@ define([
   'atlas-cesium/model/Feature',
   /* Code under test */
   '../RenderManager'
-], function (doh, TestCase, EventManager, Feature, RenderManager) {
+], function(doh, TestCase, EventManager, Feature, RenderManager) {
 
   /* Test globals go here */
   var managers, renderManager;
@@ -15,7 +15,7 @@ define([
 
     name: 'atlas-cesium/render/RenderManager',
 
-    setUp: function () {
+    setUp: function() {
       // summary:
       managers = {
         dom: {},
@@ -26,7 +26,7 @@ define([
       renderManager = new RenderManager(managers);
     },
 
-    tearDown: function () {
+    tearDown: function() {
       renderManager = null;
       managers = {
         dom: {},
@@ -35,12 +35,12 @@ define([
       };
     },
 
-    testCreate: function () {
+    testCreate: function() {
       doh.assertTrue(renderManager instanceof RenderManager);
       doh.assertTrue(managers.render == renderManager);
     },
 
-    testAddFeature: function () {
+    testAddFeature: function() {
       var args = {
         id: 12345
       };

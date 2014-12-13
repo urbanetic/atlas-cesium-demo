@@ -63,7 +63,7 @@ define([
       return billboards;
     },
 
-    _updateVisibility: function (visible) {
+    _updateVisibility: function(visible) {
       if (this._billboard) this._billboard.show = visible;
     }
 

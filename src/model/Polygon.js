@@ -495,7 +495,7 @@ define([
      * Sets the {@link #._origVertices} as a reference to the current vertices. This should be
      * called before any code that uses it.
      */
-    _initOrigVertices: function () {
+    _initOrigVertices: function() {
       if (!this._origVertices) {
         this._origVertices = this._vertices;
         this._origCentroid = this.getCentroid();
@@ -507,7 +507,7 @@ define([
      * Sets the {@link #._origVertices} as a copy of the existing vertices. This should be called
      * before any changes on the vertices take place.
      */
-    _copyOrigVertices: function () {
+    _copyOrigVertices: function() {
       this._initOrigVertices();
       if (this._origVertices === this._vertices) {
         this._origVertices = Setter.cloneDeep(this._vertices);
@@ -515,7 +515,7 @@ define([
       return this._origVertices;
     },
 
-    _resetOrigVertices: function () {
+    _resetOrigVertices: function() {
       this._origVertices = this._origCentroid = null;
       this._initOrigVertices();
     },

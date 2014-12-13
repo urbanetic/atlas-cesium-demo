@@ -4,7 +4,7 @@ define([
   '../Polygon',
   /* Code under test */
   '../Feature'
-], function (doh, TestCase, Polygon, Feature) {
+], function(doh, TestCase, Polygon, Feature) {
   "use strict";
 
   /* Test globals go here */
@@ -19,7 +19,7 @@ define([
 
     name: 'model/Feature',
 
-    setUp: function () {
+    setUp: function() {
       // summary:
       id = 12345;
       args = {
@@ -30,11 +30,11 @@ define([
       feature = new Feature(id, args);
     },
 
-    tearDown: function () {
+    tearDown: function() {
       feature = null;
     },
 
-    testCreate: function () {
+    testCreate: function() {
       doh.assertTrue(feature instanceof Feature, 'feature not valid Feature');
       doh.assertTrue(feature._footprint instanceof Polygon, 'footprint not valid Polygon');
       doh.assertEqual(id, feature.getId());

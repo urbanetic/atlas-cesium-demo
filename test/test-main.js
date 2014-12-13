@@ -6,7 +6,7 @@ var tests = [];
       { name: 'model/Mesh', run: true }
     ];
 
-specsConfig.forEach(function (config) {
+specsConfig.forEach(function(config) {
   if (config.run) {
     tests.push('/base/atlas-cesium/test/specs/' + config.name + 'Spec.js');
   }

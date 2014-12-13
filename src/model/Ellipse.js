@@ -46,7 +46,7 @@ define([
      */
     _renderManager: null,
 
-    _init: function (id, ellipseData, args) {
+    _init: function(id, ellipseData, args) {
       this._super(id, ellipseData, args);
     },
 
@@ -151,7 +151,7 @@ define([
       }
     },
 
-    _updateVisibility: function (visible) {
+    _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
     },
 

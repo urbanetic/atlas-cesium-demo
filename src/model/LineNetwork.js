@@ -2,7 +2,7 @@ define([
   'atlas-cesium/model/Line',
   // Base class
   'atlas/model/LineNetwork'
-], function (Line, LineNetworkCore) {
+], function(Line, LineNetworkCore) {
   /**
    * @typedef atlas-cesium.model.LineNetwork
    * @ignore
@@ -22,7 +22,7 @@ define([
      */
     _lines: null,
 
-    _createLineObj: function (id, lineData, args) {
+    _createLineObj: function(id, lineData, args) {
       return new Line(id, lineData, args);
     }
   });

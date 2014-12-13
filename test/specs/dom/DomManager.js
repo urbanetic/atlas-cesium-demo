@@ -3,7 +3,7 @@ define([
   'dam/TestCase',
   /* Code under test */
   '../DomManager'
-], function (doh, TestCase, DomManager) {
+], function(doh, TestCase, DomManager) {
 
   /* Test globals go here */
   var managers;
@@ -14,7 +14,7 @@ define([
 
     name: 'atlas-cesium/dom/DomManager',
 
-    setUp: function () {
+    setUp: function() {
       // summary:
       managers = {
         dom: {},
@@ -24,12 +24,12 @@ define([
       domManager = new DomManager(managers);
     },
 
-    tearDown: function () {
+    tearDown: function() {
       domManager = null;
       managers.dom = {};
     },
 
-    testCreate: function () {
+    testCreate: function() {
       doh.assertTrue(domManager instanceof DomManager, 'DomManager not created properly');
       doh.assertTrue(managers.dom instanceof DomManager, 'managers reference not created properly');
     }

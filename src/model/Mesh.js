@@ -101,7 +101,7 @@ define([
      */
     _updateStyleDf: null,
 
-    _init: function () {
+    _init: function() {
       this._modelMatrixReady = false;
       this._super.apply(this, arguments);
       this._modelMatrixReady = true;

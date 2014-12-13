@@ -9,7 +9,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/MaterialAppearance',
   /* Code under test */
   '../Polygon'
-], function (doh, TestCase, GeometryInstance, PolygonGeometry, Primitive, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, Polygon) {
+], function(doh, TestCase, GeometryInstance, PolygonGeometry, Primitive, Cartographic, EllipsoidSurfaceAppearance, MaterialAppearance, Polygon) {
 
   /* Test globals go here */
   var polygon; 
@@ -18,22 +18,22 @@ define([
   var mockedRM = {
     _widget: {
       centralBody: {
-        getEllipsoid: function () {
+        getEllipsoid: function() {
           return mockedEllipsoid;
         }
       },
       scene: {
-        getPrimitives: function () {
+        getPrimitives: function() {
           return [];
         }
       }
     },
-    getMinimumTerrainHeight: function (h) {
+    getMinimumTerrainHeight: function(h) {
       return 0;
     }
   };
   var mockedEllipsoid = {
-    cartographicArrayToCartesianArray: function (array) {
+    cartographicArrayToCartesianArray: function(array) {
       return array;
     }
   };
@@ -45,7 +45,7 @@ define([
 
     name: 'atlas-cesium/model/Polygon',
 
-    setUp: function () {
+    setUp: function() {
       // summary:
       id = 12345;
       args = {
@@ -56,17 +56,17 @@ define([
       polygon = new Polygon(id, args.vertices, args);
     },
 
-    tearDown: function () {
+    tearDown: function() {
       polygon = {};
     },
 
-    testCreatePrimitive: function () {
+    testCreatePrimitive: function() {
       polygon._createPrimitive();
       doh.assertTrue(polygon._primitive instanceof Primitive, 'primitive wrong'); 
       doh.assertTrue(polygon.isRenderable(), 'polygon is not renderable');
     },
 
-    testBuild2d: function () {
+    testBuild2d: function() {
       polygon._height = 0;
       polygon._build(mockedEllipsoid, /*elevation from rendermanager*/ 0);
       doh.assertTrue(polygon._appearance instanceof EllipsoidSurfaceAppearance, 'appearance wrong');
@@ -74,7 +74,7 @@ define([
       doh.assertTrue(!polygon.isRenderable(), 'shouldn\' be renderable');
     },
 
-    testBuildNoHeight: function () {
+    testBuildNoHeight: function() {
       delete polygon._height;
       polygon._build(mockedEllipsoid, /*elevation from rendermanager*/ 0);
       doh.assertTrue(polygon._appearance instanceof EllipsoidSurfaceAppearance, 'wrong appearance');
@@ -82,7 +82,7 @@ define([
       doh.assertTrue(!polygon.isRenderable(), 'shouldn\'t be renderable');
     },
 
-    testBuildExtruded: function () {
+    testBuildExtruded: function() {
       polygon._height = 500;
       polygon._build(mockedEllipsoid, /*elevation from rendermanager*/ 0);
       doh.assertTrue(polygon._appearance instanceof MaterialAppearance, 'wrong appearance');

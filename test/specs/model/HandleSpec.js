@@ -1,13 +1,13 @@
 define([
   // Code under test
   'atlas-cesium/model/Handle'
-], function () {
+], function() {
   var handle;
-  afterEach(function () {
+  afterEach(function() {
     handle = null;
   });
 
-  describe('A Handle', function () {
+  describe('A Handle', function() {
 
    it('should be tested');
   });

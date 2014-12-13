@@ -9,7 +9,7 @@ define([
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function (Collection, GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh,
+], function(Collection, GeoEntity, Ellipse, Feature, Image, Line, Polygon, Mesh,
     EntityManagerCore) {
 
   /**
@@ -41,12 +41,12 @@ define([
      * @param {atlas.model.Vertex} point - The screen coordinates.
      * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen coordinates.
      */
-    getAt: function (point) {
+    getAt: function(point) {
       // Get the Entities at the given screen coordinates.
       var ids = this._managers.render.getAt(point);
       // Translate entity IDs to entity objects.
       var entities = [];
-      ids.forEach(function (id) {
+      ids.forEach(function(id) {
         var entity = this.getById(id);
         if (entity instanceof GeoEntity) {
           entities.push(entity);
@@ -64,14 +64,14 @@ define([
      * @returns {atlas.model.GeoEntity|undefined} The GeoEntities located in the bounding box,
      *      or <code>undefined</code> if there are no such GeoEntities.
      */
-    getInPoly: function (boundingPoly, intersects) {
+    getInPoly: function(boundingPoly, intersects) {
       // TODO
       // See catalyst-gui cesium extensions. Aram converted the target point and visible polygons
       // to WKT and then used OpenLayers to find the intersecting entities.
       throw 'EntityManager.getInPoly not yet implemented.'
     },
 
-    getInRect: function (start, end) {
+    getInRect: function(start, end) {
       // TODO
       // See catalyst-gui cesium extensions. Aram converted the target point and visible polygons
       // to WKT and then used OpenLayers to find the intersecting entities.
