@@ -122,8 +122,7 @@ define([
       if (!shouldCreateGeometry) {
         return;
       }
-      var reWidth = /(\d+)(px)?/i;
-      var widthMatches = this._width.toString().match(reWidth);
+      var widthMatches = this._width.toString().match(/(\d+)(px)?/i);
       if (!widthMatches) {
         throw new DeveloperError('Invalid line width: ' + this._width);
       }
