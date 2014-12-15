@@ -122,6 +122,15 @@ define([
       if (!shouldCreateGeometry) {
         return;
       }
+      var reWidth = /(\d+)(px)?/i;
+      var widthMatches = this._width.toString().match(reWidth);
+      if (!widthMatches) {
+        throw new DeveloperError('Invalid line width: ' + this._width);
+      }
+      var width = parseFloat(widthMatches[1]);
+      var elevation = this._elevation;
+      var hasElevation = elevation > 0;
+      var isPixels = !!widthMatches[2];
       // Generate new cartesians if the vertices have changed.
       if (isModelDirty || !this._cartesians || !this._minTerrainElevation) {
         Log.debug('updating geometry for entity ' + this.getId());
@@ -137,17 +146,19 @@ define([
         if (vertices.length < 2) {
           return;
         }
+        // CorridorGeometry doesn't accept height specified in the vertices, so only perform this
+        // for PolylineGeometry.
+        if (isPixels && hasElevation) {
+          vertices = vertices.map(function(vertex) {
+            vertex = vertex.clone();
+            vertex.elevation = elevation;
+            return vertex;
+          });
+        }
         this._cartesians = this._renderManager.cartesianArrayFromGeoPointArray(vertices);
         this._minTerrainElevation = this._renderManager.getMinimumTerrainHeight(vertices);
       }
       // Generate geometry data.
-      var reWidth = /(\d+)(px)?/i;
-      var widthMatches = this._width.toString().match(reWidth);
-      if (!widthMatches) {
-        throw new DeveloperError('Invalid line width: ' + this._width);
-      }
-      var width = parseFloat(widthMatches[1]),
-          isPixels = !!widthMatches[2];
       var instanceArgs = {
         id: this.getId().replace('line', '')
       };
@@ -155,6 +166,10 @@ define([
         positions: this._cartesians,
         width: width
       };
+      // CorridorGeometry needs a height setting for elevation.
+      if (!isPixels && hasElevation) {
+        geometryArgs.height = elevation;
+      }
       // PolylineGeometry has line widths in pixels. CorridorGeometry has line widths in metres.
       if (isPixels) {
         geometryArgs.vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;

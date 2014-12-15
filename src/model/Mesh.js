@@ -348,15 +348,15 @@ define([
         var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
           origCentroidDiff.latitude >= 1;
         if (isTranslatedBeyondSensitivity) {
-          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
-          // where the original normal to the globe's surface is retained as the rotation when
-          // translating, causing issues if the new normal is sufficiently different.
-          this.setDirty('model');
           // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
           // for translation is minimal, reducing the issue described above.
           this._geoLocation = this._geoLocation.translate(origCentroidDiff);
           this._resetModelMatrix();
           this._origCentroid = null;
+          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+          // where the original normal to the globe's surface is retained as the rotation when
+          // translating, causing issues if the new normal is sufficiently different.
+          this.setDirty('model');
           this._update();
         }
       }
@@ -474,8 +474,8 @@ define([
     _onTransform: function() {
       // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
       // Cesium.
-      this.setDirty('modelMatrix');
       this._invalidateGeometry();
+      this.setDirty('modelMatrix');
       this._update();
     },
 
