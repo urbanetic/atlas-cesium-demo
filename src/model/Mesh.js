@@ -227,10 +227,10 @@ define([
      * @return {Matrix4} The transformation matrix.
      */
     _transformLocation: function(location) {
-      if (Cesium.VERSION < 1.2) {
-        return Transforms.northEastDownToFixedFrame(location);
-      } else {
+      if (Cesium.VERSION < 1.2 || Cesium.VERSION === undefined) {
         return Transforms.eastNorthUpToFixedFrame(location);
+      } else {
+        return Transforms.northEastDownToFixedFrame(location);
       }
     },
 
