@@ -7,5 +7,6 @@
   "unused": "vars",
   // Disable warning on, eg., wantGreen && this.makeGreen()
   "-W030": false,
-  "jasmine": true
+  "jasmine": true,
+  "browser": true
 }
