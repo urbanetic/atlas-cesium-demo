@@ -5,6 +5,7 @@ define([
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Cartographic',
+  'atlas-cesium/cesium/Source/Core/CesiumTerrainProvider',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
@@ -13,8 +14,9 @@ define([
   'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame, Imagery,
-            ImageryState, SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, CesiumTerrainProvider,
+            requestAnimationFrame, Imagery, ImageryState, SceneTransforms, Viewer, CzmlDataSource,
+            RenderManagerCore) {
 
   /**
    * @typedef atlas-cesium.render.RenderManager
@@ -80,6 +82,27 @@ define([
       });
       this._drawShim();
       this._render();
+    },
+
+    /**
+     * Toggles the visibility of terrain.
+     * @param {Boolean} show - Whether the terrain should be visible.
+     * @returns {[type]} [description]
+     */
+    toggleTerrain: function(show) {
+      var scene = this.getScene();
+      if (show) {
+        if (!this._terrainProvider) {
+          var terrainProvider = new CesiumTerrainProvider({
+              url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
+          });
+          this._terrainProvider = terrainProvider;
+        }
+        scene.terrainProvider = this._terrainProvider;
+      } else {
+        scene.terrainProvider = undefined;
+      }
+      return !!scene.terrainProvider;
     },
 
     /**
@@ -309,6 +332,14 @@ define([
       this._managers.event.addEventHandler('extern', 'sleepMode', function(state) {
         this._sleepMode = state;
         Log.info('RenderManager setting sleep mode', state);
+      }.bind(this));
+
+      this._managers.event.addEventHandler('extern', 'terrain/show', function() {
+        this.toggleTerrain(true);
+      }.bind(this));
+
+      this._managers.event.addEventHandler('extern', 'terrain/hide', function() {
+        this.toggleTerrain(false);
       }.bind(this));
 
       // TODO(aramk) Capture when the camera is moving instead of these?
