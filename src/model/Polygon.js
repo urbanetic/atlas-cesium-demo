@@ -112,12 +112,6 @@ define([
     // CONSTRUCTION
     // -------------------------------------------
 
-    // _init: function() {
-    //   this._super.apply(this, arguments);
-    //   // Use copy-on-write for vertices to reduce memory usage.
-    //   this._origVertices = this._vertices;
-    // },
-
     /**
      * Builds the geometry and appearance data required to render the Polygon in
      * Cesium.

@@ -46,10 +46,6 @@ define([
      */
     _renderManager: null,
 
-    _init: function(id, ellipseData, args) {
-      this._super(id, ellipseData, args);
-    },
-
     // -------------------------------------------
     // GETTERS AND SETTERS
     // -------------------------------------------
