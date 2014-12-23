@@ -91,23 +91,11 @@ define([
     _origCentroid: null,
 
     /**
-     * Whether the model matrix has been fully initialised and the model is ready for rendering.
-     * @type {Boolean}
-     */
-    _modelMatrixReady: null,
-
-    /**
      * The deferred promise for updating primitive styles, which is a asynchronous and should be
      * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
-
-    _init: function() {
-      this._modelMatrixReady = false;
-      this._super.apply(this, arguments);
-      this._modelMatrixReady = true;
-    },
 
     _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
@@ -340,7 +328,7 @@ define([
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
       // Ignore the initial translation which centres the mesh at the given geoLocation.
-      if (this._modelMatrixReady) {
+      if (this._isSetUp) {
         if (!this._origCentroid) {
           this._origCentroid = centroid;
         }

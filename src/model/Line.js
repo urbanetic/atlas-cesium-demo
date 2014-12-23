@@ -99,8 +99,8 @@ define([
           this._updateStyleDf && this._updateStyleDf.reject();
           this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
           this._updateStyleDf.promise.then(function() {
-              var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
-              geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+            var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+            geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
           }.bind(this));
         }
       }
