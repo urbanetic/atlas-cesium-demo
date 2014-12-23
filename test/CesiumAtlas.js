@@ -8,7 +8,6 @@ define([
   /* Test globals go here */
   var cesiumAtlas;
 
-
   /* Begin test case definitions */
   new TestCase({
 
@@ -28,4 +27,3 @@ define([
     }
   }).register(doh);
 });
-

@@ -85,11 +85,12 @@ define([
     },
 
     /**
-     * Toggles the visibility of terrain.
+     * Sets the visibility of terrain.
      * @param {Boolean} show - Whether the terrain should be visible.
-     * @returns {[type]} [description]
      */
-    toggleTerrain: function(show) {
+    setTerrainVisibility: function(show) {
+      this._super(show);
+
       var scene = this.getScene();
       if (show) {
         if (!this._terrainProvider) {
@@ -102,7 +103,6 @@ define([
       } else {
         scene.terrainProvider = undefined;
       }
-      return !!scene.terrainProvider;
     },
 
     /**
@@ -324,7 +324,6 @@ define([
      * Registers event handlers with the EventManager.
      */
     bindEvents: function() {
-      // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
       this._managers.event.addEventHandler('extern', 'debugMode', function(debug) {
         this.getScene().debugShowFramesPerSecond = debug;
       }.bind(this));
@@ -335,11 +334,11 @@ define([
       }.bind(this));
 
       this._managers.event.addEventHandler('extern', 'terrain/show', function() {
-        this.toggleTerrain(true);
+        this.setTerrainVisibility(true);
       }.bind(this));
 
       this._managers.event.addEventHandler('extern', 'terrain/hide', function() {
-        this.toggleTerrain(false);
+        this.setTerrainVisibility(false);
       }.bind(this));
 
       // TODO(aramk) Capture when the camera is moving instead of these?
