@@ -117,6 +117,7 @@ define([
      * Cesium.
      */
     _build: function() {
+      var style = this.getStyle();
       var cesiumColors = this._getCesiumColors();
       var fillColor = cesiumColors.fill;
       var borderColor = cesiumColors.border;
@@ -153,6 +154,9 @@ define([
       }
       if (borderColor) {
         if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
+          var lineWidth = style.getBorderWidth();
+          // Minimum width is 2px since 1px is too thin to render properly.
+          lineWidth = Setter.range(lineWidth, 2, scene.maximumAliasedLineWidth);
           this._outlinePrimitive = new Primitive({
             geometryInstances: this._outlineGeometry,
             // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
@@ -163,7 +167,7 @@ define([
                 depthTest: {
                   enabled: true
                 },
-                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+                lineWidth: lineWidth
               }
             })
           });
@@ -172,8 +176,8 @@ define([
           this._updateStyleDf = this._whenPrimitiveReady(this._outlinePrimitive);
           this._updateStyleDf.promise.then(function() {
             var outlineGeometryAtts =
-                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+              this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+            outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
             this._updateStyleDf = null;
           }.bind(this));
         }
@@ -381,7 +385,7 @@ define([
 
     /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the
      * transformation.
      * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
      * given point.
