@@ -21,7 +21,7 @@ define([
           show: true
         }, feature._bindDependencies({show: true}));
 
-      // setTimeout(function () {
+      // setTimeout(function() {
       //   console.log('centroid', polygon.getCentroid());
       //   polygon.setCentroid(polygon.getCentroid());
       // }, 3000);

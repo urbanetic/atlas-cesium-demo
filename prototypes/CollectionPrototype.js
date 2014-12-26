@@ -24,9 +24,21 @@ define([
 
       // Rotating a collection should rotate around the collection's centroid rather than that of
       // each individual component.
-      setInterval(function () {
+      setInterval(function() {
         collection.rotate(new Vertex(0, 0, 15));
       }, 1000);
+
+      // Create a collection through the Atlas API.
+      atlas.publish('entity/show/bulk', {
+        features: [
+          {
+            id: 'c2',
+            type: 'collection',
+            children: ['c1']
+          }
+        ]
+      });
+      console.log(entityManager.getById('c2'));
 
     }
 

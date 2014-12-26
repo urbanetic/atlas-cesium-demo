@@ -20,8 +20,11 @@ define([
       var drawMode = function() {
         console.error('entity/draw', arguments);
         atlas.publish('entity/draw', {
-          update: function() {
+          update: function(args) {
             console.error('update', arguments);
+            args.feature.getHandles().forEach(function(handle) {
+              handle.setElevation(10);
+            });
 //            count++;
 //            if (count === 5) {
 //              atlas.publish('entity/draw/stop');

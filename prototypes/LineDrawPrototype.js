@@ -21,6 +21,11 @@ define([
         console.error('entity/draw', arguments);
         atlas.publish('entity/draw', {
           displayMode: 'line',
+          init: function(args) {
+            console.log('args', args);
+            var feature = args.feature;
+            feature.setElevation(50);
+          },
           update: function() {
             console.error('update', arguments);
 //            count++;

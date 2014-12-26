@@ -47,7 +47,7 @@ define([
 //      targetGeoPoint.latitude += 1;
 //      camera.pointAt(targetGeoPoint);
 
-//      setInterval(function () {
+//      setInterval(function() {
 //        var orientation = camera.getOrientation();
 //        console.error('orientation', orientation);
 //      }, 3000);

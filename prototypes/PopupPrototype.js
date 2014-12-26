@@ -35,7 +35,7 @@ define([
         // ensure the overlay doesn't overlap the entity.
         var bBox = entity.getBoundingBox();
         var cornerYs = [];
-        bBox.getCorners().forEach(function (corner) {
+        bBox.getCorners().forEach(function(corner) {
           corner.elevation = elevation;
           cornerYs.push(renderManager.screenCoordsFromGeoPoint(corner).y);
         });

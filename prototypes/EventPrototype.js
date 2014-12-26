@@ -15,11 +15,11 @@ define([
       var features = entityManager.getFeatures();
       var feature = features[0];
 
-      atlas.subscribe('entity/select', function () {
+      atlas.subscribe('entity/select', function() {
         console.log('select', arguments);
       });
 
-      atlas.subscribe('entity/deselect', function () {
+      atlas.subscribe('entity/deselect', function() {
         console.log('deselect', arguments);
       });
 

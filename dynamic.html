@@ -36,7 +36,7 @@
              'atlas-cesium/cesium/Source/Core/Cartographic',
              'atlas-cesium/cesium/Source/Core/loadImage',
       'atlas-cesium/cesium/Source/Scene/BillboardCollection'
-    ], function (CesiumAtlas, Colour, testWKT, PopupFaculty,
+    ], function(CesiumAtlas, Colour, testWKT, PopupFaculty,
         Cartographic, loadImage, BillboardCollection) {
       var args = {};
 
@@ -53,7 +53,7 @@
       args.id = 0;
       args.show = true;
       // Show many polygons
-      testWKT.forEach(function (wkt) {
+      testWKT.forEach(function(wkt) {
         args.id = i++;
         args.polygon = {
           color: Colour.GREY,
@@ -95,7 +95,7 @@
 //      cesiumAtlas.publish('entity/bulk/show', args);
 
       // Test zoomTo
-      setTimeout( (function () {
+      setTimeout( (function() {
         console.debug('fired camera/zoomTo event');
         this._managers.render._widget.resize();
         this._managers.render._widget.render();
@@ -112,7 +112,7 @@
       // -------------------------------------------
       // Testing showing a popup.
       // -------------------------------------------
-      cesiumAtlas.subscribe('entity/select', function (args) {
+      cesiumAtlas.subscribe('entity/select', function(args) {
         this.publish('entity/popup/show', {
           title: args.ids[0],
           entityId: args.ids[0],
@@ -121,18 +121,18 @@
         });
       }.bind(cesiumAtlas));
 
-      cesiumAtlas.subscribe('entity/deselect', function (args) {
+      cesiumAtlas.subscribe('entity/deselect', function(args) {
         this.publish('entity/popup/hide', {entityId: args.ids[0]});
       }.bind(cesiumAtlas));
 
       // -------------------------------------------
       // Test static projection (hard coded).
       // -------------------------------------------
-//      setTimeout( function () {
+//      setTimeout( function() {
 //        var values = {};
 //        var vis = cesiumAtlas._managers.visualisation;
-//        setInterval(function () {
-//          [0,1,2,3,4,5,6].forEach(function (i) {
+//        setInterval(function() {
+//          [0,1,2,3,4,5,6].forEach(function(i) {
 //            values[i] = Math.random() * 100 + Math.random() * 1000;
 //          });
 //          //cesiumAtlas._managers.visualisation._testHeight(values);
@@ -144,11 +144,11 @@
       // -------------------------------------------
       // Test static projection (using publish).
       // -------------------------------------------
-      setTimeout(function () {
+      setTimeout(function() {
         var ids = [0, 1, 2, 3, 4, 5, 6, 7],
             config = {},
             values = [];
-        ids.forEach(function (i) {
+        ids.forEach(function(i) {
           values[i] = Math.random() * 100 + Math.random() * 1000;
         });
         values[4] = null;
@@ -165,7 +165,7 @@
       // -------------------------------------------
       // Test dynamic projection (using publish).
       // -------------------------------------------
-//      setTimeout(function () {
+//      setTimeout(function() {
 //        // For the dynamic projection, the 'static' projection used
 //        var ids = [0, 1, 2, 3, 4, 5, 6, 100],
 //            data = [

@@ -50,7 +50,7 @@ define([
       atlas.publish('entity/show/bulk', {features: [testMesh]});
       var meshFeature = entityManager.getById(testMesh.id);
       feature.setForm(Feature.DisplayMode.MESH, meshFeature);
-      Object.keys(Feature.DisplayMode).forEach(function (modeId) {
+      Object.keys(Feature.DisplayMode).forEach(function(modeId) {
         var form = feature.getForm(Feature.DisplayMode[modeId]);
         // form && form.setCentroid(targetPosition);
       });

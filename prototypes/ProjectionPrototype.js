@@ -11,7 +11,7 @@ define([
       setTimeout(this.runProjection.bind(this), 4000);
     },
 
-    runProjection: function () {
+    runProjection: function() {
       var atlas = this.atlas;
       var entityManager = atlas._managers.entity;
       var features = entityManager.getFeatures();
@@ -20,18 +20,29 @@ define([
       features.forEach(function(feature, i) {
         var id = feature.getId();
         values[id] = i;
+        feature.setHeight(0);
       });
       var args = {
         type: 'colour',
         ids: Object.keys(values),
         config: {
-          title: 'Sample Projection',
-          values: values,
-          codomain: {startProj: Colour.RED, endProj: Colour.GREEN}
+          title: 'Colour Projection',
+          values: values
         }
       };
       atlas.publish('projection/add', args);
       atlas.publish('projection/render', {id: args.projection.getId()});
+
+      var args2 = {
+        type: 'height',
+        ids: Object.keys(values),
+        config: {
+          title: 'Height Projection',
+          values: values
+        }
+      };
+      atlas.publish('projection/add', args2);
+      atlas.publish('projection/render', {id: args2.projection.getId()});
     }
 
   });

@@ -55,7 +55,7 @@ define([
 
         var displayModes = [Feature.DisplayMode.FOOTPRINT, Feature.DisplayMode.MESH];
         var displayModeIndex = 0;
-        setInterval(function () {
+        setInterval(function() {
           feature.setDisplayMode(displayModes[displayModeIndex % displayModes.length]);
           displayModeIndex++;
         }, 4000);

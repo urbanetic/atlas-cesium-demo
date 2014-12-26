@@ -17,6 +17,9 @@ define([
         var point = renderManager.geoPointFromScreenCoords(args.position);
         console.log('point', point);
       });
+      atlas.subscribe('input/left/dblclick', function(args) {
+        console.log('');
+      });
     }
 
   });

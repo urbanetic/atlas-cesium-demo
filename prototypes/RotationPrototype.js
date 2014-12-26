@@ -56,7 +56,7 @@ define([
         polygon.scale(new Vertex(0.5, 0.5, 0.5));
         feature.scale(new Vertex(0.5, 0.5, 0.5));
         setInterval(function() {
-          [polygon, feature].forEach(function (entity) {
+          [polygon, feature].forEach(function(entity) {
             entity.rotate(new Vertex(0, 0, 15));
             entity.translate(new GeoPoint(0.00005, 0.00005));
           });
@@ -73,12 +73,12 @@ define([
         //   modeOffset++;
         // }, 3000);
 
-        // setInterval(function () {
+        // setInterval(function() {
         //   console.log('transforming');
         //   feature.rotate(new Vertex(0, 0, 15));
         // }, 3000);        
 
-        // setTimeout(function () {
+        // setTimeout(function() {
         //   console.log('transforming');
         //   feature.translate(new GeoPoint(0.003, 0.003));
         // }, 3000);
