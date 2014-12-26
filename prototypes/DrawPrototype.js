@@ -21,15 +21,9 @@ define([
         console.error('entity/draw', arguments);
         atlas.publish('entity/draw', {
           update: function(args) {
-            console.error('update', arguments);
-            args.feature.getHandles().forEach(function(handle) {
-              handle.setElevation(10);
+            args.form.getHandles().forEach(function(handle) {
+              handle.setElevation(20);
             });
-//            count++;
-//            if (count === 5) {
-//              atlas.publish('entity/draw/stop');
-//              count = 0;
-//            }
           },
           create: function(args) {
             console.error('create', arguments);
