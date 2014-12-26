@@ -23,11 +23,11 @@ define([
 
     /**
      * Takes an atlas Style object and converts it to Cesium Color objects.
-     * @param style
+     * @param {atlas.model.Style} style
      */
     toCesiumColors: function(style) {
-      var fill = style.getFillColour();
-      var border = style.getBorderColour();
+      var fill = style.getFillMaterial();
+      var border = style.getBorderMaterial();
       return {
         fill: fill ? Colour.toCesiumColor(fill) : null,
         border: border ? Colour.toCesiumColor(border) : null

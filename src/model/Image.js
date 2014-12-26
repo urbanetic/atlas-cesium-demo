@@ -1,5 +1,5 @@
 define([
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/Style',
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
@@ -198,14 +198,14 @@ define([
    */
   Image._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Image._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Image._convertAtlasToCesiumColor(style.getBorderColour())
+      fill: Image._convertAtlasToCesiumColor(style.getFillMaterial()),
+      border: Image._convertAtlasToCesiumColor(style.getBorderMaterial())
     }
   };
 
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.model.Colour} color - The Colour to convert.
+   * @param {atlas.material.Color} color - The Colour to convert.
    * @returns {Color} The converted Cesium Color object.
    * @private
    */

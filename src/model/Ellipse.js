@@ -173,14 +173,14 @@ define([
    */
   Ellipse._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Ellipse._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Ellipse._convertAtlasToCesiumColor(style.getBorderColour())
+      fill: Ellipse._convertAtlasToCesiumColor(style.getFillMaterial()),
+      border: Ellipse._convertAtlasToCesiumColor(style.getBorderMaterial())
     }
   };
 
   /**
    * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.model.Colour} color - The Colour to convert.
+   * @param {atlas.material.Color} color - The Colour to convert.
    * @returns {CesiumColour} The converted Cesium Color object.
    * @private
    */

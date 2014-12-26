@@ -1,6 +1,6 @@
 define([
   'atlas/lib/utility/Setter',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas-cesium/cesium/Source/Core/Color',
 ], function(Setter, ColourCore, CesiumColor) {
   /**
@@ -10,10 +10,10 @@ define([
   var Colour;
 
   /**
-   * @class atlas-cesium.model.Colour
-   * @extends atlas.model.Colour
+   * @class atlas-cesium.material.Color
+   * @extends atlas.material.Color
    */
-  Colour = Setter.mixin(ColourCore.extend(/** @lends atlas-cesium.model.Colour# */ {
+  Colour = Setter.mixin(ColourCore.extend(/** @lends atlas-cesium.material.Color# */ {
 
   }), {
 
@@ -27,9 +27,9 @@ define([
 
     /**
      * Converts an Atlas Colour object to a Cesium Color object.
-     * @param {atlas.model.Colour} color - The Colour to convert.
-     * @returns {atlas-cesium.model.Colour} The converted Cesium Color object.
-     * @memberOf atlas-cesium.model.Colour
+     * @param {atlas.material.Color} color - The Colour to convert.
+     * @returns {atlas-cesium.material.Color} The converted Cesium Color object.
+     * @memberOf atlas-cesium.material.Color
      * @static
      */
     toCesiumColor: function(color) {

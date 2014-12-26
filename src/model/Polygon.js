@@ -135,9 +135,21 @@ define([
             this._appearance = new EllipsoidSurfaceAppearance({
               material: new Material({
                 fabric: {
-                  type: 'Color',
+                  // type: 'Color',
+                  // uniforms: {
+                  //   color: fillColor
+                  // }
+                  // type: 'RimLighting',
+                  // uniforms: {
+                  //   color: fillColor,
+                  //   rimColor: borderColor,
+                  //   width: 20
+                  // }
+                  type: 'Checkerboard',
                   uniforms: {
-                    color: fillColor
+                    lightColor: fillColor,
+                    darkColor: borderColor,
+                    repeat: {x: 20, y: 20}
                   }
                 },
                 translucent: false

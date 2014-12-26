@@ -1,6 +1,6 @@
 define([
   'atlas/model/Line',
-  'atlas-cesium/model/Colour',
+  'atlas-cesium/material/Color',
   'atlas-cesium/model/Handle',
   'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',

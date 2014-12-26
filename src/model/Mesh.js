@@ -24,7 +24,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Transforms',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/model/Colour',
+  'atlas-cesium/material/Color',
   //Base class.
   'atlas/model/Mesh'
 ], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
@@ -134,7 +134,7 @@ define([
     _createPrimitive: function() {
       var thePrimitive;
       var geometry = this._createGeometry();
-      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour());
+      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillMaterial());
       var instance = new GeometryInstance({
             id: this.getId(),
             geometry: geometry,
@@ -236,7 +236,7 @@ define([
           }
           this._appearance.color =
               ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
-                  this._style.getFillColour()));
+                  this._style.getFillMaterial()));
           this._updateStyleDf = null;
         }.bind(this));
       }
