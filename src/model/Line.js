@@ -14,7 +14,7 @@ define([
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError',
   'atlas/util/Timers'
-], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
+], function(LineCore, Color, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
             ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
             PolylineColorAppearance, Log, DeveloperError, Timers) {
   /**

@@ -13,8 +13,8 @@ define([
   // Base class
   'atlas/model/Image',
   'atlas/lib/utility/Log'
-], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            /*EllipsoidSurfaceAppearance,*/ Material, MaterialAppearance, CesiumColour, ImageCore, Log) {
+], function(Color, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+            /*EllipsoidSurfaceAppearance,*/ Material, MaterialAppearance, CesiumColor, ImageCore, Log) {
 
   //var Image = function(id, vertices, args) {
   var Image = ImageCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
@@ -204,14 +204,14 @@ define([
   };
 
   /**
-   * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.material.Color} color - The Colour to convert.
+   * Converts an Atlas Color object to a Cesium Color object.
+   * @param {atlas.material.Color} color - The Color to convert.
    * @returns {Color} The converted Cesium Color object.
    * @private
    */
   Image._convertAtlasToCesiumColor = function(color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
-    return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
+    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Image;

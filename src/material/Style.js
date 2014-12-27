@@ -1,8 +1,8 @@
 define([
   'atlas/lib/utility/Setter',
   'atlas/model/Style',
-  'atlas-cesium/model/Colour'
-], function(Setter, StyleCore, Colour) {
+  'atlas-cesium/model/Color'
+], function(Setter, StyleCore, Color) {
   /**
    * @typedef atlas-cesium.model.Style
    * @ignore
@@ -29,8 +29,8 @@ define([
       var fill = style.getFillMaterial();
       var border = style.getBorderMaterial();
       return {
-        fill: fill ? Colour.toCesiumColor(fill) : null,
-        border: border ? Colour.toCesiumColor(border) : null
+        fill: fill ? Color.toCesiumColor(fill) : null,
+        border: border ? Color.toCesiumColor(border) : null
       }
     }
 

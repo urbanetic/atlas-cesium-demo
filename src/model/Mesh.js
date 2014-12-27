@@ -30,7 +30,7 @@ define([
 ], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
             Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
             GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
-            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
+            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Color,
             MeshCore) {
 
   /**
@@ -46,7 +46,7 @@ define([
    * Every 3 elements forming a new triangle with counter-clockwise winding order.
    * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
    * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
-   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
+   * @param {Array.<Number>} [meshData.color] - The uniform color of the Mesh, given as a
    * [red, green, blue, alpha] formatted array.
    * @param {Number} [meshData.uniformScale] - The uniform scale of the Mesh.
    * @param {atlas.model.Vertex} [meshData.scale] - The non-uniform scale of the Mesh.
@@ -235,7 +235,7 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
+              ColorGeometryInstanceAttribute.toValue(Color.toCesiumColor(
                   this._style.getFillMaterial()));
           this._updateStyleDf = null;
         }.bind(this));
