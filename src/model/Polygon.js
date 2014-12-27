@@ -2,12 +2,12 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/lib/Q',
   // Base class
-  'atlas/material/Color',
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/Timers',
+  'atlas-cesium/material/Color',
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
@@ -22,7 +22,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, Q, Color, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Cartesian3,
+], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Color, Handle, Cartesian3,
             GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
             ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
             Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
@@ -244,11 +244,13 @@ define([
      */
     _createGeometry: function() {
       var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
+      var borderMaterial = style.getBorderMaterial();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      var shouldCreateGeometry = style.getFillMaterial() && (isModelDirty || !this._geometry);
-      var shouldCreateOutlineGeometry = style.getBorderStyle() && (isModelDirty || !this._outlineGeometry);
+      var shouldCreateGeometry = fillMaterial && (isModelDirty || !this._geometry);
+      var shouldCreateOutlineGeometry = borderMaterial && (isModelDirty || !this._outlineGeometry);
       if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
         return;
       }
@@ -529,8 +531,9 @@ define([
       this._initOrigVertices();
     },
 
-    toCesiumMaterial: function(material) {
+    _toCesiumMaterial: function(material) {
       // Temporary solution that only works with Colors materials.
+      material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
       return Color.prototype.toCesiumMaterial.apply(material);
     }
 

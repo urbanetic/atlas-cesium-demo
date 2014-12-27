@@ -2,7 +2,7 @@ define([
   'atlas/model/Line',
   'atlas-cesium/material/Color',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Style',
+  'atlas-cesium/material/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
