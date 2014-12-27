@@ -1,6 +1,6 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/GeoEntity',
   'atlas/model/GeoPoint',
   'atlas/model/Style',
@@ -8,7 +8,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Ellipsoid',
   'jquery'
-], function(Class, Colour, GeoEntity, GeoPoint, Style, Handle, Cartesian3, Ellipsoid, $) {
+], function(Class, Color, GeoEntity, GeoPoint, Style, Handle, Cartesian3, Ellipsoid, $) {
   return Class.extend({
 
     atlas: null,

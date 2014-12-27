@@ -1,10 +1,10 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/GeoPoint',
   'atlas/model/Line',
   'atlas/model/Style'
-], function(Class, Colour, GeoPoint, Line, Style) {
+], function(Class, Color, GeoPoint, Line, Style) {
   return Class.extend({
 
     atlas: null,

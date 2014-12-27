@@ -2,7 +2,7 @@ define([
   'atlas/assets/testMesh',
   'atlas/assets/testWKT',
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/GeoEntity',
   'atlas/model/Feature',
   'atlas/model/GeoPoint',
@@ -11,7 +11,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Ellipsoid',
   'jquery'
-], function(testMesh, testWKT, Class, Colour, GeoEntity, Feature, GeoPoint, Style, Handle,
+], function(testMesh, testWKT, Class, Color, GeoEntity, Feature, GeoPoint, Style, Handle,
   Cartesian3, Ellipsoid, $) {
   return Class.extend({
 

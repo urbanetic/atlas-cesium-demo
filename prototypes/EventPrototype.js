@@ -1,10 +1,10 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/Style',
   'atlas/model/GeoEntity',
   'jquery'
-], function(Class, Colour, Style, GeoEntity, $) {
+], function(Class, Color, Style, GeoEntity, $) {
   return Class.extend({
 
     atlas: null,

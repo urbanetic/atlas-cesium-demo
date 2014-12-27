@@ -30,13 +30,13 @@
       ] */
     });
     require(['atlas-cesium/core/CesiumAtlas',
-             'atlas/model/Colour',
+             'atlas/material/Color',
              'atlas/assets/testWKT',
              'atlas/dom/PopupFaculty',
              'atlas-cesium/cesium/Source/Core/Cartographic',
              'atlas-cesium/cesium/Source/Core/loadImage',
       'atlas-cesium/cesium/Source/Scene/BillboardCollection'
-    ], function(CesiumAtlas, Colour, testWKT, PopupFaculty,
+    ], function(CesiumAtlas, Color, testWKT, PopupFaculty,
         Cartographic, loadImage, BillboardCollection) {
       var args = {};
 
@@ -56,7 +56,7 @@
       testWKT.forEach(function(wkt) {
         args.id = i++;
         args.polygon = {
-          color: Colour.GREY,
+          color: Color.GREY,
           elevation: 0,
           height: 10*i,
           vertices: wkt
@@ -136,7 +136,7 @@
 //            values[i] = Math.random() * 100 + Math.random() * 1000;
 //          });
 //          //cesiumAtlas._managers.visualisation._testHeight(values);
-//          cesiumAtlas._managers.visualisation._testColour(values);
+//          cesiumAtlas._managers.visualisation._testColor(values);
 //        }.bind(cesiumAtlas), 10);
 //      }.bind(cesiumAtlas), 6000);
 
@@ -156,10 +156,10 @@
           title: 'The Awesome Projection',
           caption: 'Awesome/awesome',
           values: values,
-          codomain: {startProj: Colour.RED, endProj: Colour.BLUE}
+          codomain: {startProj: Color.RED, endProj: Color.BLUE}
         };
         cesiumAtlas.publish('projection/add',
-            {type: 'colour', ids: ids, config: config});
+            {type: 'color', ids: ids, config: config});
       }.bind(cesiumAtlas), 3000);
 
       // -------------------------------------------
@@ -177,14 +177,14 @@
 //              {index: 6, values: {0: 5, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5, 100: 0}},
 //              {index: 7}
 //            ],
-//            codomain = {startProj: Colour.BLUE, endProj: Colour.RED},
+//            codomain = {startProj: Color.BLUE, endProj: Color.RED},
 //            config = {
 //              bins: {numBins: 5, firstValue: 0, lastValue: 5},
 //              codomain: codomain,
 //              type: 'discrete'
 //            };
 //        this.publish('projection/dynamic/add', {
-//          type: 'colour', ids: ids, data: data, config: config, fps: 1, delta: 1
+//          type: 'color', ids: ids, data: data, config: config, fps: 1, delta: 1
 //        });
 //      }.bind(cesiumAtlas), 10000)
 

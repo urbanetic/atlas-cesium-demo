@@ -1,7 +1,7 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Colour'
-], function(Class, Colour) {
+  'atlas/material/Color'
+], function(Class, Color) {
   return Class.extend({
 
     atlas: null,
@@ -23,10 +23,10 @@ define([
         feature.setHeight(0);
       });
       var args = {
-        type: 'colour',
+        type: 'color',
         ids: Object.keys(values),
         config: {
-          title: 'Colour Projection',
+          title: 'Color Projection',
           values: values
         }
       };

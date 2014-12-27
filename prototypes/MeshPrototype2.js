@@ -1,7 +1,7 @@
 define([
   'atlas/assets/testMesh',
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/GeoEntity',
   'atlas/model/GeoPoint',
   'atlas/model/Style',
@@ -9,7 +9,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Ellipsoid',
   'jquery'
-], function(testMesh, Class, Colour, GeoEntity, GeoPoint, Style, Handle, Cartesian3, Ellipsoid, $) {
+], function(testMesh, Class, Color, GeoEntity, GeoPoint, Style, Handle, Cartesian3, Ellipsoid, $) {
   return Class.extend({
 
     atlas: null,
@@ -60,7 +60,7 @@ define([
 //          id: 'mesh-footprint',
 //          polygon: {
 //            vertices: positions,
-//            style: new Style({borderColour: new Colour('yellow')}),
+//            style: new Style({borderMaterial: new Color('yellow')}),
 //            width: '1px'
 //          }
 //        });

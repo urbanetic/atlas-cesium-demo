@@ -32,10 +32,10 @@
         require([
           'atlas-cesium/core/CesiumAtlas',
           'atlas/assets/testWKT',
-          'atlas/model/Colour',
+          'atlas/material/Color',
           'atlas/model/Style',
           'atlas/lib/utility/Setter'
-        ], function(CesiumAtlas, testWKT, Colour, Style, Setter) {
+        ], function(CesiumAtlas, testWKT, Color, Style, Setter) {
           console.debug('Creating atlas-cesium');
           cesiumAtlas = new CesiumAtlas();
           cesiumAtlas.attachTo('cesium');
@@ -47,11 +47,11 @@
           args.show = true;
           args.displayMode = 'extrusion';
 
-          var toAtlasStyleArgs = function(colour, opacity, prefix) {
+          var toAtlasStyleArgs = function(color, opacity, prefix) {
             var styleArgs = {};
-            styleArgs[prefix + 'Colour'] = new Colour(colour);
+            var color = styleArgs[prefix + 'Material'] = new Color(color);
             if (opacity != undefined) {
-              styleArgs[prefix + 'Colour'].alpha = opacity;
+              color.alpha = opacity;
             }
             return styleArgs;
           };

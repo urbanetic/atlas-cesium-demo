@@ -1,10 +1,10 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/Style',
   'atlas/model/GeoEntity',
   'jquery'
-], function(Class, Colour, Style, GeoEntity, $) {
+], function(Class, Color, Style, GeoEntity, $) {
   return Class.extend({
 
     atlas: null,
@@ -15,9 +15,9 @@ define([
       var features = entityManager.getFeatures();
       var feature = features[0];
 
-      var colour = new Colour('red');
+      var color = new Color('red');
       var style = new Style();
-      style.setFillColour(colour);
+      style.setFillMaterial(color);
       feature.setStyle(style);
       feature.setDisplayMode('footprint');
     }

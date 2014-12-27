@@ -1,9 +1,9 @@
 define([
   'atlas/lib/utility/Class',
   'atlas/model/Collection',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/Vertex'
-], function(Class, Collection, Colour, Vertex) {
+], function(Class, Collection, Color, Vertex) {
   return Class.extend({
 
     atlas: null,

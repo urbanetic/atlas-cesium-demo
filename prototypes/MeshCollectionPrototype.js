@@ -7,12 +7,12 @@ define([
   'atlas/model/Feature',
   'atlas/model/GeoPoint',
   'atlas/model/Style',
-  'atlas/model/Colour',
+  'atlas/material/Color',
   'atlas/model/Vertex',
   'atlas-cesium/model/Handle',
   'jquery'
 ], function(ConvexHullGrahamScan, Class, Objects, GeoEntity, Collection, Feature, GeoPoint, Style,
-            Colour, Vertex, Handle, $) {
+            Color, Vertex, Handle, $) {
 
   return Class.extend({
 
@@ -65,7 +65,7 @@ define([
                 id: 'mesh-footprint' + entityCount,
                 polygon: {
                   vertices: vertices,
-                  style: new Style({borderColour: new Colour('yellow')}),
+                  style: new Style({borderMaterial: new Color('yellow')}),
                   width: '1px'
                 }
               });
