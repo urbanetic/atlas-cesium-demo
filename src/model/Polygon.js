@@ -2,13 +2,13 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/lib/Q',
   // Base class
+  'atlas/material/Color',
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/Timers',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
@@ -22,7 +22,7 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Style, Cartesian3,
+], function(Setter, Q, Color, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Cartesian3,
             GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
             ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
             Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
@@ -118,9 +118,8 @@ define([
      */
     _build: function() {
       var style = this.getStyle();
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
+      var fillMaterial = style.getFillMaterial();
+      var borderMaterial = style.getFillMaterial();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
@@ -129,31 +128,32 @@ define([
         this._removePrimitives();
       }
       this._createGeometry();
-      if (fillColor) {
+      if (fillMaterial) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
             this._appearance = new EllipsoidSurfaceAppearance({
-              material: new Material({
-                fabric: {
+              material: this._toCesiumMaterial(fillMaterial)
+              // material: new Material({
+              //   fabric: {
                   // type: 'Color',
                   // uniforms: {
-                  //   color: fillColor
+                  //   color: fillMaterial
                   // }
                   // type: 'RimLighting',
                   // uniforms: {
-                  //   color: fillColor,
-                  //   rimColor: borderColor,
+                  //   color: fillMaterial,
+                  //   rimColor: borderMaterial,
                   //   width: 20
                   // }
-                  type: 'Checkerboard',
-                  uniforms: {
-                    lightColor: fillColor,
-                    darkColor: borderColor,
-                    repeat: {x: 20, y: 20}
-                  }
-                },
-                translucent: false
-              })
+                  // type: 'Checkerboard',
+                  // uniforms: {
+                  //   lightColor: fillMaterial,
+                  //   darkColor: borderMaterial,
+                  //   repeat: {x: 20, y: 20}
+                  // }
+              //   },
+              //   translucent: false
+              // })
             });
           }
           this._primitive = new Primitive({
@@ -161,10 +161,10 @@ define([
             appearance: this._appearance
           });
         } else if (isStyleDirty && this._appearance) {
-          this._appearance.material.uniforms.color = fillColor;
+          this._appearance.material = this._toCesiumMaterial(fillMaterial);
         }
       }
-      if (borderColor) {
+      if (borderMaterial) {
         if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
           var lineWidth = style.getBorderWidth();
           // Minimum width is 2px since 1px is too thin to render properly.
@@ -188,7 +188,8 @@ define([
           this._updateStyleDf = this._whenPrimitiveReady(this._outlinePrimitive);
           this._updateStyleDf.promise.then(function() {
             var outlineGeometryAtts =
-              this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+                this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+            var borderColor = this._toCesiumMaterial(borderMaterial).uniforms.color;
             outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
             this._updateStyleDf = null;
           }.bind(this));
@@ -242,14 +243,12 @@ define([
      * @private
      */
     _createGeometry: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
+      var style = this.getStyle();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
-      var shouldCreateOutlineGeometry = borderColor && (isModelDirty || !this._outlineGeometry);
+      var shouldCreateGeometry = style.getFillMaterial() && (isModelDirty || !this._geometry);
+      var shouldCreateOutlineGeometry = style.getBorderStyle() && (isModelDirty || !this._outlineGeometry);
       if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
         return;
       }
@@ -289,6 +288,7 @@ define([
         });
       }
       if (shouldCreateOutlineGeometry) {
+        var borderColor = this._toCesiumMaterial(borderMaterial).uniforms.color;
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
           geometry: new PolygonOutlineGeometry({
@@ -486,11 +486,10 @@ define([
     },
 
     _updateVisibility: function(visible) {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      if (this._primitive) this._primitive.show = !!(visible && fillColor);
-      if (this._outlinePrimitive) this._outlinePrimitive.show = !!(visible && borderColor);
+      var style = this.getStyle();
+      if (this._primitive) this._primitive.show = !!(visible && style.getFillMaterial());
+      if (this._outlinePrimitive) this._outlinePrimitive.show =
+          !!(visible && style.getBorderMaterial());
     },
 
     /**
@@ -530,9 +529,9 @@ define([
       this._initOrigVertices();
     },
 
-    _getCesiumColors: function() {
-      var style = this.getStyle();
-      return Style.toCesiumColors(style);
+    toCesiumMaterial: function(material) {
+      // Temporary solution that only works with Colors materials.
+      return Color.prototype.toCesiumMaterial.apply(material);
     }
 
   });

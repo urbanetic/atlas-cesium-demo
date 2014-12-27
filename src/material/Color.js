@@ -2,7 +2,8 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/material/Color',
   'atlas-cesium/cesium/Source/Core/Color',
-], function(Setter, ColorCore, CesiumColor) {
+  'atlas-cesium/cesium/Source/Scene/Material',
+], function(Setter, ColorCore, CesiumColor, Material) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -15,27 +16,30 @@ define([
    */
   Color = Setter.mixin(ColorCore.extend(/** @lends atlas-cesium.material.Color# */ {
 
-  }), {
-
-    // -------------------------------------------
-    // STATICS
-    // -------------------------------------------
-
-    // TODO(aramk) Constructing this subclass instead of an atlas color must be abstracted in atlas
-    // (e.g. using the abstract factory and/or factory method).
-    // For now I've provided a static method so this class is more like a utility class.
+    /**
+     * @returns {Color} This color converted to the Cesium format.
+     */
+    toCesiumColor: function() {
+      // TODO(aramk) Transparency causes issues in Cesium so ignored for now.
+      return new CesiumColor(this.red, this.green, this.blue, 1);
+    },
 
     /**
-     * Converts an Atlas Color object to a Cesium Color object.
-     * @param {atlas.material.Color} color - The Color to convert.
-     * @returns {atlas-cesium.material.Color} The converted Cesium Color object.
-     * @memberOf atlas-cesium.material.Color
-     * @static
+     * @return {Material} This color conveted to a Cesium material.
      */
-    toCesiumColor: function(color) {
-      return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
+    toCesiumMaterial: function() {
+      return new Material({
+        fabric: {
+          type: 'Color',
+          uniforms: {
+            color: this.toCesiumColor()
+          }
+        },
+        translucent: false
+      });
     }
 
-  });
+  }));
+
   return Color;
 });
