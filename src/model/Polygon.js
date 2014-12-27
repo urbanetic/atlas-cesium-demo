@@ -525,18 +525,18 @@ define([
         material.darkColor = new Color(material.darkColor);
         return CheckPattern.prototype.toCesiumMaterial.apply(material);
       } else {
-        throw new Error('Cannot create cesium material.');
+        throw new Error('Cannot create Cesium Material.');
       }
     },
 
     _getBorderColor: function() {
       var style = this.getStyle();
-      var borderMaterial = style.getBorderMaterial();
-      if (borderMaterial instanceof ColorCore) {
-        return this._toCesiumMaterial(borderMaterial).uniforms.color;
+      var material = style.getBorderMaterial();
+      if (material instanceof ColorCore) {
+        return this._toCesiumMaterial(material).uniforms.color;
       } else {
         // Only color is supported for polyline borders at the moment. Ignore all other materials.
-        return null;
+        throw new Error('Only Color material is supported for Polygon border.');
       }
     }
 
