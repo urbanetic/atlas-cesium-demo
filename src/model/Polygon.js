@@ -2,12 +2,15 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/lib/Q',
   // Base class
+  'atlas/material/Color',
+  'atlas/material/CheckPattern',
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/Timers',
   'atlas-cesium/material/Color',
+  'atlas-cesium/material/CheckPattern',
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
@@ -22,10 +25,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Color, Handle, Cartesian3,
-            GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
-            ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
-            Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
+], function(Setter, Q, ColorCore, CheckPatternCore, PolygonCore, GeoPoint, Vertex, AtlasMath,
+            Timers, Color, CheckPattern, Handle, Cartesian3, GeometryInstance, PolygonGeometry,
+            PolygonOutlineGeometry, ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4,
+            Transforms, Primitive, Material, PerInstanceColorAppearance,
+            EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -133,27 +137,6 @@ define([
           if (isStyleDirty || !this._appearance) {
             this._appearance = new EllipsoidSurfaceAppearance({
               material: this._toCesiumMaterial(fillMaterial)
-              // material: new Material({
-              //   fabric: {
-                  // type: 'Color',
-                  // uniforms: {
-                  //   color: fillMaterial
-                  // }
-                  // type: 'RimLighting',
-                  // uniforms: {
-                  //   color: fillMaterial,
-                  //   rimColor: borderMaterial,
-                  //   width: 20
-                  // }
-                  // type: 'Checkerboard',
-                  // uniforms: {
-                  //   lightColor: fillMaterial,
-                  //   darkColor: borderMaterial,
-                  //   repeat: {x: 20, y: 20}
-                  // }
-              //   },
-              //   translucent: false
-              // })
             });
           }
           this._primitive = new Primitive({
@@ -189,8 +172,10 @@ define([
           this._updateStyleDf.promise.then(function() {
             var outlineGeometryAtts =
                 this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
-            var borderColor = this._toCesiumMaterial(borderMaterial).uniforms.color;
-            outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+            var borderColor = this._getBorderColor();
+            if (borderColor) {
+              outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+            }
             this._updateStyleDf = null;
           }.bind(this));
         }
@@ -245,12 +230,12 @@ define([
     _createGeometry: function() {
       var style = this.getStyle();
       var fillMaterial = style.getFillMaterial();
-      var borderMaterial = style.getBorderMaterial();
+      var borderColor = this._getBorderColor();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var shouldCreateGeometry = fillMaterial && (isModelDirty || !this._geometry);
-      var shouldCreateOutlineGeometry = borderMaterial && (isModelDirty || !this._outlineGeometry);
+      var shouldCreateOutlineGeometry = borderColor && (isModelDirty || !this._outlineGeometry);
       if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
         return;
       }
@@ -290,7 +275,6 @@ define([
         });
       }
       if (shouldCreateOutlineGeometry) {
-        var borderColor = this._toCesiumMaterial(borderMaterial).uniforms.color;
         this._outlineGeometry = new GeometryInstance({
           id: geometryId + '-outline',
           geometry: new PolygonOutlineGeometry({
@@ -532,9 +516,28 @@ define([
     },
 
     _toCesiumMaterial: function(material) {
-      // Temporary solution that only works with Colors materials.
-      material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
-      return Color.prototype.toCesiumMaterial.apply(material);
+      // Temporary solution until we have factories.
+      if (material instanceof ColorCore) {
+        material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
+        return Color.prototype.toCesiumMaterial.apply(material);
+      } else if (material instanceof CheckPatternCore) {
+        material.lightColor = new Color(material.lightColor);
+        material.darkColor = new Color(material.darkColor);
+        return CheckPattern.prototype.toCesiumMaterial.apply(material);
+      } else {
+        throw new Error('Cannot create cesium material.');
+      }
+    },
+
+    _getBorderColor: function() {
+      var style = this.getStyle();
+      var borderMaterial = style.getBorderMaterial();
+      if (borderMaterial instanceof ColorCore) {
+        return this._toCesiumMaterial(borderMaterial).uniforms.color;
+      } else {
+        // Only color is supported for polyline borders at the moment. Ignore all other materials.
+        return null;
+      }
     }
 
   });

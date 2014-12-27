@@ -1,7 +1,6 @@
 define([
-  'atlas/lib/utility/Setter',
   'atlas/material/Style'
-], function(Setter, StyleCore) {
+], function(StyleCore) {
   /**
    * @typedef atlas-cesium.material.Style
    * @ignore
@@ -12,9 +11,9 @@ define([
    * @class atlas-cesium.material.Style
    * @extends atlas.material.Style
    */
-  Style = Setter.mixin(StyleCore.extend(/** @lends atlas-cesium.material.Style# */ {
+  Style = StyleCore.extend(/** @lends atlas-cesium.material.Style# */ {
 
-  }));
+  });
 
   return Style;
 });

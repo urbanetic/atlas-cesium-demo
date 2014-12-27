@@ -1,11 +1,10 @@
 define([
-  'atlas/lib/utility/Setter',
   'atlas/material/Color',
   'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Scene/Material',
-], function(Setter, ColorCore, CesiumColor, Material) {
+], function(ColorCore, CesiumColor, Material) {
   /**
-   * @typedef atlas-cesium.model.Line
+   * @typedef atlas-cesium.model.Color
    * @ignore
    */
   var Color;
@@ -14,7 +13,7 @@ define([
    * @class atlas-cesium.material.Color
    * @extends atlas.material.Color
    */
-  Color = Setter.mixin(ColorCore.extend(/** @lends atlas-cesium.material.Color# */ {
+  Color = ColorCore.extend(/** @lends atlas-cesium.material.Color# */ {
 
     /**
      * @returns {Color} This color converted to the Cesium format.
@@ -24,9 +23,6 @@ define([
       return new CesiumColor(this.red, this.green, this.blue, 1);
     },
 
-    /**
-     * @return {Material} This color conveted to a Cesium material.
-     */
     toCesiumMaterial: function() {
       return new Material({
         fabric: {
@@ -39,7 +35,7 @@ define([
       });
     }
 
-  }));
+  });
 
   return Color;
 });
