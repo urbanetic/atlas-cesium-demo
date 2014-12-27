@@ -1,7 +1,7 @@
 define([
   'atlas/lib/utility/Class',
   'atlas/material/Color',
-  'atlas/model/Style',
+  'atlas/material/Style',
   'atlas/model/GeoEntity',
   'jquery'
 ], function(Class, Color, Style, GeoEntity, $) {

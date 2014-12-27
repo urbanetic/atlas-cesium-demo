@@ -42,7 +42,7 @@
       'atlas-cesium/core/CesiumAtlas',
       'atlas/assets/testWKT',
       'atlas/material/Color',
-      'atlas/model/Style',
+      'atlas/material/Style',
       'atlas/lib/utility/Setter'
     ], function(CesiumAtlas, testWKT, Color, Style, Setter) {
       console.debug('Creating atlas-cesium');
@@ -105,14 +105,14 @@
           './prototypes/PolygonTransformPrototype',
           './prototypes/PopupPrototype',
           './prototypes/PopupPrototype2',
-          './prototypes/TexturePrototype',
+          './prototypes/MaterialPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
                     MeshPrototype3, MeshPrototype4, MeshCollectionPrototype, GltfMeshPrototype, LinePrototype, 
                     GeocoderPrototype, InputPrototype, RenderPrototype, StylePrototype, 
                     EventPrototype, ProjectionPrototype, CollectionPrototype, SelectionPrototype, 
-                    PolygonTransformPrototype, PopupPrototype, PopupPrototype2, TexturePrototype, Log) {
+                    PolygonTransformPrototype, PopupPrototype, PopupPrototype2, MaterialPrototype, Log) {
          // new CameraPrototype(cesiumAtlas);
          // new EditPrototype(cesiumAtlas);
          // new DrawPrototype(cesiumAtlas);
@@ -138,7 +138,7 @@
          // new PolygonTransformPrototype(cesiumAtlas);
          // new PopupPrototype(cesiumAtlas);
          // new PopupPrototype2(cesiumAtlas);
-         // new TexturePrototype(cesiumAtlas);
+         new MaterialPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);

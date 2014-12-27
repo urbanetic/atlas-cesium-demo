@@ -3,7 +3,7 @@ define([
   'atlas/material/Color',
   'atlas/model/GeoEntity',
   'atlas/model/GeoPoint',
-  'atlas/model/Style',
+  'atlas/material/Style',
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Ellipsoid',

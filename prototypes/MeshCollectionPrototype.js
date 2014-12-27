@@ -6,7 +6,7 @@ define([
   'atlas/model/Collection',
   'atlas/model/Feature',
   'atlas/model/GeoPoint',
-  'atlas/model/Style',
+  'atlas/material/Style',
   'atlas/material/Color',
   'atlas/model/Vertex',
   'atlas-cesium/model/Handle',
