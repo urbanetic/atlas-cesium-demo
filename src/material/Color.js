@@ -19,8 +19,7 @@ define([
      * @returns {Color} This color converted to the Cesium format.
      */
     toCesiumColor: function() {
-      // TODO(aramk) Transparency causes issues in Cesium so ignored for now.
-      return new CesiumColor(this.red, this.green, this.blue, 1);
+      return new CesiumColor(this.red, this.green, this.blue, this.alpha);
     },
 
     toCesiumMaterial: function() {

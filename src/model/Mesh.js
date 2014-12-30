@@ -483,7 +483,7 @@ define([
       if (material instanceof ColorCore) {
         return this._toCesiumMaterial(material).uniforms.color;
       } else {
-        // Only color is supported for polyline borders at the moment. Ignore all other materials.
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
         throw new Error('Only Color material is supported for Mesh fill.');
       }
     }

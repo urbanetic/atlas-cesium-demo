@@ -14,9 +14,8 @@ define([
   'atlas/model/Image',
   'atlas/lib/utility/Log'
 ], function(Color, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            /*EllipsoidSurfaceAppearance,*/ Material, MaterialAppearance, CesiumColor, ImageCore, Log) {
+            Material, MaterialAppearance, CesiumColor, ImageCore, Log) {
 
-  //var Image = function(id, vertices, args) {
   var Image = ImageCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
@@ -193,7 +192,7 @@ define([
 
   /**
    * Takes an atlas Style object and converts it to Cesium Color objects.
-   * @param style
+   * @param {atlas.model.Style} style
    * @private
    */
   Image._convertStyleToCesiumColors = function(style) {

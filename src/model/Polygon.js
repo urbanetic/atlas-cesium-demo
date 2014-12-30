@@ -521,8 +521,8 @@ define([
         material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
         return Color.prototype.toCesiumMaterial.apply(material);
       } else if (material instanceof CheckPatternCore) {
-        material.lightColor = new Color(material.lightColor);
-        material.darkColor = new Color(material.darkColor);
+        material.color1 = new Color(material.color1);
+        material.color2 = new Color(material.color2);
         return CheckPattern.prototype.toCesiumMaterial.apply(material);
       } else {
         throw new Error('Cannot create Cesium Material.');
@@ -535,7 +535,7 @@ define([
       if (material instanceof ColorCore) {
         return this._toCesiumMaterial(material).uniforms.color;
       } else {
-        // Only color is supported for polyline borders at the moment. Ignore all other materials.
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
         throw new Error('Only Color material is supported for Polygon border.');
       }
     }

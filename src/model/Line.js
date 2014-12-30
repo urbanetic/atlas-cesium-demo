@@ -1,9 +1,9 @@
 define([
   'atlas/material/Color',
+  'atlas/material/Style',
   'atlas/model/Line',
   'atlas-cesium/material/Color',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/material/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -15,7 +15,7 @@ define([
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError',
   'atlas/util/Timers'
-], function(ColorCore, LineCore, Color, Handle, Style, GeometryInstance, CorridorGeometry,
+], function(ColorCore, Style, LineCore, Color, Handle, GeometryInstance, CorridorGeometry,
             PolylineGeometry, ColorGeometryInstanceAttribute, CornerType, Primitive,
             PerInstanceColorAppearance, PolylineColorAppearance, Log, DeveloperError, Timers) {
   /**
@@ -300,7 +300,7 @@ define([
       if (material instanceof ColorCore) {
         return this._toCesiumMaterial(material).uniforms.color;
       } else {
-        // Only color is supported for polyline borders at the moment. Ignore all other materials.
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
         throw new Error('Only Color material is supported for Polygon border.');
       }
     }

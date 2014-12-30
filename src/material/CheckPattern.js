@@ -20,8 +20,8 @@ define([
         fabric: {
           type: 'Checkerboard',
           uniforms: {
-            lightColor: this.lightColor.toCesiumColor(),
-            darkColor: this.darkColor.toCesiumColor(),
+            lightColor: this.color1.toCesiumColor(),
+            darkColor: this.color2.toCesiumColor(),
             repeat: {x: repeat.x, y: repeat.y}
           }
         },
