@@ -142,7 +142,7 @@ define([
               appearance1 = ellipse._appearance,
               primitive1 = ellipse._primitive;
           // Change geometry of Ellipse and check only that changed.
-          ellipse.modifyStyle({fillColour: {red: 1, green: 1, blue: 1}});
+          ellipse.modifyStyle({fillMaterial: {red: 1, green: 1, blue: 1}});
           ellipse.show();
           var geometry2 = ellipse._geometry,
               appearance2 = ellipse._appearance,

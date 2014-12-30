@@ -9,7 +9,7 @@ define([
   // Base class
   'atlas/model/Ellipse'
 ], function(Log, AtlasMath, EllipseGeometry, GeometryInstance, Primitive, MaterialAppearance,
-            CesiumColour, EllipseCore) {
+            CesiumColor, EllipseCore) {
 
   var Ellipse = EllipseCore.extend(/** @lends atlas-cesium.model.Ellipse# */ {
 
@@ -173,15 +173,15 @@ define([
    */
   Ellipse._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Ellipse._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Ellipse._convertAtlasToCesiumColor(style.getBorderColour())
+      fill: Ellipse._convertAtlasToCesiumColor(style.getFillMaterial()),
+      border: Ellipse._convertAtlasToCesiumColor(style.getBorderMaterial())
     }
   };
 
   /**
-   * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.model.Colour} color - The Colour to convert.
-   * @returns {CesiumColour} The converted Cesium Color object.
+   * Converts an Atlas Color object to a Cesium Color object.
+   * @param {atlas.material.Color} color - The Color to convert.
+   * @returns {CesiumColor} The converted Cesium Color object.
    * @private
    */
   Ellipse._convertAtlasToCesiumColor = function(color) {
@@ -189,7 +189,7 @@ define([
       return;
     }
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
-    return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
+    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Ellipse;

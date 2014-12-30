@@ -1,5 +1,6 @@
 define([
   'atlas/lib/Q',
+  'atlas/material/Color',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
@@ -24,14 +25,14 @@ define([
   'atlas-cesium/cesium/Source/Core/Transforms',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/model/Colour',
+  'atlas-cesium/material/Color',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
-            Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
-            GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
-            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
-            MeshCore) {
+], function(Q, ColorCore, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium,
+            BoundingSphere, Cartesian3, CesiumColor, ColorGeometryInstanceAttribute,
+            ComponentDatatype, Geometry, GeometryAttribute, GeometryAttributes, GeometryInstance,
+            GeometryPipeline, Matrix3, Matrix4, PrimitiveType, Transforms,
+            PerInstanceColorAppearance, Primitive, Color, MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -46,7 +47,7 @@ define([
    * Every 3 elements forming a new triangle with counter-clockwise winding order.
    * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
    * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
-   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
+   * @param {Array.<Number>} [meshData.color] - The uniform color of the Mesh, given as a
    * [red, green, blue, alpha] formatted array.
    * @param {Number} [meshData.uniformScale] - The uniform scale of the Mesh.
    * @param {atlas.model.Vertex} [meshData.scale] - The non-uniform scale of the Mesh.
@@ -134,14 +135,14 @@ define([
     _createPrimitive: function() {
       var thePrimitive;
       var geometry = this._createGeometry();
-      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour());
+      var color = ColorGeometryInstanceAttribute.fromColor(this._getFillColor());
       var instance = new GeometryInstance({
-            id: this.getId(),
-            geometry: geometry,
-            attributes: {
-              color: color
-            }
-          });
+        id: this.getId(),
+        geometry: geometry,
+        attributes: {
+          color: color
+        }
+      });
 
       // TODO(bpstudds): Work out how to get MaterialAppearance working.
       thePrimitive = new Primitive({
@@ -235,8 +236,7 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
-                  this._style.getFillColour()));
+              ColorGeometryInstanceAttribute.toValue(Color.toCesiumColor(this._getFillColor()));
           this._updateStyleDf = null;
         }.bind(this));
       }
@@ -466,6 +466,27 @@ define([
       this.setDirty('modelMatrix');
       this._update();
     },
+
+    _toCesiumMaterial: function(material) {
+      // Temporary solution until we have factories.
+      if (material instanceof ColorCore) {
+        material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
+        return Color.prototype.toCesiumMaterial.apply(material);
+      } else {
+        throw new Error('Cannot create Cesium Material.');
+      }
+    },
+
+    _getFillColor: function() {
+      var style = this.getStyle();
+      var material = style.getFillMaterial();
+      if (material instanceof ColorCore) {
+        return this._toCesiumMaterial(material).uniforms.color;
+      } else {
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
+        throw new Error('Only Color material is supported for Mesh fill.');
+      }
+    }
 
   });
 
