@@ -149,9 +149,10 @@ define([
       }
       if (borderMaterial) {
         if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
-          var lineWidth = style.getBorderWidth();
-          // Minimum width is 2px since 1px is too thin to render properly.
-          lineWidth = Setter.range(lineWidth, 2, scene.maximumAliasedLineWidth);
+          // TODO(aramk) This causes an issue on high-res screens.
+          // var lineWidth = style.getBorderWidth();
+          // lineWidth = Setter.range(lineWidth, 2, scene.maximumAliasedLineWidth);
+          var lineWidth = Math.min(2, scene.maximumAliasedLineWidth);
           this._outlinePrimitive = new Primitive({
             geometryInstances: this._outlineGeometry,
             // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
