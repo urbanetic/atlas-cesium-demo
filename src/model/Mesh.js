@@ -8,10 +8,8 @@ define([
   'atlas/util/ConvexHullFactory',
   'atlas/util/Timers',
   // Cesium includes
-  'atlas-cesium/cesium/Source/Cesium',
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
-  'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/ComponentDatatype',
   'atlas-cesium/cesium/Source/Core/Geometry',
@@ -28,8 +26,8 @@ define([
   'atlas-cesium/material/Color',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, ColorCore, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium,
-            BoundingSphere, Cartesian3, CesiumColor, ColorGeometryInstanceAttribute,
+], function(Q, ColorCore, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers,
+            BoundingSphere, Cartesian3, ColorGeometryInstanceAttribute,
             ComponentDatatype, Geometry, GeometryAttribute, GeometryAttributes, GeometryInstance,
             GeometryPipeline, Matrix3, Matrix4, PrimitiveType, Transforms,
             PerInstanceColorAppearance, Primitive, Color, MeshCore) {
@@ -236,7 +234,7 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Color.toCesiumColor(this._getFillColor()));
+              ColorGeometryInstanceAttribute.toValue(this._getFillColor());
           this._updateStyleDf = null;
         }.bind(this));
       }
@@ -481,7 +479,7 @@ define([
       var style = this.getStyle();
       var material = style.getFillMaterial();
       if (material instanceof ColorCore) {
-        return this._toCesiumMaterial(material).uniforms.color;
+        return Color.prototype.toCesiumColor.bind(material)();
       } else {
         // Only color is supported for polyline borders at the moment. Reject all other materials.
         throw new Error('Only Color material is supported for Mesh fill.');

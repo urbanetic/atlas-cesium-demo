@@ -298,7 +298,7 @@ define([
       var style = this.getStyle();
       var material = style.getFillMaterial();
       if (material instanceof ColorCore) {
-        return this._toCesiumMaterial(material).uniforms.color;
+        return Color.prototype.toCesiumColor.bind(material)();
       } else {
         // Only color is supported for polyline borders at the moment. Reject all other materials.
         throw new Error('Only Color material is supported for Polygon border.');
