@@ -195,10 +195,7 @@ define([
       if (this.isDirty('entity') || this.isDirty('model')) {
         // The matrix to apply transformations on.
         // Apply rotation, translation and scale transformations.
-        var rotationTranslation = Matrix4.fromRotationTranslation(
-            // Input angle must be in radians.
-            Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
-            new Cartesian3(0, 0, 0));
+        var rotationTranslation = this._calcRotationTranslationMatrix(this.getRotation());
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
             modelMatrix);
@@ -382,10 +379,15 @@ define([
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
+      return this._calcTransformOriginMatrix(this._calcRotationTranslationMatrix(rotation),
+          centroid);
+    },
+
+    _calcRotationTranslationMatrix: function(rotation) {
       // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._calcTransformOriginMatrix(rotMatrix, centroid);
+      var zRotation = 360 - rotation.z;
+      return Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(zRotation)), new Cartesian3());
     },
 
     /**

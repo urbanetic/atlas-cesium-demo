@@ -391,10 +391,15 @@ define([
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
+      return this._calcTransformOriginMatrix(this._calcRotationTranslationMatrix(rotation),
+          centroid);
+    },
+
+    _calcRotationTranslationMatrix: function(rotation) {
       // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._calcTransformOriginMatrix(rotMatrix, centroid);
+      var zRotation = 360 - rotation.z;
+      return Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(zRotation)), new Cartesian3());
     },
 
     /**
