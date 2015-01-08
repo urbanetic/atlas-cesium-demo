@@ -15,10 +15,11 @@ define([
       var features = atlas._managers.entity.getFeatures();
       var featureA = features[0];
       var featureB = features[1];
+      var featureC = features[2];
 
       // Create material programmatically.
 
-      var checkPattern = new CheckPattern({lightColor: Color.YELLOW, darkColor: Color.RED});
+      var checkPattern = new CheckPattern({color1: Color.YELLOW, color2: Color.RED});
       var currentStyle = featureA.getStyle();
       var style = new Style({fillMaterial: checkPattern,
           borderMaterial: currentStyle.getBorderMaterial()});
@@ -37,20 +38,32 @@ define([
         polygon: {
           vertices: positions,
           height: 50,
-          fillMaterial: {
-            type: 'CheckPattern',
-            lightColor: 'green',
-            darkColor: 'red'
-          },
-          borderMaterial: {
-            type: 'Color',
-            blue: 1
+          // color: 'green',
+          // borderColor: 'blue'
+          style: {
+            fillMaterial: {
+              type: 'CheckPattern',
+              color1: 'green',
+              color2: 'red'
+            },
+            borderMaterial: {
+              type: 'Color',
+              blue: 1
+            },
+            borderWidth: 5
           }
         }
       });
 
       var featureB = atlas._managers.entity.getById(featureBId);
         
+      // Set the opacity for one feature to 50%.
+
+      var styleC = new Style(featureC.getStyle());
+      var fillC = new Color('green')
+      fillC.alpha = 0.5;
+      styleC.setFillMaterial(fillC);
+      featureC.setStyle(styleC);
     }
 
   });

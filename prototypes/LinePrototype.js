@@ -20,7 +20,7 @@ define([
           width: 1,
           // width: '5px',
           elevation: 100,
-          color: 'red'
+          color: 'green'
         },
         show: true
       });

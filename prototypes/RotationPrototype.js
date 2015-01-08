@@ -53,6 +53,7 @@ define([
         // polygon.rotate(new Vertex(0, 0, 15));
         // polygon.setRotation(new Vertex(0, 0, 15));
 
+        // Scaling and rotation over time.
         polygon.scale(new Vertex(0.5, 0.5, 0.5));
         feature.scale(new Vertex(0.5, 0.5, 0.5));
         setInterval(function() {

@@ -63,8 +63,10 @@
           vertices: wkt,
           elevation: 0,
           height: 50,
-          color: '#ccc',
-          borderColor: '#000'
+          style: {
+            fillColor: '#ccc',
+            borderColor: '#999'
+          }
         };
         cesiumAtlas.publish('entity/show', args);
       });
@@ -118,7 +120,7 @@
          // new DrawPrototype(cesiumAtlas);
          // new LineDrawPrototype(cesiumAtlas);
          // new TranslatePrototype(cesiumAtlas);
-         // new RotationPrototype(cesiumAtlas);
+         new RotationPrototype(cesiumAtlas);
          // new ScalePrototype(cesiumAtlas);
          // new MeshPrototype(cesiumAtlas);
          // new MeshPrototype2(cesiumAtlas);
@@ -138,7 +140,7 @@
          // new PolygonTransformPrototype(cesiumAtlas);
          // new PopupPrototype(cesiumAtlas);
          // new PopupPrototype2(cesiumAtlas);
-         new MaterialPrototype(cesiumAtlas);
+         // new MaterialPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);
