@@ -5,7 +5,6 @@ define([
   // Cesium imports.
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Cartographic',
-  'atlas-cesium/cesium/Source/Core/CesiumTerrainProvider',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
@@ -14,9 +13,8 @@ define([
   'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, CesiumTerrainProvider,
-            requestAnimationFrame, Imagery, ImageryState, SceneTransforms, Viewer, CzmlDataSource,
-            RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame, Imagery,
+            ImageryState, SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
 
   /**
    * @typedef atlas-cesium.render.RenderManager
@@ -82,27 +80,6 @@ define([
       });
       this._drawShim();
       this._render();
-    },
-
-    /**
-     * Sets the visibility of terrain.
-     * @param {Boolean} show - Whether the terrain should be visible.
-     */
-    setTerrainVisibility: function(show) {
-      this._super(show);
-
-      var scene = this.getScene();
-      if (show) {
-        if (!this._terrainProvider) {
-          var terrainProvider = new CesiumTerrainProvider({
-              url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
-          });
-          this._terrainProvider = terrainProvider;
-        }
-        scene.terrainProvider = this._terrainProvider;
-      } else {
-        scene.terrainProvider = undefined;
-      }
     },
 
     /**
@@ -333,14 +310,6 @@ define([
         Log.info('RenderManager setting sleep mode', state);
       }.bind(this));
 
-      this._managers.event.addEventHandler('extern', 'terrain/show', function() {
-        this.setTerrainVisibility(true);
-      }.bind(this));
-
-      this._managers.event.addEventHandler('extern', 'terrain/hide', function() {
-        this.setTerrainVisibility(false);
-      }.bind(this));
-
       // TODO(aramk) Capture when the camera is moving instead of these?
 
       this._managers.event.addEventHandler('intern', 'input/leftdown', function() {
@@ -383,10 +352,14 @@ define([
     },
 
     /**
+     * @deprecated Terrain is now handled via atlas.render.TerrainManager.
+     *
      * Returns the minimum terrain height, given currently configured terrain options, for
      * an array of Vertices.
+     *
      * @param {Array.<atlas.model.Vertex>} vertices - The Vertices to determine minimum terrain
      *     height of.
+     *
      * @returns {Number} The minimum terrain height.
      */
     getMinimumTerrainHeight: function(vertices) {
