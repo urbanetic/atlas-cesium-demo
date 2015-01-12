@@ -29,6 +29,9 @@ define([
       }, 1000);
 
       collection.setHeight(300);
+      collection.setElevation(100);
+      console.log('height', collection.getHeight());
+      console.log('elevation', collection.getElevation());
 
       // Create a collection through the Atlas API.
       atlas.publish('entity/show/bulk', {
