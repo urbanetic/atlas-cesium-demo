@@ -4,8 +4,10 @@ define([
   'atlas-cesium/dom/DomManager',
   'atlas-cesium/entity/EntityManager',
   'atlas-cesium/input/InputManager',
-  'atlas-cesium/render/RenderManager'
-], function(Atlas, CameraManager, DomManager, EntityManager, InputManager, RenderManager) {
+  'atlas-cesium/render/RenderManager',
+  'atlas-cesium/render/TerrainManager'
+], function(Atlas, CameraManager, DomManager, EntityManager, InputManager, RenderManager,
+            TerrainManager) {
 
   /**
    * @typedef atlas.core.CesiumAtlas
@@ -21,7 +23,8 @@ define([
 
     _initManagers: function() {
       this._super();
-      [CameraManager, DomManager, EntityManager, InputManager, RenderManager].forEach(
+      [CameraManager, DomManager, EntityManager, InputManager, RenderManager,
+          TerrainManager].forEach(
         this.setManagerClass, this);
     }
 
