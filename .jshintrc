@@ -1,12 +1,15 @@
 {
+  "eqeqeq": true,
   "predef": [
     "define"
+    "xit",
+    "xdescribe"
   ],
+  "jasmine": true,
+  "browser": true
   "latedef": true,
   "undef": true,
   "unused": "vars",
   // Disable warning on, eg., wantGreen && this.makeGreen()
   "-W030": false,
-  "jasmine": true,
-  "browser": true
 }
