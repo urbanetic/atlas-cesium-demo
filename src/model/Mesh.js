@@ -1,5 +1,6 @@
 define([
   'atlas/lib/Q',
+  'atlas/material/Color',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
@@ -7,10 +8,8 @@ define([
   'atlas/util/ConvexHullFactory',
   'atlas/util/Timers',
   // Cesium includes
-  'atlas-cesium/cesium/Source/Cesium',
   'atlas-cesium/cesium/Source/Core/BoundingSphere',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
-  'atlas-cesium/cesium/Source/Core/Color',
   'atlas-cesium/cesium/Source/Core/ColorGeometryInstanceAttribute',
   'atlas-cesium/cesium/Source/Core/ComponentDatatype',
   'atlas-cesium/cesium/Source/Core/Geometry',
@@ -24,14 +23,14 @@ define([
   'atlas-cesium/cesium/Source/Core/Transforms',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/Primitive',
-  'atlas-cesium/model/Colour',
+  'atlas-cesium/material/Color',
   //Base class.
   'atlas/model/Mesh'
-], function(Q, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers, Cesium, BoundingSphere,
-            Cartesian3, CesiumColor, ColorGeometryInstanceAttribute, ComponentDatatype, Geometry,
-            GeometryAttribute, GeometryAttributes, GeometryInstance, GeometryPipeline, Matrix3,
-            Matrix4, PrimitiveType, Transforms, PerInstanceColorAppearance, Primitive, Colour,
-            MeshCore) {
+], function(Q, ColorCore, GeoPoint, Vertex, AtlasMath, WKT, ConvexHullFactory, Timers,
+            BoundingSphere, Cartesian3, ColorGeometryInstanceAttribute,
+            ComponentDatatype, Geometry, GeometryAttribute, GeometryAttributes, GeometryInstance,
+            GeometryPipeline, Matrix3, Matrix4, PrimitiveType, Transforms,
+            PerInstanceColorAppearance, Primitive, Color, MeshCore) {
 
   /**
    * @classdesc A Mesh represents a 3D renderable object in atlas.
@@ -46,7 +45,7 @@ define([
    * Every 3 elements forming a new triangle with counter-clockwise winding order.
    * @param {Array.<Number>} [meshData.normals] - CURRENTLY NOT USED. A 1D array of normals for
    * each vertex in the triangles array. Every 3 elements form an (x, y, z) vector tuple.
-   * @param {Array.<Number>} [meshData.color] - The uniform colour of the Mesh, given as a
+   * @param {Array.<Number>} [meshData.color] - The uniform color of the Mesh, given as a
    * [red, green, blue, alpha] formatted array.
    * @param {Number} [meshData.uniformScale] - The uniform scale of the Mesh.
    * @param {atlas.model.Vertex} [meshData.scale] - The non-uniform scale of the Mesh.
@@ -91,23 +90,11 @@ define([
     _origCentroid: null,
 
     /**
-     * Whether the model matrix has been fully initialised and the model is ready for rendering.
-     * @type {Boolean}
-     */
-    _modelMatrixReady: null,
-
-    /**
      * The deferred promise for updating primitive styles, which is a asynchronous and should be
      * mutually exclusive.
      * @type {Deferred}
      */
     _updateStyleDf: null,
-
-    _init: function() {
-      this._modelMatrixReady = false;
-      this._super.apply(this, arguments);
-      this._modelMatrixReady = true;
-    },
 
     _updateVisibility: function(visible) {
       if (this._primitive) this._primitive.show = visible;
@@ -146,14 +133,14 @@ define([
     _createPrimitive: function() {
       var thePrimitive;
       var geometry = this._createGeometry();
-      var color = ColorGeometryInstanceAttribute.fromColor(this._style.getFillColour());
+      var color = ColorGeometryInstanceAttribute.fromColor(this._getFillColor());
       var instance = new GeometryInstance({
-            id: this.getId(),
-            geometry: geometry,
-            attributes: {
-              color: color
-            }
-          });
+        id: this.getId(),
+        geometry: geometry,
+        attributes: {
+          color: color
+        }
+      });
 
       // TODO(bpstudds): Work out how to get MaterialAppearance working.
       thePrimitive = new Primitive({
@@ -208,10 +195,7 @@ define([
       if (this.isDirty('entity') || this.isDirty('model')) {
         // The matrix to apply transformations on.
         // Apply rotation, translation and scale transformations.
-        var rotationTranslation = Matrix4.fromRotationTranslation(
-            // Input angle must be in radians.
-            Matrix3.fromRotationZ(AtlasMath.toRadians(this.getRotation().z)),
-            new Cartesian3(0, 0, 0));
+        var rotationTranslation = this._calcRotationTranslationMatrix(this.getRotation());
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
             modelMatrix);
@@ -227,7 +211,7 @@ define([
      * @return {Matrix4} The transformation matrix.
      */
     _transformLocation: function(location) {
-      if (Cesium.VERSION < 1.2) {
+      if (this.isGltf()) {
         return Transforms.northEastDownToFixedFrame(location);
       } else {
         return Transforms.eastNorthUpToFixedFrame(location);
@@ -247,8 +231,7 @@ define([
             this._appearance = this._primitive.getGeometryInstanceAttributes(this.getId());
           }
           this._appearance.color =
-              ColorGeometryInstanceAttribute.toValue(Colour.toCesiumColor(
-                  this._style.getFillColour()));
+              ColorGeometryInstanceAttribute.toValue(this._getFillColor());
           this._updateStyleDf = null;
         }.bind(this));
       }
@@ -340,7 +323,7 @@ define([
       this._calcTranslateMatrix(this._translateMatrix(centroid, target));
       this._super(translation);
       // Ignore the initial translation which centres the mesh at the given geoLocation.
-      if (this._modelMatrixReady) {
+      if (this._isSetUp) {
         if (!this._origCentroid) {
           this._origCentroid = centroid;
         }
@@ -348,15 +331,17 @@ define([
         var isTranslatedBeyondSensitivity = origCentroidDiff.longitude >= 1 ||
           origCentroidDiff.latitude >= 1;
         if (isTranslatedBeyondSensitivity) {
+          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
+          // where the original normal to the globe's surface is retained as the rotation when
+          // translating, causing issues if the new normal is sufficiently different.
+          // NOTE: We must set the model as dirty before calling _resetModelMatrix() to ensure
+          // the model matrix is regenerated.
+          this.setDirty('model');
           // NOTE: geoLocation is moved as well to ensure that the matrix transformation necessary
           // for translation is minimal, reducing the issue described above.
           this._geoLocation = this._geoLocation.translate(origCentroidDiff);
           this._resetModelMatrix();
           this._origCentroid = null;
-          // Revert the model matrix and redraw the primitives at the new points to avoid an issue
-          // where the original normal to the globe's surface is retained as the rotation when
-          // translating, causing issues if the new normal is sufficiently different.
-          this.setDirty('model');
           this._update();
         }
       }
@@ -396,10 +381,15 @@ define([
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
+      return this._calcTransformOriginMatrix(this._calcRotationTranslationMatrix(rotation),
+          centroid);
+    },
+
+    _calcRotationTranslationMatrix: function(rotation) {
       // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._calcTransformOriginMatrix(rotMatrix, centroid);
+      var zRotation = 360 - rotation.z;
+      return Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(zRotation)), new Cartesian3());
     },
 
     /**
@@ -478,6 +468,27 @@ define([
       this.setDirty('modelMatrix');
       this._update();
     },
+
+    _toCesiumMaterial: function(material) {
+      // Temporary solution until we have factories.
+      if (material instanceof ColorCore) {
+        material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
+        return Color.prototype.toCesiumMaterial.apply(material);
+      } else {
+        throw new Error('Cannot create Cesium Material.');
+      }
+    },
+
+    _getFillColor: function() {
+      var style = this.getStyle();
+      var material = style.getFillMaterial();
+      if (material instanceof ColorCore) {
+        return Color.prototype.toCesiumColor.bind(material)();
+      } else {
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
+        throw new Error('Only Color material is supported for Mesh fill.');
+      }
+    }
 
   });
 

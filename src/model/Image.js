@@ -1,6 +1,6 @@
 define([
-  'atlas/model/Colour',
-  'atlas/model/Style',
+  'atlas/material/Color',
+  'atlas/material/Style',
   'atlas-cesium/model/Handle',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
@@ -13,10 +13,9 @@ define([
   // Base class
   'atlas/model/Image',
   'atlas/lib/utility/Log'
-], function(Colour, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
-            /*EllipsoidSurfaceAppearance,*/ Material, MaterialAppearance, CesiumColour, ImageCore, Log) {
+], function(Color, Style, Handle, GeometryInstance, PolygonGeometry, Primitive, Cartographic,
+            Material, MaterialAppearance, CesiumColor, ImageCore, Log) {
 
-  //var Image = function(id, vertices, args) {
   var Image = ImageCore.extend(/** @lends atlas-cesium.model.Polygon# */ {
 
     /**
@@ -193,25 +192,25 @@ define([
 
   /**
    * Takes an atlas Style object and converts it to Cesium Color objects.
-   * @param style
+   * @param {atlas.model.Style} style
    * @private
    */
   Image._convertStyleToCesiumColors = function(style) {
     return {
-      fill: Image._convertAtlasToCesiumColor(style.getFillColour()),
-      border: Image._convertAtlasToCesiumColor(style.getBorderColour())
+      fill: Image._convertAtlasToCesiumColor(style.getFillMaterial()),
+      border: Image._convertAtlasToCesiumColor(style.getBorderMaterial())
     }
   };
 
   /**
-   * Converts an Atlas Colour object to a Cesium Color object.
-   * @param {atlas.model.Colour} color - The Colour to convert.
+   * Converts an Atlas Color object to a Cesium Color object.
+   * @param {atlas.material.Color} color - The Color to convert.
    * @returns {Color} The converted Cesium Color object.
    * @private
    */
   Image._convertAtlasToCesiumColor = function(color) {
     // TODO(bpstudds) Determine how to get Cesium working with alpha enabled.
-    return new CesiumColour(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
+    return new CesiumColor(color.red, color.green, color.blue, /* override alpha temporarily*/ 1);
   };
 
   return Image;

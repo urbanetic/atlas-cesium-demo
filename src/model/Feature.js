@@ -33,7 +33,8 @@ define([
    * @extends atlas.model.Feature
    */
   return Feature.extend(/** @lends atlas-cesium.model.Feature# */ {
-    _init: function(id, args) {
+
+    _setup: function(id, data, args) {
       // TODO(bpstudds) Replace this with a factory.
       if (args.line) {
         args.line = new Line(id + 'line', args.line, args);
@@ -57,7 +58,8 @@ define([
       if (args.image) {
         args.image = new Image(id + 'image', args.image, args);
       }
-      this._super(id, args);
+      this._super(id, data, args);
     }
+
   });
 });

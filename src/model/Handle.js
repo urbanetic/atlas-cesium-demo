@@ -33,14 +33,17 @@ define([
       var renderManager = this._renderManager;
       var billboards = this._getBillboards();
       var position = renderManager.cartesianFromGeoPoint(this.getTarget());
-      if (this.isDirty('model')) {
+      var eyeOffset = new Cartesian3(0, this.getElevation(), 0);
+      if (this.isDirty('model') || this.isDirty('entity')) {
+        // this._billboard && billboards.remove(this._billboard);
         if (this._billboard) {
-          this._billboard.position = renderManager.cartesianFromGeoPoint(this.getTarget());
+          this._billboard.position = position;
+          this._billboard.eyeOffset = eyeOffset;
         } else {
           this._billboard = billboards.add({
             id: this.getId(),
             image: Paths.getInstance().getResourceDirectory() + 'images/handle.png',
-            eyeOffset: new Cartesian3(0, 1, 0),
+            eyeOffset: eyeOffset,
             position: position
           });
         }

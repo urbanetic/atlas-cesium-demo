@@ -2,13 +2,16 @@ define([
   'atlas/lib/utility/Setter',
   'atlas/lib/Q',
   // Base class
+  'atlas/material/Color',
+  'atlas/material/CheckPattern',
   'atlas/model/Polygon',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   'atlas/util/AtlasMath',
   'atlas/util/Timers',
+  'atlas-cesium/material/Color',
+  'atlas-cesium/material/CheckPattern',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/PolygonGeometry',
@@ -22,10 +25,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/Material',
   'atlas-cesium/cesium/Source/Scene/PerInstanceColorAppearance',
   'atlas-cesium/cesium/Source/Scene/EllipsoidSurfaceAppearance'
-], function(Setter, Q, PolygonCore, GeoPoint, Vertex, AtlasMath, Timers, Handle, Style, Cartesian3,
-            GeometryInstance, PolygonGeometry, PolygonOutlineGeometry,
-            ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4, Transforms, Primitive,
-            Material, PerInstanceColorAppearance, EllipsoidSurfaceAppearance) {
+], function(Setter, Q, ColorCore, CheckPatternCore, PolygonCore, GeoPoint, Vertex, AtlasMath,
+            Timers, Color, CheckPattern, Handle, Cartesian3, GeometryInstance, PolygonGeometry,
+            PolygonOutlineGeometry, ColorGeometryInstanceAttribute, VertexFormat, Matrix3, Matrix4,
+            Transforms, Primitive, Material, PerInstanceColorAppearance,
+            EllipsoidSurfaceAppearance) {
 
   /**
    * @class atlas-cesium.model.Polygon
@@ -112,20 +116,14 @@ define([
     // CONSTRUCTION
     // -------------------------------------------
 
-    // _init: function() {
-    //   this._super.apply(this, arguments);
-    //   // Use copy-on-write for vertices to reduce memory usage.
-    //   this._origVertices = this._vertices;
-    // },
-
     /**
      * Builds the geometry and appearance data required to render the Polygon in
      * Cesium.
      */
     _build: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
+      var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
+      var borderMaterial = style.getFillMaterial();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
@@ -134,19 +132,11 @@ define([
         this._removePrimitives();
       }
       this._createGeometry();
-      if (fillColor) {
+      if (fillMaterial) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           if (isStyleDirty || !this._appearance) {
             this._appearance = new EllipsoidSurfaceAppearance({
-              material: new Material({
-                fabric: {
-                  type: 'Color',
-                  uniforms: {
-                    color: fillColor
-                  }
-                },
-                translucent: false
-              })
+              material: this._toCesiumMaterial(fillMaterial)
             });
           }
           this._primitive = new Primitive({
@@ -154,11 +144,15 @@ define([
             appearance: this._appearance
           });
         } else if (isStyleDirty && this._appearance) {
-          this._appearance.material.uniforms.color = fillColor;
+          this._appearance.material = this._toCesiumMaterial(fillMaterial);
         }
       }
-      if (borderColor) {
+      if (borderMaterial) {
         if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
+          // TODO(aramk) This causes an issue on high-res screens.
+          // var lineWidth = style.getBorderWidth();
+          // lineWidth = Setter.range(lineWidth, 2, scene.maximumAliasedLineWidth);
+          var lineWidth = Math.min(2, scene.maximumAliasedLineWidth);
           this._outlinePrimitive = new Primitive({
             geometryInstances: this._outlineGeometry,
             // TODO(aramk) https://github.com/AnalyticalGraphicsInc/cesium/issues/2052
@@ -169,7 +163,7 @@ define([
                 depthTest: {
                   enabled: true
                 },
-                lineWidth: Math.min(2.0, scene.maximumAliasedLineWidth)
+                lineWidth: lineWidth
               }
             })
           });
@@ -178,8 +172,11 @@ define([
           this._updateStyleDf = this._whenPrimitiveReady(this._outlinePrimitive);
           this._updateStyleDf.promise.then(function() {
             var outlineGeometryAtts =
-                  this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+                this._outlinePrimitive.getGeometryInstanceAttributes(this._outlineGeometry.id);
+            var borderColor = this._getBorderColor();
+            if (borderColor) {
               outlineGeometryAtts.color = ColorGeometryInstanceAttribute.toValue(borderColor);
+            }
             this._updateStyleDf = null;
           }.bind(this));
         }
@@ -232,13 +229,13 @@ define([
      * @private
      */
     _createGeometry: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
+      var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
+      var borderColor = this._getBorderColor();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
           this.isDirty('model');
-      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
+      var shouldCreateGeometry = fillMaterial && (isModelDirty || !this._geometry);
       var shouldCreateOutlineGeometry = borderColor && (isModelDirty || !this._outlineGeometry);
       if (!shouldCreateGeometry && !shouldCreateOutlineGeometry) {
         return;
@@ -387,17 +384,22 @@ define([
 
     /**
      * @param {atlas.model.Vertex} rotation
-     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the 
+     * @param {atlas.model.GeoPoint} [centroid] The point around which to perform the
      * transformation.
      * @returns {Matrix4} The transformation matrix needed to apply the given rotation around the
      * given point.
      * @private
      */
     _calcRotateMatrix: function(rotation, centroid) {
+      return this._calcTransformOriginMatrix(this._calcRotationTranslationMatrix(rotation),
+          centroid);
+    },
+
+    _calcRotationTranslationMatrix: function(rotation) {
       // TODO(aramk) Support rotation in all axes.
-      var rotMatrix = Matrix4.fromRotationTranslation(
-          Matrix3.fromRotationZ(AtlasMath.toRadians(rotation.z)), new Cartesian3());
-      return this._calcTransformOriginMatrix(rotMatrix, centroid);
+      var zRotation = 360 - rotation.z;
+      return Matrix4.fromRotationTranslation(
+          Matrix3.fromRotationZ(AtlasMath.toRadians(zRotation)), new Cartesian3());
     },
 
     /**
@@ -476,11 +478,10 @@ define([
     },
 
     _updateVisibility: function(visible) {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
-      var borderColor = cesiumColors.border;
-      if (this._primitive) this._primitive.show = !!(visible && fillColor);
-      if (this._outlinePrimitive) this._outlinePrimitive.show = !!(visible && borderColor);
+      var style = this.getStyle();
+      if (this._primitive) this._primitive.show = !!(visible && style.getFillMaterial());
+      if (this._outlinePrimitive) this._outlinePrimitive.show =
+          !!(visible && style.getBorderMaterial());
     },
 
     /**
@@ -520,9 +521,29 @@ define([
       this._initOrigVertices();
     },
 
-    _getCesiumColors: function() {
+    _toCesiumMaterial: function(material) {
+      // Temporary solution until we have factories.
+      if (material instanceof ColorCore) {
+        material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
+        return Color.prototype.toCesiumMaterial.apply(material);
+      } else if (material instanceof CheckPatternCore) {
+        material.color1 = new Color(material.color1);
+        material.color2 = new Color(material.color2);
+        return CheckPattern.prototype.toCesiumMaterial.apply(material);
+      } else {
+        throw new Error('Cannot create Cesium Material.');
+      }
+    },
+
+    _getBorderColor: function() {
       var style = this.getStyle();
-      return Style.toCesiumColors(style);
+      var material = style.getBorderMaterial();
+      if (material instanceof ColorCore) {
+        return Color.prototype.toCesiumColor.bind(material)();
+      } else {
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
+        throw new Error('Only Color material is supported for Polygon border.');
+      }
     }
 
   });

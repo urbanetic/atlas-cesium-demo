@@ -31,7 +31,7 @@ define([
      */
     _baseUrl: null,
 
-    _init: function(id, meshData, args) {
+    _setup: function(id, meshData, args) {
       this._super(id, meshData, args);
 
       this._baseUrl = Setter.def(meshData.baseUrl, '');

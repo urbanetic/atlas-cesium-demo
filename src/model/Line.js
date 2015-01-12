@@ -1,8 +1,9 @@
 define([
+  'atlas/material/Color',
+  'atlas/material/Style',
   'atlas/model/Line',
-  'atlas-cesium/model/Colour',
+  'atlas-cesium/material/Color',
   'atlas-cesium/model/Handle',
-  'atlas-cesium/model/Style',
   'atlas-cesium/cesium/Source/Core/GeometryInstance',
   'atlas-cesium/cesium/Source/Core/CorridorGeometry',
   'atlas-cesium/cesium/Source/Core/PolylineGeometry',
@@ -14,9 +15,9 @@ define([
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError',
   'atlas/util/Timers'
-], function(LineCore, Colour, Handle, Style, GeometryInstance, CorridorGeometry, PolylineGeometry,
-            ColorGeometryInstanceAttribute, CornerType, Primitive, PerInstanceColorAppearance,
-            PolylineColorAppearance, Log, DeveloperError, Timers) {
+], function(ColorCore, Style, LineCore, Color, Handle, GeometryInstance, CorridorGeometry,
+            PolylineGeometry, ColorGeometryInstanceAttribute, CornerType, Primitive,
+            PerInstanceColorAppearance, PolylineColorAppearance, Log, DeveloperError, Timers) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -79,8 +80,8 @@ define([
     // -------------------------------------------
 
     _build: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
+      var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
       var isStyleDirty = this.isDirty('style');
@@ -89,7 +90,7 @@ define([
       }
       this._createGeometry();
       this._createAppearance();
-      if (fillColor) {
+      if (fillMaterial) {
         if ((isModelDirty || !this._primitive) && this._geometry) {
           this._primitive = new Primitive({
             geometryInstances: this._geometry,
@@ -99,8 +100,8 @@ define([
           this._updateStyleDf && this._updateStyleDf.reject();
           this._updateStyleDf = this._whenPrimitiveReady(this._primitive);
           this._updateStyleDf.promise.then(function() {
-              var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
-              geometryAtts.color = ColorGeometryInstanceAttribute.toValue(fillColor);
+            var geometryAtts = this._primitive.getGeometryInstanceAttributes(this._geometry.id);
+            geometryAtts.color = ColorGeometryInstanceAttribute.toValue(this._getFillColor());
           }.bind(this));
         }
       }
@@ -113,12 +114,12 @@ define([
      * @private
      */
     _createGeometry: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
+      var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
-      var shouldCreateGeometry = fillColor && (isModelDirty || !this._geometry);
+      var shouldCreateGeometry = fillMaterial && (isModelDirty || !this._geometry);
       if (!shouldCreateGeometry) {
         return;
       }
@@ -180,7 +181,7 @@ define([
         instanceArgs.geometry = new CorridorGeometry(geometryArgs);
       }
       instanceArgs.attributes = {
-        color: ColorGeometryInstanceAttribute.fromColor(fillColor)
+        color: ColorGeometryInstanceAttribute.fromColor(this._getFillColor())
       };
       this._geometry = new GeometryInstance(instanceArgs);
     },
@@ -190,14 +191,14 @@ define([
      * @private
      */
     _createAppearance: function() {
-      var cesiumColors = this._getCesiumColors();
-      var fillColor = cesiumColors.fill;
+      var style = this.getStyle();
+      var fillMaterial = style.getFillMaterial();
       var isStyleDirty = this.isDirty('style');
       // If the width is set from pixels to metres, the appearance must be changed to match the new
       // primitive.
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
-      if ((isStyleDirty || isModelDirty || !this._appearance) && fillColor) {
+      if ((isStyleDirty || isModelDirty || !this._appearance) && fillMaterial) {
         if (this._isPolyline()) {
           this._appearance = new PolylineColorAppearance();
         } else {
@@ -283,9 +284,25 @@ define([
       return this._geometry && this._geometry.geometry instanceof PolylineGeometry;
     },
 
-    _getCesiumColors: function() {
+    _toCesiumMaterial: function(material) {
+      // Temporary solution until we have factories.
+      if (material instanceof ColorCore) {
+        material.toCesiumColor = Color.prototype.toCesiumColor.bind(material);
+        return Color.prototype.toCesiumMaterial.apply(material);
+      } else {
+        throw new Error('Cannot create Cesium Material.');
+      }
+    },
+
+    _getFillColor: function() {
       var style = this.getStyle();
-      return Style.toCesiumColors(style);
+      var material = style.getFillMaterial();
+      if (material instanceof ColorCore) {
+        return Color.prototype.toCesiumColor.bind(material)();
+      } else {
+        // Only color is supported for polyline borders at the moment. Reject all other materials.
+        throw new Error('Only Color material is supported for Polygon border.');
+      }
     }
 
   });
