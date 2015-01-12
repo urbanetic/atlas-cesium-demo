@@ -28,6 +28,8 @@ define([
         collection.rotate(new Vertex(0, 0, 15));
       }, 1000);
 
+      collection.setHeight(300);
+
       // Create a collection through the Atlas API.
       atlas.publish('entity/show/bulk', {
         features: [
