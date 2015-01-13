@@ -1,8 +1,10 @@
 define([
+  'atlas/lib/utility/Log',
+  'atlas/lib/utility/Types',
   'atlas/render/TerrainManager',
   'atlas-cesium/cesium/Source/Core/EllipsoidTerrainProvider',
   'atlas-cesium/cesium/Source/Core/CesiumTerrainProvider',
-], function(CoreTerrainManager, EllipsoidTerrainProvider, CesiumTerrainProvider) {
+], function(Log, Types, CoreTerrainManager, EllipsoidTerrainProvider, CesiumTerrainProvider) {
 
   /**
    * @typedef atlas-cesium.render.TerrainManager
@@ -13,45 +15,61 @@ define([
   TerrainManager = CoreTerrainManager.extend(/** @lends atlas-cesium.render.TerrainManager# */ {
 
     /**
-     * Cesium provider of terrain elevation data.
+     * Terrain elevation data provider using Cesium's hosted data.
      *
      * @type {TerrainProvider}
      *
      * @private
      */
-    _terrainProvider: null,
+    _cesiumProvider: null,
 
     /**
-     * The original WGS84 ellipsoid terrain provider, used to disable actual 3D terrain.
+     * Default terrain elevation data provider. Provides the elevation data for a standard WGS84
+     * ellipsoid.
+     *
      * @type {TerrainProvider}
+     *
+     * @private
      */
     _ellipsoidTerrain: null,
 
     /**
      * Sets the visibility of terrain.
      *
-     * @param {Boolean} show - Whether the terrain should be visible.
+     * @param {Boolean} enabled - Whether the terrain should be enabled.
      */
-    setEnabled: function(show) {
-      this._super(show);
+    _handleEnabledChange: function(enabled) {
+      this._super(enabled);
 
       var scene = this._managers.render.getScene();
-      if (show) {
-        if (!this._terrainProvider) {
-          var terrainProvider = new CesiumTerrainProvider({
-              url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
-          });
-          this._terrainProvider = terrainProvider;
-        }
-        scene.terrainProvider = this._terrainProvider;
+      if (enabled) {
+        scene.terrainProvider = this._getCesiumProvider();
         scene.globe.enableLighting = true;
       } else {
-        if (!this._ellipsoidTerrain) {
-          this._ellipsoidTerrain = new EllipsoidTerrainProvider();
-        }
-        scene.terrainProvider = this._ellipsoidTerrain;
+        scene.terrainProvider = this._getEllipsoidProvider();
         scene.globe.enableLighting = false;
       }
+      // Shift any existing entities
+      this._managers.entity.getEntities().forEach(function(entity) {
+        this._shiftEntityForTerrain(entity, enabled);
+      }, this);
+    },
+
+    _getCesiumProvider: function() {
+      if (!this._cesiumProvider) {
+        var terrainProvider = new CesiumTerrainProvider({
+            url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
+        });
+        this._cesiumProvider = terrainProvider;
+      }
+      return this._cesiumProvider;
+    },
+
+    _getEllipsoidProvider: function() {
+      if (!this._ellipsoidTerrain) {
+        this._ellipsoidTerrain = new EllipsoidTerrainProvider();
+      }
+      return this._ellipsoidTerrain;
     }
 
   });
