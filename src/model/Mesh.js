@@ -196,7 +196,6 @@ define([
         // The matrix to apply transformations on.
         // Apply rotation, translation and scale transformations.
         var rotationTranslation = this._calcRotationTranslationMatrix(this.getRotation());
-        this._geoLocation.clone().translate({elevation: 20});
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
         Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
             modelMatrix);
