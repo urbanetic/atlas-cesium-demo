@@ -320,7 +320,7 @@ define([
     translate: function(translation) {
       var centroid = this.getCentroid();
       var target = centroid.translate(translation);
-      this._calcTranslateMatrix(this._translateMatrix(centroid, target));
+      this._transformModelMatrix(this._calcTranslateMatrix(centroid, target));
       this._super(translation);
       // Ignore the initial translation which centres the mesh at the given geoLocation.
       if (this._isSetUp) {
@@ -350,13 +350,13 @@ define([
     scale: function(scale) {
       var scaleCartesian = this._renderManager.cartesianFromVertex(scale);
       var scaleMatrix = Matrix4.fromScale(scaleCartesian);
-      this._calcTranslateMatrix(this._calcTransformOriginMatrix(scaleMatrix));
+      this._transformModelMatrix(this._calcTransformOriginMatrix(scaleMatrix));
       this._super(scale);
     },
 
     rotate: function(rotation, centroid) {
       centroid = centroid || this.getCentroid();
-      this._calcTranslateMatrix(this._calcRotateMatrix(rotation, centroid));
+      this._transformModelMatrix(this._calcRotateMatrix(rotation, centroid));
       this._super(rotation);
     },
 
@@ -365,7 +365,7 @@ define([
      * @param {Matrix4} modelMatrix
      * @private
      */
-    _calcTranslateMatrix: function(modelMatrix) {
+    _transformModelMatrix: function(modelMatrix) {
       var oldModelMatrix = this._getModelMatrix();
       // Matrix4.IDENTITY is a reference to an immutable identity matrix so we need to clone it.
       var newModelMatrix = Matrix4.multiply(modelMatrix, oldModelMatrix, Matrix4.IDENTITY.clone());
@@ -454,7 +454,7 @@ define([
      * target.
      * @private
      */
-    _translateMatrix: function(source, target) {
+    _calcTranslateMatrix: function(source, target) {
       var sourceCartesian = this._renderManager.cartesianFromGeoPoint(source);
       var targetCartesian = this._renderManager.cartesianFromGeoPoint(target);
       var diffCartesian = Cartesian3.subtract(targetCartesian, sourceCartesian, new Cartesian3());
