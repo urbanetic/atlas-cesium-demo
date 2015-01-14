@@ -100,7 +100,6 @@ define([
     _doShift: function(entity, shift, enabled) {
       // Reverse shift if terrain is being disabled.
       if (!enabled) { shift *= -1; }
-      console.log('Shifting entity ' + entity.getId() + ' by ' + shift);
 
       // Apply the shift.
       entity.translate({latitude: 0, longitude: 0, elevation: shift});
@@ -145,7 +144,7 @@ define([
         scene.globe.enableLighting = false;
       }
       // Shift any existing entities
-      this._managers.entity.getEntities().forEach(function(entity) {
+      this._managers.entity.getFeatures().forEach(function(entity) {
         this._shiftEntityForTerrain(entity, enabled);
       }, this);
     },
