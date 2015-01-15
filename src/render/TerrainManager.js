@@ -2,11 +2,12 @@ define([
   'atlas/lib/utility/Log',
   'atlas/lib/utility/Types',
   'atlas/render/TerrainManager',
+  'atlas/util/AtlasMath',
   'atlas-cesium/cesium/Source/Core/CesiumTerrainProvider',
   'atlas-cesium/cesium/Source/Core/EllipsoidTerrainProvider',
   'atlas-cesium/cesium/Source/Core/sampleTerrain'
-], function(Log, Types, CoreTerrainManager, CesiumTerrainProvider, EllipsoidTerrainProvider,
-            sampleTerrain) {
+], function(Log, Types, CoreTerrainManager, AtlasMath, CesiumTerrainProvider,
+            EllipsoidTerrainProvider, sampleTerrain) {
 
   /**
    * @typedef atlas-cesium.render.TerrainManager
@@ -36,10 +37,11 @@ define([
     _ellipsoidTerrain: null,
 
     /**
-     * A map of GeoEntity ID to the value in metres the Entity has been translated in the vertical
-     * axis to account for the terrain height at it's location.
+     * A map of GeoEntity ID to an object literal specifying the GeoEntity's terrain shift and the
+     * (cached) location of that terrain shift, based of the GeoEntity's centroid when it was
+     * calculated.
      *
-     * @type {Object.<String, Number>}
+     * @type {Object.<String, Object.<atlas.model.GeoPoint: centroid, Number: value>}
      *
      * @private
      */
@@ -54,20 +56,27 @@ define([
       this._entityShifts = {};
     },
 
+    /**
+     * Handles an entity being shown.
+     *
+     * @see {@link atlas.render.TerrainManager#_handleEntityShow}.
+     */
     _handleEntityShow: function(entity, visible) {
       if (!this.isTerrainEnabled) { return; }
 
-      // This function is only called when Terrain is enabled.
+      // Shifting entities on show only occurs if the terrain is enabled.
+      // Disabling the terrain "un-shifts" all Entities.
       this._shiftEntityForTerrain(entity, true);
     },
 
     /**
-     * Shifts the given entity to allow for the terrain elevation at it's location.
+     * Shifts the given entity vertically to allow for the terrain elevation at it's location. This
+     * handles the shift on both enabling and disabling the terrain.
+     *
      * @param {atlas.model.GeoEntity} entity - The GeoEntity to shift.
-     * @param {Boolean} enabled - Whether terrain has been enabled.
-     * @returns {[type]} [description]
      */
-    _shiftEntityForTerrain: function(entity, enabled) {
+    _shiftEntityForTerrain: function(entity) {
+      var enabled = this.isTerrainEnabled();
       var id = entity.getId();
       var centroid = entity.getCentroid();
       var shift = 0;
@@ -77,13 +86,16 @@ define([
         return;
       }
 
+      // Previously calculated shift values are cached. The cache includes the Entities centroid
+      // value at the time of calculation. The entity has moved (it's centroid is different), the
+      // terrain shift is recalculated.
       var existingShift = this._entityShifts[id];
       if (existingShift && existingShift.centroid.equals(centroid)) {
         shift = existingShift.value;
         this._doShift(entity, shift, enabled);
       } else if (!enabled) {
         // If we somehow get to the point that the terrain is being disabled and an entity exists
-        // that is not already shifted (presumably up), we should not shift it down.
+        // that has not been shifted (presumably up), we should not shift it down.
         return;
       } else {
         this._getTerrainShift(entity).then(function(shift) {
@@ -92,12 +104,22 @@ define([
             value: shift
           };
           this._doShift(entity, shift, enabled);
-          Log.debug('More stuff is happening');
         }.bind(this));
       }
     },
 
+    /**
+     * Shifts the given <code>entity</code> by the given <code>shift</code>, depending
+     * on whether the terrain is enabled or not.
+     *
+     * @param {atlas.model.GeoEntity} entity - The GeoEntity to shift.
+     * @param {Number} shift The amount to shift the entity up or down, in metres.
+     * @param {Boolean} enabled - Whether the terrain is enabled.
+     */
     _doShift: function(entity, shift, enabled) {
+      // TODO(bpstudds): Will we have timing issues with `enabled` because this is called
+      // asynchronously?
+
       // Reverse shift if terrain is being disabled.
       if (!enabled) { shift *= -1; }
 
@@ -105,6 +127,16 @@ define([
       entity.translate({latitude: 0, longitude: 0, elevation: shift});
     },
 
+    /**
+     * Gets the terrain shift, where the shift is the average terrain height at the GeoPoints
+     * defining the footprint of the GeoEntity. This value is positive if the terrain is above the
+     * <code>0m</code> elevation relative to the current <code>TerrainProvider</code>, and negative
+     * if the reverse is true.
+     *
+     * @param {atlas.model.GeoEntity} entity - The entity to calculate the shift for.
+     *
+     * @returns {Number} The GeoEntitys shift value.
+     */
     _getTerrainShift: function(entity) {
       var getGeopoints = entity.getVertices || entity._getFootprintVertices;
       var geoPoints = getGeopoints.bind(entity)();
@@ -120,22 +152,21 @@ define([
         Log.debug('Stuff is happening');
         if (terrainPoints.length === 0) { return 0; }
 
-        var sum = terrainPoints.reduce(function(sum, point) {
-          return sum + point.height;
-        }, 0);
-        return sum / terrainPoints.length;
+        return AtlasMath.average(terrainPoints.map(function(point) {
+          return point.height;
+        }));
       });
     },
 
     /**
      * Handles a change in the terrain status.
      *
-     * @param {Boolean} enabled - Whether the terrain should be enabled.
+     * @see {@link atlas.render.TerrainManager#_handleEnabledChange}.
      */
-    _handleEnabledChange: function(enabled) {
-      this._super(enabled);
-
+    _handleEnabledChange: function() {
+      var enabled = this.isTerrainEnabled();
       var scene = this._managers.render.getScene();
+
       if (enabled) {
         scene.terrainProvider = this._getCesiumProvider();
         scene.globe.enableLighting = true;
@@ -143,9 +174,9 @@ define([
         scene.terrainProvider = this._getEllipsoidProvider();
         scene.globe.enableLighting = false;
       }
-      // Shift any existing entities
+      // Shift any existing entities.
       this._managers.entity.getFeatures().forEach(function(entity) {
-        this._shiftEntityForTerrain(entity, enabled);
+        this._shiftEntityForTerrain(entity);
       }, this);
     },
 
