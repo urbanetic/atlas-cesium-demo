@@ -1,8 +1,8 @@
+/* global module,require,console */
 module.exports = function(grunt) {
-  var path = require('path'),
-      glob = require('glob'),
-      fs = require('fs'),
-      shell = require('shelljs');
+  var path = require('path');
+  var glob = require('glob');
+  var fs = require('fs');
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
   // Time how long tasks take. Can help when optimizing build times
@@ -197,14 +197,25 @@ module.exports = function(grunt) {
     karma: {
       options: {
         configFile: 'test/karma.conf.js',
-        runnerPort: 9876,
+        runnerPort: 9878,
       },
       unit: {
         browsers: ['Chrome', 'Firefox']
       },
+      local: {
+        browsers: ['Firefox'],
+        preprocessors: []
+      },
       continuous: {
         singleRun: true,
         browsers: ['PhantomJS']
+      },
+      debug: {
+        // Click DEBUG on Karma page and open Dev Tools. Refresh to re-run.
+        browsers: [],
+        singleRun: false,
+        // Ensures source files are readable.
+        preprocessors: []
       }
     },
 
@@ -220,8 +231,8 @@ module.exports = function(grunt) {
   });
 
   // TODO(aramk) Duplicated from atlas.
-  grunt.registerTask('compile-imports', 'Builds a RequireJS script to import all source files '
-      + 'which are AMD modules.', function() {
+  grunt.registerTask('compile-imports', 'Builds a RequireJS script to import all source files ' +
+      'which are AMD modules.', function() {
     console.log('Compiling modules for importing...');
     var findResults = findAmdModules(SRC_DIR),
         modules = findResults.modules,
@@ -294,7 +305,7 @@ module.exports = function(grunt) {
     console.log('Running tasks', tasks);
     tasks.forEach(function(task) {
       grunt.task.run(task);
-    })
+    });
   });
   grunt.registerTask('doc', 'Generates documentation.', ['shell:jsdoc']);
 

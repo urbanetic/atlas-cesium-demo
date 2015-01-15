@@ -23,10 +23,12 @@ define([
   var RenderManager;
 
   /**
+   * @classdesc The Atlas-Cesium implementation of {@link atlas.render.RenderManager}.
+   *
+   * @class atlas-cesium.render.RenderManager
    * @extends atlas.render.RenderManager
-   * @alias atlas-cesium.render.RenderManager
    */
-  RenderManager = RenderManagerCore.extend({
+  RenderManager = RenderManagerCore.extend(/** @lends atlas-cesium.render.RenderManager# */ {
 
     /**
      * The underlying viewer widget for Cesium.
@@ -59,8 +61,8 @@ define([
      * Creates and initialises the Cesium viewer widget. Sets which
      * control components are included in the widget.
      * @see {@link http://cesiumjs.org/Cesium/Build/Documentation/Viewer.html}
-     * @param {String|HTMLElement} elem - The ID of the DOM element or the element to place the widget
-     * in.
+     * @param {String|HTMLElement} elem - The ID of the DOM element or the element to place
+     *     the widget in.
      */
     createWidget: function(elem) {
       if (this._widget !== null) {
@@ -115,9 +117,9 @@ define([
      */
     _drawShim: function() {
       var primitives = this.getPrimitives();
-      var oldAdd = primitives.add,
-          oldRemove = primitives.remove,
-          delay = 1000;
+      var oldAdd = primitives.add;
+      var oldRemove = primitives.remove;
+      var delay = 1000;
       primitives.add = function() {
         var results = oldAdd.apply(primitives, arguments);
         this._delaySleep(delay);
@@ -136,8 +138,8 @@ define([
      * @private
      */
     _render: function() {
-      var widget = this._widget,
-          tick = this._render.bind(this);
+      var widget = this._widget;
+      var tick = this._render.bind(this);
 
       // This is adapted from CesiumWidget.
 
@@ -163,7 +165,7 @@ define([
           }
         } else {
           this._isSleeping = false;
-          this._fps = this._maxFps
+          this._fps = this._maxFps;
         }
         requestAnimationFrame(tick);
       }.bind(this);
@@ -189,17 +191,18 @@ define([
     /**
      * Creates statistics on the history of rendered frames. Used to determine the target FPS when
      * sleeping.
-     * @param elapsed
+     * @param {Object} elapsed
      * @private
      */
     _updateFpsStats: function(elapsed) {
       if (elapsed >= this._maxDelta) {
         return;
       }
-      var stats = this._fpsStats;
 
-      var existingMin = stats.min,
-          existingMax = stats.max;
+      var stats = this._fpsStats;
+      var existingMin = stats.min;
+      var existingMax = stats.max;
+
       stats.min = existingMin !== undefined ? Math.min(existingMin, elapsed) : elapsed;
       stats.max = existingMax !== undefined ? Math.max(existingMax, elapsed) : elapsed;
 
@@ -224,9 +227,9 @@ define([
           stats.bins[i * this._deltaBinSize] = 0;
         }
       }
-      var bins = stats.bins,
-          roundDelta = elapsed - (elapsed % this._deltaBinSize),
-          stride = this._deltaBinSize;
+      var bins = stats.bins;
+      var roundDelta = elapsed - (elapsed % this._deltaBinSize);
+      var stride = this._deltaBinSize;
       bins[roundDelta]++;
       // Loop from last bin to second last and compare with previous bin to find outliers.
       // Note that over time when sleeping the bins for smaller deltas will be positively biased,
@@ -234,9 +237,9 @@ define([
       stats.outlierMin = stats.min;
       stats.outlierMax = stats.max;
       for (var j = bins.length - 1; j >= stride; j = j - stride) {
-        var currBin = bins[j],
-            prevBin = bins[j - stride],
-            prevPrevBin = bins[j - stride * 2];
+        var currBin = bins[j];
+        var prevBin = bins[j - stride];
+        var prevPrevBin = bins[j - stride * 2];
         if (prevBin > 0 && prevPrevBin > 0 && prevBin > currBin * 2) {
           stats.outlierMax = j;
           break;
@@ -292,6 +295,7 @@ define([
     },
 
     setup: function() {
+      this._super();
       this.bindEvents();
     },
 
@@ -299,7 +303,6 @@ define([
      * Registers event handlers with the EventManager.
      */
     bindEvents: function() {
-      // Nothing to see here. 'entity/show' now handled by CesiumAtlas.
       this._managers.event.addEventHandler('extern', 'debugMode', function(debug) {
         this.getScene().debugShowFramesPerSecond = debug;
       }.bind(this));
@@ -336,9 +339,9 @@ define([
 
     /**
      * @param {Object} screenCoords - Containing "x" and "y" properties as positions relative to the
-     * Atlas widget.
+     *     Atlas widget.
      * @returns {Array} IDs of the {@link atlas.model.GeoEntity} objects which exist at the given
-     * screen coordinates.
+     *     screen coordinates.
      */
     getAt: function(screenCoords) {
       var pickedPrimitives = this.getScene().drillPick(screenCoords);
@@ -351,9 +354,14 @@ define([
     },
 
     /**
+     * @deprecated Terrain is now handled via atlas.render.TerrainManager.
+     *
      * Returns the minimum terrain height, given currently configured terrain options, for
      * an array of Vertices.
-     * @param {Array.<atlas.model.Vertex>} vertices - The Vertices to determine minimum terrain height of.
+     *
+     * @param {Array.<atlas.model.Vertex>} vertices - The Vertices to determine minimum terrain
+     *     height of.
+     *
      * @returns {Number} The minimum terrain height.
      */
     getMinimumTerrainHeight: function(vertices) {
@@ -376,9 +384,9 @@ define([
 
     /**
      * @param {atlas.model.Vertex} screenCoords - The screen coordinates in pixels relative to the
-     * origin (top-left) of the Cesium container.
+     *     origin (top-left) of the Cesium container.
      * @returns {atlas.model.GeoPoint} The given screen coordinates in cartographic degrees on the
-     * globe.
+     *     globe.
      */
     geoPointFromScreenCoords: function(screenCoords) {
       var ray = this.getCesiumCamera().getPickRay(screenCoords);
@@ -399,8 +407,8 @@ define([
     },
 
     cartesianArrayFromVertexArray: function(vertices) {
-      var cartographics = [],
-          ellipsoid = this.getEllipsoid();
+      var cartographics = [];
+      var ellipsoid = this.getEllipsoid();
       for (var i = 0; i < vertices.length; i++) {
         var vertex = vertices[i];
         cartographics.push(Cartographic.fromDegrees(vertex.x, vertex.y, vertex.z));
@@ -487,4 +495,3 @@ define([
 
   return RenderManager;
 });
-
