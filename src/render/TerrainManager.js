@@ -15,6 +15,12 @@ define([
    */
   var TerrainManager;
 
+  /**
+   * The Atlas-Cesium implementation of {@link atlas.render.TerrainManager}.
+   *
+   * @class atlas-cesium.render.TerrainManager
+   * @extends atlas.render.TerrainManager
+   */
   TerrainManager = CoreTerrainManager.extend(/** @lends atlas-cesium.render.TerrainManager# */ {
 
     /**
@@ -41,7 +47,7 @@ define([
      * (cached) location of that terrain shift, based of the GeoEntity's centroid when it was
      * calculated.
      *
-     * @type {Object.<String, Object.<atlas.model.GeoPoint: centroid, Number: value>}
+     * @type {Object.<String, Object.<atlas.model.GeoPoint, Number>>}
      *
      * @private
      */
@@ -60,6 +66,8 @@ define([
      * Handles an entity being shown.
      *
      * @see {@link atlas.render.TerrainManager#_handleEntityShow}.
+     *
+     * @private
      */
     _handleEntityShow: function(entity, visible) {
       if (!this.isTerrainEnabled) { return; }
@@ -115,6 +123,8 @@ define([
      * @param {atlas.model.GeoEntity} entity - The GeoEntity to shift.
      * @param {Number} shift The amount to shift the entity up or down, in metres.
      * @param {Boolean} enabled - Whether the terrain is enabled.
+     *
+     * @private
      */
     _doShift: function(entity, shift, enabled) {
       // TODO(bpstudds): Will we have timing issues with `enabled` because this is called
@@ -136,6 +146,8 @@ define([
      * @param {atlas.model.GeoEntity} entity - The entity to calculate the shift for.
      *
      * @returns {Number} The GeoEntitys shift value.
+     *
+     * @private
      */
     _getTerrainShift: function(entity) {
       var getGeopoints = entity.getVertices || entity._getFootprintVertices;
@@ -162,6 +174,8 @@ define([
      * Handles a change in the terrain status.
      *
      * @see {@link atlas.render.TerrainManager#_handleEnabledChange}.
+     *
+     * @private
      */
     _handleEnabledChange: function() {
       var enabled = this.isTerrainEnabled();
@@ -180,6 +194,10 @@ define([
       }, this);
     },
 
+    /**
+     * @returns {TerrainProvider} The Cesium terrain provider.
+     * @private
+     */
     _getCesiumProvider: function() {
       if (!this._cesiumProvider) {
         var terrainProvider = new CesiumTerrainProvider({
@@ -190,6 +208,10 @@ define([
       return this._cesiumProvider;
     },
 
+    /**
+     * @returns {TerrainProvider} The default Ellipsoid terrain provider.
+     * @private
+     */
     _getEllipsoidProvider: function() {
       if (!this._ellipsoidTerrain) {
         this._ellipsoidTerrain = new EllipsoidTerrainProvider();

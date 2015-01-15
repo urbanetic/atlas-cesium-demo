@@ -23,10 +23,12 @@ define([
   var RenderManager;
 
   /**
+   * @classdesc The Atlas-Cesium implementation of {@link atlas.render.RenderManager}.
+   *
+   * @class atlas-cesium.render.RenderManager
    * @extends atlas.render.RenderManager
-   * @alias atlas-cesium.render.RenderManager
    */
-  RenderManager = RenderManagerCore.extend({
+  RenderManager = RenderManagerCore.extend(/** @lends atlas-cesium.render.RenderManager# */ {
 
     /**
      * The underlying viewer widget for Cesium.
