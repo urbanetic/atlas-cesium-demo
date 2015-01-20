@@ -35,6 +35,13 @@ define([
       expect(mesh.getId()).toEqual('id');
     });
 
+    it('can be constructed with URL to GLTF, with data URIs', function() {
+      meshData.gltfUrl = './assets/duck-no-light.gltf';
+      mesh = new GltfMesh('id', meshData, args);
+      expect(mesh).not.toBe(undefined);
+      expect(mesh.getId()).toEqual('id');
+    });
+
     // TODO(bpstudds): Can this be tested without mocking a heap of Cesium components.
     xit('can construct a primitive', function() {
       meshData.gltfUrl = './assets/duck.gltf';

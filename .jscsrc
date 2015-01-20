@@ -5,11 +5,16 @@
     "lib/**",
     "test/**"
   ],
+  "validateQuoteMarks": {
+    "escape": true,
+    "mark": "'"
+  },
   "disallowMixedSpacesAndTabs": true,
   "disallowMultipleLineStrings": true,
-  "disallowSpaceAfterKeywords": [
-    "function"
-  ],
+  "disallowSpacesInFunctionExpression": {
+    "beforeOpeningRoundBrace": true,
+    "beforeOpeningCurlyBrace": false
+  },
   /* Overriding Google preset. */
   "maximumLineLength": 100,
    "requireCurlyBraces": [
