@@ -150,7 +150,9 @@ define([
       if (borderMaterial) {
         if ((isModelDirty || !this._outlinePrimitive) && this._outlineGeometry) {
           // TODO(aramk) This causes an issue on high-res screens.
-          var lineWidth = Setter.range(style.getBorderWidth(), 2, scene.maximumAliasedLineWidth);
+          var maxWidth = scene.maximumAliasedLineWidth;
+          var minWidth = Math.min(2, maxWidth);
+          var lineWidth = Setter.range(style.getBorderWidth(), minWidth, maxWidth);
           console.log('lineWidth', style.getBorderWidth(), 2, scene.maximumAliasedLineWidth);
           // var lineWidth = Math.min(2, scene.maximumAliasedLineWidth);
           this._outlinePrimitive = new Primitive({
