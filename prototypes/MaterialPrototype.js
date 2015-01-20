@@ -38,8 +38,6 @@ define([
         polygon: {
           vertices: positions,
           height: 50,
-          // color: 'green',
-          // borderColor: 'blue'
           style: {
             fillMaterial: {
               type: 'CheckPattern',

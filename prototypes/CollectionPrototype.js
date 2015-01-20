@@ -33,6 +33,11 @@ define([
       console.log('height', collection.getHeight());
       console.log('elevation', collection.getElevation());
 
+      setTimeout(function() {
+        collection.setSelected(true);
+        console.log('collection selected', collection.isSelected());
+      }, 3000);
+
       // Create a collection through the Atlas API.
       atlas.publish('entity/show/bulk', {
         features: [

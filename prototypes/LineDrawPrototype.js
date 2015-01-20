@@ -45,15 +45,17 @@ define([
               // selectedEntity
               atlas.publish('edit/enable', {ids: [args.id]});
             });
-            // setTimeout(function() {
-            //   console.log('edit/enable');
-            //   atlas.publish('edit/enable', {ids: [id]});
-            // }, 1000);
-//            setTimeout(registerDraw, 3000);
+            setTimeout(function() {
+              console.log('edit/enable');
+              atlas.publish('edit/enable', {ids: [id]});
+            }, 1000);
+            registerDraw();
+           // setTimeout(registerDraw, 3000);
           },
           cancel: function(args) {
             console.error('cancel', arguments);
-            setTimeout(registerDraw, 3000);
+            registerDraw();
+            // setTimeout(registerDraw, 3000);
           }
         });
       };
