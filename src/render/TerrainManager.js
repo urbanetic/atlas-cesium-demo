@@ -3,11 +3,12 @@ define([
   'atlas/lib/utility/Types',
   'atlas/render/TerrainManager',
   'atlas/util/AtlasMath',
-  'atlas-cesium/cesium/Source/Core/CesiumTerrainProvider',
+  'atlas-cesium/render/LocalTerrainProvider',
   'atlas-cesium/cesium/Source/Core/EllipsoidTerrainProvider',
-  'atlas-cesium/cesium/Source/Core/sampleTerrain'
-], function(Log, Types, CoreTerrainManager, AtlasMath, CesiumTerrainProvider,
-            EllipsoidTerrainProvider, sampleTerrain) {
+  'atlas-cesium/cesium/Source/Core/sampleTerrain',
+  'atlas-cesium/cesium/Source/Widgets/BaseLayerPicker/ProviderViewModel',
+], function(Log, Types, CoreTerrainManager, AtlasMath, LocalTerrainProvider,
+            EllipsoidTerrainProvider, sampleTerrain, ProviderViewModel) {
 
   /**
    * @typedef atlas-cesium.render.TerrainManager
@@ -43,6 +44,17 @@ define([
     _ellipsoidTerrain: null,
 
     /**
+     * Flag that is true if the terrain provider has been set directly via the Cesium layer picker
+     * widget and <code>_handleEnabledChange</code> should not change the terrain.
+     * This prevents the terrain provider from being set twice and slowing down.
+     *
+     * @type {Boolean}
+     *
+     * @private
+     */
+    _terrainAlreadySet: false,
+
+    /**
      * A map of GeoEntity ID to an object literal specifying the GeoEntity's terrain shift and the
      * (cached) location of that terrain shift, based of the GeoEntity's centroid when it was
      * calculated.
@@ -60,6 +72,7 @@ define([
     setup: function() {
       this._super();
       this._entityShifts = {};
+      this._setupCesiumTerrainPicker();
     },
 
     /**
@@ -74,7 +87,13 @@ define([
 
       // Shifting entities on show only occurs if the terrain is enabled.
       // Disabling the terrain "un-shifts" all Entities.
-      this._shiftEntityForTerrain(entity, true);
+      this._shiftEntityForTerrain(entity);
+    },
+
+    _shiftEntitiesForTerrain: function(entities) {
+      entities.forEach(function(entity) {
+        this._shiftEntityForTerrain(entity);
+      }, this);
     },
 
     /**
@@ -160,11 +179,10 @@ define([
       }
 
       var cartographics = geoPoints.map(this._managers.render.cartographicFromGeoPoint, this);
-      return sampleTerrain(this._cesiumProvider, 14, cartographics).then(function(terrainPoints) {
-        Log.debug('Stuff is happening');
+      return sampleTerrain(this._localTerrain, 14, cartographics).then(function(terrainPoints) {
         if (terrainPoints.length === 0) { return 0; }
 
-        return AtlasMath.average(terrainPoints.map(function(point) {
+        return AtlasMath.max(terrainPoints.map(function(point) {
           return point.height;
         }));
       });
@@ -181,31 +199,33 @@ define([
       var enabled = this.isTerrainEnabled();
       var scene = this._managers.render.getScene();
 
-      if (enabled) {
-        scene.terrainProvider = this._getCesiumProvider();
-        scene.globe.enableLighting = true;
-      } else {
-        scene.terrainProvider = this._getEllipsoidProvider();
-        scene.globe.enableLighting = false;
+      if (!this._terrainAlreadySet) {
+        if (enabled) {
+          scene.terrainProvider = this._getLocalProvider();
+          scene.globe.enableLighting = true;
+        } else {
+          scene.terrainProvider = this._getEllipsoidProvider();
+          scene.globe.enableLighting = false;
+        }
       }
+      // Next time the terrain may be changed normally
+      this._terrainAlreadySet = false;
+
       // Shift any existing entities.
-      this._managers.entity.getFeatures().forEach(function(entity) {
-        this._shiftEntityForTerrain(entity);
-      }, this);
+      this._shiftEntitiesForTerrain(this._managers.entity.getFeatures());
     },
 
     /**
-     * @returns {TerrainProvider} The Cesium terrain provider.
-     * @private
+     * Configures the Cesium layer picker widget.
      */
-    _getCesiumProvider: function() {
-      if (!this._cesiumProvider) {
-        var terrainProvider = new CesiumTerrainProvider({
-            url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
-        });
-        this._cesiumProvider = terrainProvider;
-      }
-      return this._cesiumProvider;
+    _setupCesiumTerrainPicker: function() {
+      var baseLayerPicker = this._managers.render._widget.baseLayerPicker;
+      var blpViewModels = baseLayerPicker.viewModel;
+      var terrainProviderViewModels = [
+        this._getEllipsoidProviderViewModel(),
+        this._getLocalProviderViewModel()
+      ];
+      blpViewModels.terrainProviderViewModels = terrainProviderViewModels;
     },
 
     /**
@@ -217,6 +237,79 @@ define([
         this._ellipsoidTerrain = new EllipsoidTerrainProvider();
       }
       return this._ellipsoidTerrain;
+    },
+
+    /**
+     * @returns {TerrainProvider} The Local terrain provider. This terrain provider utilises
+     * the SRTM elevation data.
+     * @private
+     */
+    _getLocalProvider: function() {
+      if (!this._localTerrain) {
+       this._localTerrain = new LocalTerrainProvider();
+      }
+      return this._localTerrain;
+    },
+
+    /**
+     * Manually sets the terrain provider.
+     * Calls <code>super.setEnabled</code> for its side affects but sets
+     * <code>_terrainAlreadySet</code> to true to prevent the  the terrain provider being reset
+     * in <code>_handleEnableChanged</code>
+     *
+     * @param {Boolean} enable - Whether to enable local terrain.
+     *
+     * @returns {TerrainProvider} The local terrain provider iff enable is true, otherwise the
+     *     ellipsoid terrain provider.
+     */
+    _manualTerrainToggle: function(enable) {
+      this._terrainAlreadySet = true;
+      this.setEnabled(enable);
+      if (enable) {
+        return this._getLocalProvider();
+      } else {
+        return this._getEllipsoidProvider();
+      }
+    },
+
+    /**
+     * @returns {TerrainProviderViewModel} The Ellipsoid Terrain provider view model to be used in
+     * the Cesium layer picker widget.
+     */
+    _getEllipsoidProviderViewModel: function() {
+      var terrainManager = this;
+      /**
+       * The view model used to display this terrain provider in the Cesium layer picker widget.
+       * @type{ProviderViewModel}
+       */
+      return new ProviderViewModel({
+        creationFunction: function() {
+          return terrainManager._manualTerrainToggle(false);
+        },
+        iconUrl: '',
+        name: 'WGS84 Ellipsoid',
+        tooltip: 'Standard WGS84 ellipsoid'
+      });
+    },
+
+    /**
+     * @returns {TerrainProviderViewModel} The Local Terrain provider view model to be used in
+     * the Cesium layer picker widget.
+     */
+    _getLocalProviderViewModel: function() {
+      var terrainManager = this;
+      /**
+       * The view model used to display this terrain provider in the Cesium layer picker widget.
+       * @type{ProviderViewModel}
+       */
+      return new ProviderViewModel({
+        creationFunction: function() {
+          return terrainManager._manualTerrainToggle(true);
+        },
+        iconUrl: '',
+        name: 'SRTM Terrain',
+        tooltip: 'Elevation data based on the SRTM dataset'
+      });
     }
 
   });
