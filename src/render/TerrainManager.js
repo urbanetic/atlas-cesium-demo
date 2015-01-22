@@ -289,7 +289,7 @@ define([
         creationFunction: function() {
           return terrainManager._manualTerrainToggle(false);
         },
-        iconUrl: '',
+        iconUrl: 'atlas-cesium/lib/cesium/Source/Widgets/Images/TerrainProviders/Ellipsoid.png',
         name: 'WGS84 Ellipsoid',
         tooltip: 'Standard WGS84 ellipsoid'
       });
@@ -309,9 +309,9 @@ define([
         creationFunction: function() {
           return terrainManager._manualTerrainToggle(true);
         },
-        iconUrl: '',
-        name: 'SRTM Terrain',
-        tooltip: 'Elevation data based on the SRTM dataset'
+        iconUrl: 'atlas-cesium/lib/cesium/Source/Widgets/Images/TerrainProviders/STK.png',
+        name: 'STK Terrain',
+        tooltip: 'Elevation data based on the SRTM dataset, provided by STK'
       });
     }
 
