@@ -26,8 +26,9 @@ define([
       var targetPosition = new GeoPoint(115.852662, -31.9546781);
 
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
+        c3ml.show = true;
         console.log('c3ml', c3ml);
-        atlas.publish('entity/show/bulk', {features: [c3ml]});
+        atlas.publish('entity/create/bulk', {features: [c3ml]});
         var feature = entityManager.getById(c3ml.id);
         // feature.setForm(Feature.DisplayMode.MESH, meshFeature);
         var mesh = feature.getForm(Feature.DisplayMode.MESH);
@@ -37,6 +38,8 @@ define([
         cesiumAtlas.publish('camera/zoomTo', {
           position: targetPosition
         });
+
+        console.log('mesh json', mesh.toJson());
 
       });
 

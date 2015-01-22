@@ -22,21 +22,24 @@ define([
         elevation: -1000
       });
 
-      atlas.publish('entity/show', {
+      atlas.publish('entity/create', {
         id: 'duck',
         mesh: {
           gltfUrl: './assets/duck-no-light.gltf',
           baseUrl: './assets',
           uniformScale: 2000,
           geoLocation: location
-        }
+        },
+        show: true
       });
+      var mesh = atlas.getManager('entity').getById('duck');
 
       location.elevation = 10000;
       atlas.publish('camera/zoomTo', {
         position: location
       });
 
+      console.log('mesh json', mesh.toJson());
     }
 
   });

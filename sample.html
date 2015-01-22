@@ -68,7 +68,7 @@
             borderColor: '#999'
           }
         };
-        cesiumAtlas.publish('entity/show', args);
+        cesiumAtlas.publish('entity/create', args);
       });
       cesiumAtlas.publish('camera/zoomTo', {
         position: {
@@ -138,12 +138,12 @@
          // new StylePrototype(cesiumAtlas);
          // new EventPrototype(cesiumAtlas);
          // new ProjectionPrototype(cesiumAtlas);
-         // new CollectionPrototype(cesiumAtlas);
+         new CollectionPrototype(cesiumAtlas);
          // new SelectionPrototype(cesiumAtlas);
          // new PolygonTransformPrototype(cesiumAtlas);
          // new PopupPrototype(cesiumAtlas);
          // new PopupPrototype2(cesiumAtlas);
-         new MaterialPrototype(cesiumAtlas);
+         // new MaterialPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);

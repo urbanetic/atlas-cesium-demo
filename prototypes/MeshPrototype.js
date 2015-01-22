@@ -20,7 +20,7 @@ define([
         c3ml.show = false;
         console.log('c3ml', c3ml);
         c3ml.geoLocation = [145.253159238, -37.81175024725, 0];
-        atlas.publish('entity/show/bulk', {features: [c3ml]});
+        atlas.publish('entity/create/bulk', {features: [c3ml]});
 
         var id = c3ml.id;
         var meshFeature = entityManager.getById(id);
@@ -33,7 +33,7 @@ define([
         var centroid = mesh.getCentroid();
         console.log('centroid', centroid);
 
-        atlas.publish('entity/show', {
+        atlas.publish('entity/create', {
           id: 'mesh-footprint',
           polygon: {
             vertices: positions,

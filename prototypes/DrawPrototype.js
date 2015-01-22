@@ -46,7 +46,7 @@ define([
 
       // Ensure drawing an empty polygon doesn't cause issues.
       // TODO(aramk) Put this in a test.
-      atlas.publish('entity/show/bulk', {features: [
+      atlas.publish('entity/create/bulk', {features: [
         {
           id: 'poly-123',
           coordinates: [],

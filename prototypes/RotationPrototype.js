@@ -24,7 +24,7 @@ define([
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
         c3ml.show = false;
         c3ml.geoLocation = feature.getCentroid().toArray();
-        atlas.publish('entity/show/bulk', {
+        atlas.publish('entity/create/bulk', {
           features: [c3ml]
         });
         var id = c3ml.id;
