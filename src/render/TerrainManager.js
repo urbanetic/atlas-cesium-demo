@@ -72,6 +72,9 @@ define([
     setup: function() {
       this._super();
       this._entityShifts = {};
+      this._localTerrain = this._getLocalProvider();
+      this._ellipsoidTerrain = this._getEllipsoidProvider();
+
       this._setupCesiumTerrainPicker();
     },
 
