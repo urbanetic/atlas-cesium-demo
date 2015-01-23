@@ -149,7 +149,7 @@ define([
           flat: false,
           translucent: false
         }),
-        debugShowBoundingVolume: false
+        allowPicking: this.isSelectable()
       });
       return thePrimitive;
     },
