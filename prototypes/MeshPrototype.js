@@ -18,6 +18,7 @@ define([
       var entityManager = atlas._managers.entity;
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
         c3ml.show = false;
+        c3ml.color = [255, 0, 0, 128];
         console.log('c3ml', c3ml);
         c3ml.geoLocation = [145.253159238, -37.81175024725, 0];
         atlas.publish('entity/create/bulk', {features: [c3ml]});

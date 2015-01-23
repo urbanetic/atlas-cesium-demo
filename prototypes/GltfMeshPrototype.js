@@ -40,6 +40,8 @@ define([
       });
 
       console.log('mesh json', mesh.toJson());
+      console.log('mesh json', mesh.getBoundingBox());
+      console.log('mesh json', mesh.getOpenLayersGeometry());
     }
 
   });
