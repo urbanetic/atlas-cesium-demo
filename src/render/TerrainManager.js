@@ -74,7 +74,6 @@ define([
       this._entityShifts = {};
       this._localTerrain = this._getLocalProvider();
       this._ellipsoidTerrain = this._getEllipsoidProvider();
-
       this._setupCesiumTerrainPicker();
     },
 
@@ -94,9 +93,7 @@ define([
     },
 
     _shiftEntitiesForTerrain: function(entities) {
-      entities.forEach(function(entity) {
-        this._shiftEntityForTerrain(entity);
-      }, this);
+      entities.forEach(this._shiftEntityForTerrain, this);
     },
 
     /**
@@ -205,12 +202,12 @@ define([
       if (!this._terrainAlreadySet) {
         if (enabled) {
           scene.terrainProvider = this._getLocalProvider();
-          scene.globe.enableLighting = true;
         } else {
           scene.terrainProvider = this._getEllipsoidProvider();
-          scene.globe.enableLighting = false;
         }
       }
+      scene.globe.enableLighting = enabled;
+
       // Next time the terrain may be changed normally
       this._terrainAlreadySet = false;
 
@@ -283,7 +280,7 @@ define([
       var terrainManager = this;
       /**
        * The view model used to display this terrain provider in the Cesium layer picker widget.
-       * @type{ProviderViewModel}
+       * @type {ProviderViewModel}
        */
       return new ProviderViewModel({
         creationFunction: function() {
@@ -303,7 +300,7 @@ define([
       var terrainManager = this;
       /**
        * The view model used to display this terrain provider in the Cesium layer picker widget.
-       * @type{ProviderViewModel}
+       * @type {ProviderViewModel}
        */
       return new ProviderViewModel({
         creationFunction: function() {

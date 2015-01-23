@@ -15,7 +15,7 @@ define([
   /**
    * @classdesc Provides the ability to override a "global" terrain model with terrain data for
    * specified regions.
-   * @class  atlas.render.LocalTerrainProvider
+   * @class atlas.render.LocalTerrainProvider
    * @implements {TerrainProvider}
    */
   LocalTerrainProvider = Class.extend(/** @lends atlas.render.LocalTerrainProvider# */ {
@@ -33,6 +33,7 @@ define([
 
     _init: function() {
       this._cesiumProvider = this._getCesiumProvider();
+      this._initDelegation();
     },
 
     _getCesiumProvider: function() {
@@ -45,27 +46,10 @@ define([
       return this._cesiumProvider;
     },
 
-    // getViewModel: function() {
-    //   var that = this._getCesiumProvider();
-    //   /**
-    //    * The view model used to display this terrain provider in the Cesium layer picker widget.
-    //    * @type{ProviderViewModel}
-    //    */
-    //   return new ProviderViewModel({
-    //     creationFunction: function() {
-    //       terrainManager._enabled = false;
-    //       terrainManager._shiftEntitiesForTerrain(entityManger.getFeatures());
-    //       return that;
-    //     },
-    //     iconUrl: '',
-    //     name: 'SRTM Terrain',
-    //     tooltip: 'Elevation data based on the SRTM dataset'
-    //   });
-    // },
-
     //
     // Delegate To Cesium Terrain Provider
     //
+
     getRegularGridIndices: function() {
       return TerrainProvider.getRegularGridIndices.apply(null, arguments);
     },
@@ -76,20 +60,15 @@ define([
           .getEstimatedLevelZeroGeometricErrorForAHeightmap.apply(null, arguments);
     },
 
-    requestTileGeometry: function() {
-      var cp = this._getCesiumProvider();
-      var geom = cp.requestTileGeometry.apply(cp, arguments);
-      return geom;
-    },
-
-    getLevelMaximumGeometricError: function() {
-      var cp = this._getCesiumProvider();
-      return cp.getLevelMaximumGeometricError.apply(cp, arguments);
-    },
-
-    getTileDataAvailable: function() {
-      var cp = this._getCesiumProvider();
-      return cp.getTileDataAvailable.apply(cp, arguments);
+    _initDelegation: function() {
+      var terrainProviderMethods = ['requestTileGeometry', 'getLevelMaximumGeometricError',
+          'getTileDataAvailable'];
+      terrainProviderMethods.forEach(function(method) {
+        this[method] = function() {
+          var cp = this._getCesiumProvider();
+          return cp[method].apply(cp, arguments);
+        };
+      }, this);
     }
 
   });
