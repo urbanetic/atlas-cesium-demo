@@ -1,16 +1,23 @@
 var tests = [];
-    specsConfig = [
-      { name: 'camera/Camera', run: true },
-      { name: 'model/Ellipse', run: true },
-      { name: 'model/Handle', run: true },
-      { name: 'model/Mesh', run: true }
-    ];
+var specsConfig = [
+  { name: 'camera/Camera', run: true },
+  { name: 'model/Ellipse', run: true },
+  { name: 'model/Handle', run: true },
+  { name: 'model/Mesh', run: true }
+];
 
+var warnings = '\n';
 specsConfig.forEach(function(config) {
   if (config.run) {
     tests.push('/base/atlas-cesium/test/specs/' + config.name + 'Spec.js');
+  } else {
+    warnings += 'Not running test spec: ' + config.name;
+    config.fix && (warnings += ', fix: ' + config.fix);
+    warnings += '\n';
   }
 });
+/* global console */
+warnings !== '\n' && console.log(warnings);
 
 //for (var file in window.__karma__.files) {
 //  if (window.__karma__.files.hasOwnProperty(file)) {
@@ -21,6 +28,7 @@ specsConfig.forEach(function(config) {
 //  }
 //}
 
+/* global requirejs,window */
 requirejs.config({
   // Karma serves files from '/base'.
   baseUrl: '/base',

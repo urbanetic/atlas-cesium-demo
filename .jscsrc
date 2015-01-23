@@ -12,8 +12,7 @@
   "disallowMixedSpacesAndTabs": true,
   "disallowMultipleLineStrings": true,
   "disallowSpacesInFunctionExpression": {
-    "beforeOpeningRoundBrace": true,
-    "beforeOpeningCurlyBrace": false
+    "beforeOpeningRoundBrace": true
   },
   /* Overriding Google preset. */
   "maximumLineLength": 100,
