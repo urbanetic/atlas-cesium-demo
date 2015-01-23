@@ -28,7 +28,6 @@ define([
      * Terrain elevation data provider using Cesium's hosted data.
      *
      * @type {TerrainProvider}
-     *
      * @private
      */
     _cesiumProvider: null,
@@ -38,7 +37,6 @@ define([
      * ellipsoid.
      *
      * @type {TerrainProvider}
-     *
      * @private
      */
     _ellipsoidTerrain: null,
@@ -49,7 +47,6 @@ define([
      * This prevents the terrain provider from being set twice and slowing down.
      *
      * @type {Boolean}
-     *
      * @private
      */
     _terrainAlreadySet: false,
@@ -60,7 +57,6 @@ define([
      * calculated.
      *
      * @type {Object.<String, Object.<atlas.model.GeoPoint, Number>>}
-     *
      * @private
      */
     _entityShifts: null,
@@ -81,7 +77,6 @@ define([
      * Handles an entity being shown.
      *
      * @see {@link atlas.render.TerrainManager#_handleEntityShow}.
-     *
      * @private
      */
     _handleEntityShow: function(entity, visible) {
@@ -142,7 +137,6 @@ define([
      * @param {atlas.model.GeoEntity} entity - The GeoEntity to shift.
      * @param {Number} shift The amount to shift the entity up or down, in metres.
      * @param {Boolean} enabled - Whether the terrain is enabled.
-     *
      * @private
      */
     _doShift: function(entity, shift, enabled) {
@@ -163,9 +157,7 @@ define([
      * if the reverse is true.
      *
      * @param {atlas.model.GeoEntity} entity - The entity to calculate the shift for.
-     *
      * @returns {Number} The GeoEntitys shift value.
-     *
      * @private
      */
     _getTerrainShift: function(entity) {
@@ -192,7 +184,6 @@ define([
      * Handles a change in the terrain status.
      *
      * @see {@link atlas.render.TerrainManager#_handleEnabledChange}.
-     *
      * @private
      */
     _handleEnabledChange: function() {
@@ -258,7 +249,6 @@ define([
      * in <code>_handleEnableChanged</code>
      *
      * @param {Boolean} enable - Whether to enable local terrain.
-     *
      * @returns {TerrainProvider} The local terrain provider iff enable is true, otherwise the
      *     ellipsoid terrain provider.
      */
@@ -280,6 +270,7 @@ define([
       var terrainManager = this;
       /**
        * The view model used to display this terrain provider in the Cesium layer picker widget.
+       *
        * @type {ProviderViewModel}
        */
       return new ProviderViewModel({
@@ -300,6 +291,7 @@ define([
       var terrainManager = this;
       /**
        * The view model used to display this terrain provider in the Cesium layer picker widget.
+       *
        * @type {ProviderViewModel}
        */
       return new ProviderViewModel({

@@ -15,19 +15,24 @@ define([
   /**
    * @classdesc Provides the ability to override a "global" terrain model with terrain data for
    * specified regions.
+   *
    * @class atlas.render.LocalTerrainProvider
    * @implements {TerrainProvider}
    */
   LocalTerrainProvider = Class.extend(/** @lends atlas.render.LocalTerrainProvider# */ {
     /**
      * The Cesium Terrain Provider.
+     *
      * @type {TerrainProvider}
+     * @private
      */
     _cesiumProvider: null,
 
     /**
      * The local terrain provider.
+     *
      * @type {TerrainProvider}
+     * @private
      */
     _localTerrain: null,
 
@@ -49,7 +54,6 @@ define([
     //
     // Delegate To Cesium Terrain Provider
     //
-
     getRegularGridIndices: function() {
       return TerrainProvider.getRegularGridIndices.apply(null, arguments);
     },
