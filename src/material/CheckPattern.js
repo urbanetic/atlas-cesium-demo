@@ -16,16 +16,19 @@ define([
 
     toCesiumMaterial: function() {
       var repeat = this.repeat;
+      var color1 = this.color1;
+      var color2 = this.color2;
+      var isTranslucent = color1.alpha < 1 || color1.alpha < 1;
       return new Material({
         fabric: {
           type: 'Checkerboard',
           uniforms: {
-            lightColor: this.color1.toCesiumColor(),
-            darkColor: this.color2.toCesiumColor(),
+            lightColor: color1.toCesiumColor(),
+            darkColor: color2.toCesiumColor(),
             repeat: {x: repeat.x, y: repeat.y}
           }
         },
-        translucent: false
+        translucent: isTranslucent
       });
     }
 

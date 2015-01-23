@@ -141,13 +141,12 @@ define([
           color: color
         }
       });
-
       // TODO(bpstudds): Work out how to get MaterialAppearance working.
       thePrimitive = new Primitive({
         geometryInstances: instance,
         appearance: new PerInstanceColorAppearance({
           flat: false,
-          translucent: false
+          translucent: true
         }),
         debugShowBoundingVolume: false
       });

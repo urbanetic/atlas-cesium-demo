@@ -23,6 +23,7 @@ define([
     },
 
     toCesiumMaterial: function() {
+      var isTranslucent = this.alpha < 1;
       return new Material({
         fabric: {
           type: 'Color',
@@ -30,7 +31,7 @@ define([
             color: this.toCesiumColor()
           }
         },
-        translucent: false
+        translucent: isTranslucent
       });
     }
 
