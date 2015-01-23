@@ -13,8 +13,9 @@ define([
    */
   DomManager = DomManagerCore.extend(/** @lends atlas-cesium.dom.DomManager# */{
 
-    populateDom: function(elem) {
-      this._managers.render.createWidget(elem);
+    populateDom: function() {
+      var node = this.getDomNode();
+      this._managers.render.createWidget(node);
       this._rendered = true;
       this._visible = true;
     }
