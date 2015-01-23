@@ -197,25 +197,12 @@ define([
         // Apply rotation, translation and scale transformations.
         var rotationTranslation = this._calcRotationTranslationMatrix(this.getRotation());
         var locationCartesian = this._renderManager.cartesianFromGeoPoint(this._geoLocation);
-        Matrix4.multiply(this._transformLocation(locationCartesian), rotationTranslation,
+        Matrix4.multiply(Transforms.eastNorthUpToFixedFrame(locationCartesian), rotationTranslation,
             modelMatrix);
         Matrix4.multiplyByScale(modelMatrix, this.getScale(), modelMatrix);
         // this._modelMatrix = modelMatrix;
       }
       return modelMatrix;
-    },
-
-    /**
-     * Generates the correct matrix transformation to use based on the version of Cesium used.
-     * @param  {atlas.model.GeoPoint} location - The location for the transform
-     * @return {Matrix4} The transformation matrix.
-     */
-    _transformLocation: function(location) {
-      if (this.isGltf()) {
-        return Transforms.northEastDownToFixedFrame(location);
-      } else {
-        return Transforms.eastNorthUpToFixedFrame(location);
-      }
     },
 
     /**
@@ -410,7 +397,7 @@ define([
       // aligns the east and north as the x and y axes. The z is the vector from the centre of the
       // earth to the surface location and points upward from the earth - it's the normal vector
       // for the surface of the earth at that location.
-      var originMatrix = this._transformLocation(centroidCartesian);
+      var originMatrix = Transforms.eastNorthUpToFixedFrame(centroidCartesian);
       // Since our existing position after construction is NOT the centre of the earth, we must
       // reverse the above transformation and move the geometry back to the origin, apply the
       // given matrix transformation, then apply the transformation again.
