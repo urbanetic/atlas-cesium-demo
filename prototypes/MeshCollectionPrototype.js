@@ -30,7 +30,10 @@ define([
       var featurePoint = feature.getCentroid();
 
       $.getJSON('assets/VIC_SH_2St_3Bed.c3ml.json', function(c3mls) {
-        atlas.publish('entity/show/bulk', {
+        c3mls.forEach(function(c3ml) {
+          c3ml.show = true;
+        });
+        atlas.publish('entity/create/bulk', {
           features: c3mls,
           callback: function(ids) {
             // var c3mlPoint = new GeoPoint([145.2521592379, -37.81075024723, 0.0]);
@@ -61,13 +64,14 @@ define([
               entityCount++;
               var vertices = entity.getForm()._getFootprintVertices();
 
-              atlas.publish('entity/show', {
+              atlas.publish('entity/create', {
                 id: 'mesh-footprint' + entityCount,
                 polygon: {
                   vertices: vertices,
                   style: new Style({borderMaterial: new Color('yellow')}),
                   width: '1px'
-                }
+                },
+                show: true
               });
 //              var centroidHandle = new Handle(feature._bindDependencies({target: centroid, owner: entity}));
 //              centroidHandle.show();

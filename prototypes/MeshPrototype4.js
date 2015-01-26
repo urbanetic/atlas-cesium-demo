@@ -29,19 +29,21 @@ define([
       });
 
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
+        c3ml.show = true;
         console.log('c3ml', c3ml);
-        atlas.publish('entity/show/bulk', {features: [c3ml]});
+        atlas.publish('entity/create/bulk', {features: [c3ml]});
         var feature = entityManager.getById(c3ml.id);
         // feature.setForm(Feature.DisplayMode.MESH, meshFeature);
         var mesh = feature.getForm(Feature.DisplayMode.MESH);
 
         var positions = mesh._getFootprintVertices();
 
-        atlas.publish('entity/show', {
+        atlas.publish('entity/create', {
           id: 'mesh-footprint',
           polygon: {
             vertices: positions
-          }
+          },
+          show: true
         });
         var polygonFeature = entityManager.getById('mesh-footprint');
         var polygon = polygonFeature.getForm();

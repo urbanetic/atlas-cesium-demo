@@ -33,7 +33,7 @@ define([
       // Create material with c3ml.
 
       var featureBId = 'material-polygon';
-      atlas.publish('entity/show', {
+      atlas.publish('entity/create', {
         id: featureBId,
         polygon: {
           vertices: positions,
@@ -50,10 +50,12 @@ define([
             },
             borderWidth: 5
           }
-        }
+        },
+        show: true
       });
 
       var featureB = atlas._managers.entity.getById(featureBId);
+      console.log('featureB', featureB.toJson());
         
       // Set the opacity for one feature to 50%.
 
@@ -62,6 +64,8 @@ define([
       fillC.alpha = 0.5;
       styleC.setFillMaterial(fillC);
       featureC.setStyle(styleC);
+
+      console.log('featureC', featureC.toJson());
     }
 
   });

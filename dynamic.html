@@ -61,7 +61,7 @@
           height: 10*i,
           vertices: wkt
         };
-        cesiumAtlas.publish('entity/show', args);
+        cesiumAtlas.publish('entity/create', args);
       });
       args.id = i++;
       args.parentId = '3';
@@ -70,7 +70,7 @@
         height: 30,
         elevation: 40
       };
-      cesiumAtlas.publish('entity/show', args);
+      cesiumAtlas.publish('entity/create', args);
 
       // Attempt to draw ellipse.
 //      args.id++;
@@ -197,12 +197,13 @@
 //              {x: -37, y: 143},
 //              {x: -37, y: 144}
 //            ],
+//            show: true,
 //            eventManager: cesiumAtlas._managers.event,
 //            renderManager: cesiumAtlas._managers.render
 //          };
 //      // Construct using WKT.
 //      args.line = 'LINESTRING (-37 144, -37 143)';
-//      cesiumAtlas.publish('entity/show', args);
+//      cesiumAtlas.publish('entity/create', args);
 //      //line.show();
 //      console.error('Drawn line?');
 

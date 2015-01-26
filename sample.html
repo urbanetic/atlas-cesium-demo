@@ -68,7 +68,7 @@
             borderColor: '#999'
           }
         };
-        cesiumAtlas.publish('entity/show', args);
+        cesiumAtlas.publish('entity/create', args);
       });
       cesiumAtlas.publish('camera/zoomTo', {
         position: {
@@ -109,6 +109,7 @@
           './prototypes/PopupPrototype',
           './prototypes/PopupPrototype2',
           './prototypes/MaterialPrototype',
+          './prototypes/PointPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
@@ -116,7 +117,7 @@
                     GltfMeshPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
                     CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
-                    PopupPrototype, PopupPrototype2, MaterialPrototype, Log) {
+                    PopupPrototype, PopupPrototype2, MaterialPrototype, PointPrototype, Log) {
          // new CameraPrototype(cesiumAtlas);
          // new EditPrototype(cesiumAtlas);
          // new DrawPrototype(cesiumAtlas);
@@ -131,7 +132,7 @@
          // new MeshPrototype5(cesiumAtlas);
          // new MeshCollectionPrototype(cesiumAtlas);
          // new GltfMeshPrototype(cesiumAtlas);
-         // new LinePrototype(cesiumAtlas);
+         new LinePrototype(cesiumAtlas);
          // new GeocoderPrototype(cesiumAtlas);
          // new InputPrototype(cesiumAtlas);
          // new RenderPrototype(cesiumAtlas);
@@ -143,7 +144,8 @@
          // new PolygonTransformPrototype(cesiumAtlas);
          // new PopupPrototype(cesiumAtlas);
          // new PopupPrototype2(cesiumAtlas);
-         new MaterialPrototype(cesiumAtlas);
+         // new MaterialPrototype(cesiumAtlas);
+         // new PointPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);

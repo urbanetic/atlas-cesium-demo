@@ -39,7 +39,7 @@ define([
       }, 3000);
 
       // Create a collection through the Atlas API.
-      atlas.publish('entity/show/bulk', {
+      atlas.publish('entity/create/bulk', {
         features: [
           {
             id: 'c2',
@@ -48,7 +48,10 @@ define([
           }
         ]
       });
-      console.log(entityManager.getById('c2'));
+
+      var c2 = entityManager.getById('c2');
+      console.log(c2);
+      console.log('c2 json', c2.toJson());
 
     }
 

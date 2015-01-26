@@ -18,7 +18,7 @@ define([
       this.atlas = atlas;
       var entityManager = atlas._managers.entity;
 
-      atlas.publish('entity/show/bulk', {features: [testMesh]});
+      atlas.publish('entity/create/bulk', {features: [testMesh]});
 
       var id = testMesh.id;
       var feature = entityManager.getById(id);
@@ -35,15 +35,17 @@ define([
       }, 4000);
 
 
-//      atlas.publish('entity/show', {
+//      atlas.publish('entity/create', {
 //        id: 123,
-//        mesh: testMesh
+//        mesh: testMesh,
+//        show: true
 //      });
 
 //      $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
+//        c3ml.show = true;
 //        console.log('c3ml', c3ml);
 //        c3ml.geoLocation = [145.253159238, -37.81175024725, 0];
-//        atlas.publish('entity/show/bulk', {features: [c3ml]});
+//        atlas.publish('entity/create/bulk', {features: [c3ml]});
 //
 //        var id = c3ml.id;
 //        var meshFeature = entityManager.getById(id);
@@ -56,13 +58,14 @@ define([
 //        var centroid = mesh.getCentroid();
 //        console.log('centroid', centroid);
 //
-//        atlas.publish('entity/show', {
+//        atlas.publish('entity/create', {
 //          id: 'mesh-footprint',
 //          polygon: {
 //            vertices: positions,
 //            style: new Style({borderMaterial: new Color('yellow')}),
 //            width: '1px'
-//          }
+//          },
+//          show: true
 //        });
 //
 //        var centroidHandle = new Handle(meshFeature._bindDependencies({target: centroid, owner: meshFeature}));
