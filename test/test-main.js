@@ -1,9 +1,10 @@
 var tests = [];
 var specsConfig = [
-  {name: 'camera/Camera', run: true},
-  {name: 'model/Ellipse', run: true},
-  {name: 'model/Handle', run: true},
-  {name: 'model/Mesh', run: true}
+  {name: 'camera/Camera', run: false},
+  {name: 'model/Ellipse', run: false},
+  {name: 'model/Handle', run: false},
+  {name: 'model/Mesh', run: false},
+  {name: 'render/LocalTerrainData', run: true}
 ];
 
 var warnings = '\n';

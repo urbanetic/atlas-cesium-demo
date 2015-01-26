@@ -1,13 +1,14 @@
 define([
   'atlas/lib/utility/Log',
   'atlas/lib/utility/Types',
+  'atlas/lib/Q',
   'atlas/render/TerrainManager',
   'atlas/util/AtlasMath',
   'atlas-cesium/render/LocalTerrainProvider',
   'atlas-cesium/cesium/Source/Core/EllipsoidTerrainProvider',
   'atlas-cesium/cesium/Source/Core/sampleTerrain',
   'atlas-cesium/cesium/Source/Widgets/BaseLayerPicker/ProviderViewModel',
-], function(Log, Types, CoreTerrainManager, AtlasMath, LocalTerrainProvider,
+], function(Log, Types, Q, CoreTerrainManager, AtlasMath, LocalTerrainProvider,
             EllipsoidTerrainProvider, sampleTerrain, ProviderViewModel) {
 
   /**
@@ -68,7 +69,6 @@ define([
     setup: function() {
       this._super();
       this._entityShifts = {};
-      this._localTerrain = this._getLocalProvider();
       this._ellipsoidTerrain = this._getEllipsoidProvider();
       this._setupCesiumTerrainPicker();
     },
@@ -121,6 +121,7 @@ define([
         return;
       } else {
         this._getTerrainShift(entity).then(function(shift) {
+          if (shift === null) {return;}
           this._entityShifts[id] = {
             centroid: centroid.clone(),
             value: shift
@@ -148,6 +149,7 @@ define([
 
       // Apply the shift.
       entity.translate({latitude: 0, longitude: 0, elevation: shift});
+      Log.debug('Shifting entity ' + entity.getId() + ' ' + parseFloat(shift) + 'm for terrain.');
     },
 
     /**
@@ -157,27 +159,32 @@ define([
      * if the reverse is true.
      *
      * @param {atlas.model.GeoEntity} entity - The entity to calculate the shift for.
-     * @returns {Number} The GeoEntitys shift value.
+     * @returns {Promise} A promise for the GeoEntity's shift value.
      * @private
      */
     _getTerrainShift: function(entity) {
+      var deferred = Q.defer();
       var getGeopoints = entity.getVertices || entity._getFootprintVertices;
       var geoPoints = getGeopoints.bind(entity)();
 
       if (!geoPoints || geoPoints.length === 0) {
         Log.warn('Tried to retrieve terrain shift for entity ' + entity.getId() + ', which has' +
             'does not have a footprint');
-        return 0;
+        defer.resolve(0);
       }
 
-      var cartographics = geoPoints.map(this._managers.render.cartographicFromGeoPoint, this);
-      return sampleTerrain(this._localTerrain, 14, cartographics).then(function(terrainPoints) {
-        if (terrainPoints.length === 0) { return 0; }
+      // var cartographics = geoPoints.map(this._managers.render.cartographicFromGeoPoint, this);
+      // return sampleTerrain(this._localTerrain, 14, cartographics).then(function(terrainPoints) {
+      //   if (terrainPoints.length === 0) { return 0; }
 
-        return AtlasMath.max(terrainPoints.map(function(point) {
-          return point.height;
-        }));
+      //   return AtlasMath.max(terrainPoints.map(function(point) {
+      //     return point.height;
+      //   }));
+      // });
+      this._localTerrain.sampleTerrain(geoPoints).then(function(shift) {
+        deferred.resolve(shift);
       });
+      return deferred.promise;
     },
 
     /**
@@ -186,15 +193,20 @@ define([
      * @see {@link atlas.render.TerrainManager#_handleEnabledChange}.
      * @private
      */
-    _handleEnabledChange: function() {
+    _handleEnabledChange: function(args) {
       var enabled = this.isTerrainEnabled();
       var scene = this._managers.render.getScene();
+      var localProvider = this._getLocalProvider(args);
 
       if (!this._terrainAlreadySet) {
-        if (enabled) {
-          scene.terrainProvider = this._getLocalProvider();
+        if (localProvider.isTrueLocal()) {
+          localProvider.setEnabled(enabled);
         } else {
-          scene.terrainProvider = this._getEllipsoidProvider();
+          if (enabled) {
+            scene.terrainProvider = localProvider;
+          } else {
+            scene.terrainProvider = this._getEllipsoidProvider();
+          }
         }
       }
       scene.globe.enableLighting = enabled;
@@ -235,9 +247,11 @@ define([
      * the SRTM elevation data.
      * @private
      */
-    _getLocalProvider: function() {
+    _getLocalProvider: function(args) {
+      args = args || {};
       if (!this._localTerrain) {
-       this._localTerrain = new LocalTerrainProvider();
+        args.renderManager = this._managers.render;
+        this._localTerrain = new LocalTerrainProvider(args);
       }
       return this._localTerrain;
     },
