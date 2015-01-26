@@ -32,7 +32,7 @@ define([
       // line.setWidth(5);
       // line.setWidth('5px');
       console.log('Line length', line.getLength());
-
+      console.log('Line bounding box', line.getBoundingBox());
       console.log('line json', lineFeature.toJson());
 
       atlas.publish('camera/zoomTo',
