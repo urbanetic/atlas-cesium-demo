@@ -2,10 +2,11 @@ define([
   'atlas/material/Color',
   'atlas/model/Point',
   'atlas/util/Paths',
+  'atlas/util/WKT',
   'atlas-cesium/material/Color',
   'atlas-cesium/cesium/Source/Scene/BillboardCollection',
   'atlas-cesium/cesium/Source/Core/Cartesian3'
-], function(ColorCore, PointCore, Paths, Color, BillboardCollection, Cartesian3) {
+], function(ColorCore, PointCore, Paths, WKT, Color, BillboardCollection, Cartesian3) {
 
   /**
    * @typedef atlas-cesium.model.Point
@@ -63,6 +64,11 @@ define([
       this._super();
       var billboards = this._getBillboards();
       billboards.remove(this._billboard);
+    },
+
+    getOpenLayersGeometry: function() {
+      wkt = WKT.getInstance();
+      return wkt.openLayersPointsFromGeoPoints([this._position])[0];
     },
 
     _getBillboards: function() {
