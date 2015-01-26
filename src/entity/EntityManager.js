@@ -6,11 +6,12 @@ define([
   'atlas-cesium/model/GltfMesh',
   'atlas-cesium/model/Image',
   'atlas-cesium/model/Line',
+  'atlas-cesium/model/Point',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function(Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Polygon, Mesh,
+], function(Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Point, Polygon, Mesh,
     EntityManagerCore) {
 
   /**
@@ -34,6 +35,7 @@ define([
       Image: Image,
       Line: Line,
       Mesh: Mesh,
+      Point: Point,
       Polygon: Polygon,
       Collection: Collection
     },
