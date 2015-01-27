@@ -22,12 +22,24 @@ define([
         values[id] = i;
         feature.setHeight(0);
       });
+
+      // var opacity = 0.6;
+      // var red = Color.RED.clone();
+      // red.alpha = opacity;
+      // var green = Color.GREEN.clone();
+      // green.alpha = opacity;
+
       var args = {
         type: 'color',
         ids: Object.keys(values),
         config: {
           title: 'Color Projection',
-          values: values
+          values: values,
+          opacity: 0.6,
+          // codomain: {
+          //   startProj: red,
+          //   endProj: green
+          // }
         }
       };
       atlas.publish('projection/add', args);

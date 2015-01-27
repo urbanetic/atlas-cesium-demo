@@ -1,10 +1,11 @@
 define([
   'atlas/lib/utility/Class',
+  'atlas/lib/utility/Setter',
   'atlas/material/CheckPattern',
   'atlas/material/Color',
   'atlas/material/Style',
   'atlas/model/GeoPoint'
-], function(Class, CheckPattern, Color, Style, GeoPoint) {
+], function(Class, Setter, CheckPattern, Color, Style, GeoPoint) {
   return Class.extend({
 
     atlas: null,
@@ -65,7 +66,20 @@ define([
       styleC.setFillMaterial(fillC);
       featureC.setStyle(styleC);
 
-      console.log('featureC', featureC.toJson());
+      var featureCJson = featureC.toJson();
+      console.log('featureC', featureCJson);
+
+      // Create a new feature from the json of another.
+
+      var featureDId = 'featureD';
+      var featureDJson = Setter.clone(featureCJson);
+      featureDJson.id = featureDId;
+      atlas.publish('entity/create/bulk', {
+        features: [featureDJson]
+      });
+      var featureD = atlas._managers.entity.getById(featureDId);
+      console.log('featureD', featureD.toJson());
+      featureD.translate(translation);
     }
 
   });

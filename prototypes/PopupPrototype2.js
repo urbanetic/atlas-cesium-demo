@@ -11,7 +11,7 @@ define([
 
     _init: function(atlas) {
       this.atlas = atlas;
-      var atlasDomNode = atlas._managers.dom.getDom();
+      var atlasDomNode = atlas._managers.dom.getDomNode();
 
       $(function() {
         $('#cesium').css({

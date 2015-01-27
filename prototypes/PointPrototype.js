@@ -18,6 +18,8 @@ define([
       var featureB = features[1];
       var featureC = features[2];
 
+      // Create point feature.
+
       var pointAPosition = featureA.getCentroid().translate({longitude: 0.001, latitude: 0.001});
       var wkt = WKT.getInstance();
       var pointAWkt = wkt.wktFromGeoPoint(pointAPosition);
@@ -49,11 +51,38 @@ define([
       setInterval(function() {
         var colorName = colors[colorIndex % colors.length];
         var style = new Style({fillMaterial: new Color(colorName)});
-        console.log('color', colorName);
         pointA.setStyle(style);
         colorIndex++;
       }, 1000);
 
+      // Create point c3ml.
+
+      var pointBPosition = pointAPosition.translate({longitude: 0.001, latitude: 0.001});
+      var pointBId = 'point-B';
+      atlas.publish('entity/create/bulk', {
+        features: [
+          {
+            "id": pointBId,
+            "type": "point",
+            "latitude": pointBPosition.latitude,
+            "longitude": pointBPosition.longitude,
+            "elevation": 0,
+            "color": [
+              255,
+              18,
+              18,
+              255
+            ],
+            "parentId": "4f3cac0a-4c3d-45e8-938d-a024349bd853",
+            "children": [],
+            "show": true
+          }
+        ]
+      });
+
+      var pointB = atlas._managers.entity.getById(pointBId);
+      console.log('pointB', pointB.toJson());
+      
     }
 
   });
