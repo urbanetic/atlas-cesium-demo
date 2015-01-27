@@ -146,7 +146,9 @@ define([
         geometryInstances: instance,
         appearance: new PerInstanceColorAppearance({
           flat: false,
-          translucent: true
+          // TODO(aramk) If enabled this causes meshes with opaque colors to become transparent
+          // where they overlap (from the camera's perspective). Try to update cesium to fix this.
+          translucent: false
         }),
         debugShowBoundingVolume: false
       });

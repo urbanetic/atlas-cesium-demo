@@ -1,7 +1,7 @@
 // Meteor package definition.
 Package.describe({
   name: 'urbanetic:atlas-cesium',
-  version: '0.7.0_3',
+  version: '0.7.0_4',
   summary: 'An AGI Cesium <cesiumjs.org> implementation of the Atlas rendering API.',
   git: 'https://bitbucket.org/mutopia/atlas-cesium.git'
 });
