@@ -4,21 +4,14 @@ define([
   'atlas/util/Paths',
   'atlas/util/WKT',
   'atlas-cesium/material/Color',
-  'atlas-cesium/cesium/Source/Scene/BillboardCollection',
   'atlas-cesium/cesium/Source/Core/Cartesian3'
-], function(ColorCore, PointCore, Paths, WKT, Color, BillboardCollection, Cartesian3) {
+], function(ColorCore, PointCore, Paths, WKT, Color, Cartesian3) {
 
   /**
    * @typedef atlas-cesium.model.Point
    * @ignore
    */
   var Point;
-
-  /**
-   * A global {@link BillboardCollection} for all {@link atlas.model.Point} objects.
-   * @type {BillboardCollection}
-   */
-  var billboards;
 
   /**
    * @class atlas-cesium.model.Point
@@ -30,7 +23,7 @@ define([
 
     _build: function() {
       var renderManager = this._renderManager;
-      var billboards = this._getBillboards();
+      var billboards = renderManager.getBillboards();
       var position = renderManager.cartesianFromGeoPoint(this.getPosition());
       var eyeOffset = new Cartesian3(0, this.getElevation(), 0);
       var style = this.getStyle();
@@ -59,23 +52,13 @@ define([
 
     remove: function() {
       this._super();
-      var billboards = this._getBillboards();
+      var billboards = this._renderManager.getBillboards();
       billboards.remove(this._billboard);
     },
 
     getOpenLayersGeometry: function() {
       wkt = WKT.getInstance();
       return wkt.openLayersPointsFromGeoPoints([this._position])[0];
-    },
-
-    _getBillboards: function() {
-      if (!billboards) {
-        var renderManager = this._renderManager;
-        var primitives = renderManager.getPrimitives();
-        billboards = new BillboardCollection();
-        primitives.add(billboards);
-      }
-      return billboards;
     },
 
     _updateVisibility: function(visible) {

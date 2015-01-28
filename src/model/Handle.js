@@ -1,22 +1,14 @@
 define([
   'atlas/model/Handle',
   'atlas/util/Paths',
-  'atlas-cesium/cesium/Source/Scene/BillboardCollection',
   'atlas-cesium/cesium/Source/Core/Cartesian3'
-], function(HandleCore, Paths, BillboardCollection, Cartesian3) {
+], function(HandleCore, Paths, Cartesian3) {
 
   /**
    * @typedef atlas-cesium.model.Handle
    * @ignore
    */
   var Handle;
-
-  /**
-   * A global {@link BillboardCollection} for all {@link atlas.model.Handle} objects.
-   * @type {BillboardCollection}
-   */
-  // TODO(aramk) Store handle collection per entity? See http://cesiumjs.org/Cesium/Build/Documentation/BillboardCollection.html?classFilter=billbo
-  var billboards;
 
   /**
    * @class atlas-cesium.model.Handle
@@ -28,7 +20,7 @@ define([
 
     _build: function() {
       var renderManager = this._renderManager;
-      var billboards = this._getBillboards();
+      var billboards = renderManager.getBillboards();
       var position = renderManager.cartesianFromGeoPoint(this.getTarget());
       var eyeOffset = new Cartesian3(0, this.getElevation(), 0);
       if (this.isDirty('model') || this.isDirty('entity')) {
@@ -49,18 +41,8 @@ define([
 
     remove: function() {
       this._super();
-      var billboards = this._getBillboards();
+      var billboards = this._renderManager.getBillboards();
       billboards.remove(this._billboard);
-    },
-
-    _getBillboards: function() {
-      if (!billboards) {
-        var renderManager = this._renderManager;
-        var primitives = renderManager.getPrimitives();
-        billboards = new BillboardCollection();
-        primitives.add(billboards);
-      }
-      return billboards;
     },
 
     _updateVisibility: function(visible) {
