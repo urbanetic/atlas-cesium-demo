@@ -33,6 +33,10 @@ define([
         },
         translucent: isTranslucent
       });
+    },
+
+    clone: function() {
+      return new Color(this.toJson());
     }
 
   });

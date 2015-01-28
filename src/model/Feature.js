@@ -3,11 +3,12 @@ define([
   'atlas-cesium/model/GltfMesh',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Mesh',
+  'atlas-cesium/model/Point',
   'atlas-cesium/model/Polygon',
   'atlas-cesium/model/Image',
   // Base class
   'atlas/model/Feature'
-], function(Ellipse, GltfMesh, Line, Mesh, Polygon, Image, Feature) {
+], function(Ellipse, GltfMesh, Line, Mesh, Point, Polygon, Image, Feature) {
   /**
    * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
@@ -41,6 +42,9 @@ define([
       }
       if (args.ellipse) {
         args.ellipse = new Ellipse(id + 'ellipse', args.ellipse, args);
+      }
+      if (args.point) {
+        args.point = new Point(id + 'point', args.point, args);
       }
       if (args.polygon) {
         args.polygon = new Polygon(id + 'polygon', args.polygon, args);
