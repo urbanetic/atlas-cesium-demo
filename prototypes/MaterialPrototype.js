@@ -74,6 +74,8 @@ define([
       var featureDId = 'featureD';
       var featureDJson = Setter.clone(featureCJson);
       featureDJson.id = featureDId;
+      // Set color with RGBA.
+      featureDJson.color = featureDJson.polygon.color = 'rgba(96, 123, 121, 1)';
       atlas.publish('entity/create/bulk', {
         features: [featureDJson]
       });

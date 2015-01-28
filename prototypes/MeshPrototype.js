@@ -18,7 +18,7 @@ define([
       var entityManager = atlas._managers.entity;
       $.getJSON('assets/VIC_SH_2St_3Bed_roof.c3ml.json', function(c3ml) {
         c3ml.show = false;
-        c3ml.color = [255, 0, 0, 128];
+        c3ml.color = 'rgba(255, 0, 0, 1)';
         console.log('c3ml', c3ml);
         c3ml.geoLocation = [145.253159238, -37.81175024725, 0];
         atlas.publish('entity/create/bulk', {features: [c3ml]});
@@ -26,7 +26,8 @@ define([
         var id = c3ml.id;
         var meshFeature = entityManager.getById(id);
 
-        meshFeature.translate(new GeoPoint({latitude: 0.001, longitude: 0.001}));
+        var translation = new GeoPoint({latitude: 0.001, longitude: 0.001});
+        meshFeature.translate(translation);
 
         var mesh = meshFeature.getForm();
         var positions = mesh._getFootprintVertices();
@@ -57,6 +58,15 @@ define([
           });
           //mesh.show();
         }, 4000);
+
+        var id2 = id + '2';
+        c3ml.id = id2;
+        c3ml.show = true;
+        c3ml.color = 'blue';
+        atlas.publish('entity/create/bulk', {features: [c3ml]});
+        var meshFeature = entityManager.getById(id2);
+        meshFeature.translate(translation);
+        meshFeature.translate(new GeoPoint({latitude: 0.00001, longitude: 0.00001}));
 
       });
     }
