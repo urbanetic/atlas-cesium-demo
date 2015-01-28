@@ -19,9 +19,6 @@ define([
   var billboards;
 
   /**
-   * @classdesc This class extends the Atlas Handle class so it can be rendered
-   * using cesium.
-   *
    * @class atlas-cesium.model.Handle
    * @extends atlas.model.Handle
    */
