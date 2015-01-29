@@ -20,7 +20,8 @@ define([
 
       // Create point feature.
 
-      var pointAPosition = featureA.getCentroid().translate({longitude: 0.001, latitude: 0.001});
+      var pointAPosition = featureA.getCentroid()
+          .translate(new GeoPoint({longitude: 0.001, latitude: 0.001}));
       var wkt = WKT.getInstance();
       var pointAWkt = wkt.wktFromGeoPoint(pointAPosition);
 
@@ -57,7 +58,8 @@ define([
 
       // Create point c3ml.
 
-      var pointBPosition = pointAPosition.translate({longitude: 0.001, latitude: 0.001});
+      var pointBPosition = pointAPosition
+          .translate(new GeoPoint({longitude: 0.001, latitude: 0.001}));
       var pointBId = 'point-B';
       atlas.publish('entity/create/bulk', {
         features: [
