@@ -82,7 +82,7 @@ define([
     },
 
     // -------------------------------------------
-    // Local Terrain Data
+    // LOCAL TERRAIN DATA
     // -------------------------------------------
     setEnabled: function(enable) {
       if (!this.isTrueLocal()) {return;}
@@ -100,21 +100,21 @@ define([
      * @returns {Promise} A promise for an array of terrain elevations.
      */
     sampleTerrain: function(geoPoints) {
-      var deferred = Q.defer();
+      var df = Q.defer();
       if (this.isTrueLocal()) {
-        deferred.resolve(AtlasMath.max(this.getLocalData().sampleTerrain(geoPoints)));
+        df.resolve(AtlasMath.max(this.getLocalData().sampleTerrain(geoPoints)));
       } else {
         var cartographics = geoPoints.map(this._renderManager.cartographicFromGeoPoint, this);
         sampleTerrain(this._getCesiumProvider(), 14, cartographics).then(
             function(terrainPoints) {
           if (terrainPoints.length === 0) { return 0; }
 
-          deferred.resolve(AtlasMath.max(terrainPoints.map(function(point) {
+          df.resolve(AtlasMath.max(terrainPoints.map(function(point) {
             return point.height;
           })));
         });
       }
-      return deferred.promise;
+      return df.promise;
     },
 
     _getCesiumProvider: function() {

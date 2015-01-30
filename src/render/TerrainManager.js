@@ -163,28 +163,20 @@ define([
      * @private
      */
     _getTerrainShift: function(entity) {
-      var deferred = Q.defer();
+      var df = Q.defer();
       var getGeopoints = entity.getVertices || entity._getFootprintVertices;
       var geoPoints = getGeopoints.bind(entity)();
 
       if (!geoPoints || geoPoints.length === 0) {
         Log.warn('Tried to retrieve terrain shift for entity ' + entity.getId() + ', which has' +
             'does not have a footprint');
-        defer.resolve(0);
+        df.resolve(0);
       }
 
-      // var cartographics = geoPoints.map(this._managers.render.cartographicFromGeoPoint, this);
-      // return sampleTerrain(this._localTerrain, 14, cartographics).then(function(terrainPoints) {
-      //   if (terrainPoints.length === 0) { return 0; }
-
-      //   return AtlasMath.max(terrainPoints.map(function(point) {
-      //     return point.height;
-      //   }));
-      // });
       this._localTerrain.sampleTerrain(geoPoints).then(function(shift) {
-        deferred.resolve(shift);
+        df.resolve(shift);
       });
-      return deferred.promise;
+      return df.promise;
     },
 
     /**
