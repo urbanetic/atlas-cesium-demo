@@ -93,6 +93,12 @@ define([
       }
     },
 
+    /**
+     * Given a set of GeoPoints, the current terrain elevation model is queried to determine the
+     * terrain elevation at their location.
+     * @param {Array.<atlas.model.GeoPoint>} geoPoints - The GeoPoints to query at.
+     * @returns {Promise} A promise for an array of terrain elevations.
+     */
     sampleTerrain: function(geoPoints) {
       var deferred = Q.defer();
       if (this.isTrueLocal()) {
@@ -121,18 +127,10 @@ define([
       return this._cesiumProvider;
     },
 
-    //
-    // Delegate To Cesium Terrain Provider
-    //
-    // getRegularGridIndices: function() {
-    //   return TerrainProvider.getRegularGridIndices.apply(null, arguments);
-    // },
-
-    // getEstimatedLevelZeroGeometricErrorForAHeightmap: function() {
-    //   return TerrainProvider
-    //       .getEstimatedLevelZeroGeometricErrorForAHeightmap.apply(null, arguments);
-    // },
-
+    /**
+     * Delegates TerrainProvider static and CesiumTerrainProvider instance methods to the relevant
+     * object.
+     */
     _initDelegation: function() {
       // Delegate TerrainProvider static methods.
       ['getRegularGridIndices', 'getEstimatedLevelZeroGeometricErrorForAHeightmap']

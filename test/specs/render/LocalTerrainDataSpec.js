@@ -71,7 +71,7 @@ define([
     // -------------------------------------------
     // Terrain Sampling
     // -------------------------------------------
-    xdescribe('(Terrain sampling)', function() {
+    describe('(Terrain sampling)', function() {
       beforeEach(function() {
         // Generate some terrain data somehow.
         ltd = new LocalTerrainData(args);

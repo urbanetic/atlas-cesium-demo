@@ -42,7 +42,7 @@ define([
       }
 
       this._heightMap = new HeightMap(args.heightMap);
-      var centroid = this._heightMap._centroidFromGeoLocation();
+      var centroid = this._heightMap.getGeoLocation();
       args.mesh.geoLocation = centroid;
       this._mesh = new GltfMesh('local-terrain', args.mesh, {renderManager: args.renderManager});
       this.ready = true;
@@ -60,10 +60,16 @@ define([
       return this._heightMap.sampleTerrain(geoPoints);
     },
 
+    /**
+     * @returns {atlas.model.HeightMap} The LocalTerrainData terrain elevation model.
+     */
     getHeightMap: function() {
       return this._heightMap;
     },
 
+    /**
+     * @returns {atlas.model.Mesh} The LocalTerrainData terrain mesh.
+     */
     getMesh: function() {
       return this._mesh;
     },
