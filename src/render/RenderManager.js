@@ -6,6 +6,7 @@ define([
   'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Core/Cartographic',
   'atlas-cesium/cesium/Source/Core/requestAnimationFrame',
+  'atlas-cesium/cesium/Source/Scene/BillboardCollection',
   'atlas-cesium/cesium/Source/Scene/Imagery',
   'atlas-cesium/cesium/Source/Scene/ImageryState',
   'atlas-cesium/cesium/Source/Scene/SceneTransforms',
@@ -13,8 +14,9 @@ define([
   'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame, Imagery,
-            ImageryState, SceneTransforms, Viewer, CzmlDataSource, RenderManagerCore) {
+], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame,
+            BillboardCollection, Imagery, ImageryState, SceneTransforms, Viewer, CzmlDataSource,
+            RenderManagerCore) {
 
   /**
    * @typedef atlas-cesium.render.RenderManager
@@ -35,6 +37,11 @@ define([
      * @type {Viewer}
      */
     _widget: null,
+
+    /**
+     * @type {BillboardCollection}
+     */
+    _billboards: null,
 
     _init: function(managers) {
       this._super(managers);
@@ -477,6 +484,19 @@ define([
 
     getPrimitives: function() {
       return this._widget.scene.primitives;
+    },
+
+    /**
+     * @return {BillboardCollection} A global {@link BillboardCollection} for storing
+     *     {@link Billboard} objects.
+     */
+    getBillboards: function() {
+      var billboards = this._billboards;
+      if (!billboards) {
+        this._billboards = billboards = new BillboardCollection();
+        this.getPrimitives().add(billboards);
+      }
+      return billboards;
     },
 
     getScene: function() {

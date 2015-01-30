@@ -14,10 +14,11 @@ define([
   'atlas-cesium/cesium/Source/Scene/PolylineColorAppearance',
   'atlas/lib/utility/Log',
   'atlas/util/DeveloperError',
-  'atlas/util/Timers'
+  'atlas/util/Timers',
+  'atlas/util/WKT',
 ], function(ColorCore, Style, LineCore, Color, Handle, GeometryInstance, CorridorGeometry,
             PolylineGeometry, ColorGeometryInstanceAttribute, CornerType, Primitive,
-            PerInstanceColorAppearance, PolylineColorAppearance, Log, DeveloperError, Timers) {
+            PerInstanceColorAppearance, PolylineColorAppearance, Log, DeveloperError, Timers, WKT) {
   /**
    * @typedef atlas-cesium.model.Line
    * @ignore
@@ -275,6 +276,11 @@ define([
     // -------------------------------------------
     // GETTERS & SETTERS
     // -------------------------------------------
+
+    getOpenLayersGeometry: function() {
+      wkt = WKT.getInstance();
+      return wkt.openLayersPolylineFromGeoPoints(this._vertices);
+    },
 
     /**
      * @return {Boolean} Whether the geometry is a {@link PolylineGeometry} as opposed to a

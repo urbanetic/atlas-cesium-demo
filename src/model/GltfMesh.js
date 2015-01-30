@@ -2,9 +2,11 @@ define([
   'atlas/lib/Q',
   'atlas/lib/utility/Setter',
   'atlas/model/GeoPoint',
+  'atlas/model/Rectangle',
+  'atlas/util/WKT',
   'atlas-cesium/cesium/Source/Scene/Model',
   'atlas-cesium/model/Mesh'
-], function(Q, Setter, GeoPoint, CesiumModel, Mesh) {
+], function(Q, Setter, GeoPoint, Rectangle, WKT, CesiumModel, Mesh) {
 
   /**
    * @typedef {atlas-cesium.model.GltfMesh}
@@ -72,7 +74,8 @@ define([
     },
 
     getOpenLayersGeometry: function() {
-      throw new Error('Function _getOpenLayersGeometry not supported by GltfMesh');
+      wkt = WKT.getInstance();
+      return wkt.openLayersPointsFromGeoPoints([this._geoLocation])[0];
     },
 
     getCentroid: function() {
