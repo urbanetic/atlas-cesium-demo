@@ -10,6 +10,7 @@
   </script>
   <link rel="stylesheet/less" href="atlas/resources/atlas.less">
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
+  <link rel="stylesheet/less" href="prototypes/resources/dropzone.less">
   <style>
     html, body, #cesium {
       margin: 0;
@@ -34,7 +35,8 @@
         { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
         { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
         { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-        { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'}
+        { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'},
+        { name: 'dropzone', location: 'lib/dropzone/dist', main: 'dropzone-amd-module'}
       ]
     });
 
@@ -111,6 +113,7 @@
           './prototypes/PopupPrototype2',
           './prototypes/MaterialPrototype',
           './prototypes/PointPrototype',
+          './prototypes/AssetConversionPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2, 
@@ -118,7 +121,8 @@
                     GltfMeshPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
                     CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
-                    PopupPrototype, PopupPrototype2, MaterialPrototype, PointPrototype, Log) {
+                    PopupPrototype, PopupPrototype2, MaterialPrototype, PointPrototype,
+                    AssetConversionPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
           // new DrawPrototype(cesiumAtlas);
@@ -147,6 +151,7 @@
           // new PopupPrototype2(cesiumAtlas);
           // new MaterialPrototype(cesiumAtlas);
           // new PointPrototype(cesiumAtlas);
+          new AssetConversionPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);
