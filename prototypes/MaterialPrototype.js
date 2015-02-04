@@ -12,8 +12,9 @@ define([
 
     _init: function(atlas) {
       this.atlas = atlas;
+      var entityManager = atlas._managers.entity;
       
-      var features = atlas._managers.entity.getFeatures();
+      var features = entityManager.getFeatures();
       var featureA = features[0];
       var featureB = features[1];
       var featureC = features[2];
@@ -55,7 +56,7 @@ define([
         show: true
       });
 
-      var featureB = atlas._managers.entity.getById(featureBId);
+      var featureB = entityManager.getById(featureBId);
       console.log('featureB', featureB.toJson());
         
       // Set the opacity for one feature to 50%.
@@ -74,14 +75,18 @@ define([
       var featureDId = 'featureD';
       var featureDJson = Setter.clone(featureCJson);
       featureDJson.id = featureDId;
+      featureDPolyJson = entityManager.getById(featureDJson.forms.polygon).toJson();
+      featureDJson.forms.polygon = featureDPolyJson.id = featureDId + 'poly';
+      featureDPolyJson.parentId = featureDId;
       // Set color with RGBA.
-      featureDJson.color = featureDJson.polygon.color = 'rgba(96, 123, 121, 1)';
+      featureDPolyJson.color = 'rgba(96, 123, 121, 1)';
       atlas.publish('entity/create/bulk', {
-        features: [featureDJson]
+        features: [featureDJson, featureDPolyJson]
       });
-      var featureD = atlas._managers.entity.getById(featureDId);
+      var featureD = entityManager.getById(featureDId);
       console.log('featureD', featureD.toJson());
       featureD.translate(translation);
+      console.log('featureD children', featureD.getRecursiveChildren());
     }
 
   });
