@@ -18,7 +18,7 @@ define([
       var $dropzone = $('<div class="dropzone"></div>');
       $('body').append($dropzone);
       var dropzone = new Dropzone($dropzone[0], {
-        url: '/assets/upload',
+        url: 'http://acs.urbanetic.net/convert',
         dictDefaultMessage: 'Drop a file here or click to upload.',
         addRemoveLinks: false
       });
