@@ -39,9 +39,9 @@ define([
       }
 
       $.getJSON('assets/VIC_SH_2St_3Bed.c3ml.json', function(c3mls) {
-        c3mls.forEach(function(c3ml) {
-          c3ml.show = true;
-        });
+        // c3mls.forEach(function(c3ml) {
+        //   c3ml.show = true;
+        // });
         atlas.publish('entity/create/bulk', {
           features: c3mls,
           callback: function(ids) {
@@ -55,6 +55,7 @@ define([
             //     feature._bindDependencies({show: true}));
 
             var collection = getRootEntity(atlas._managers.entity.getById(ids[0]));
+            // var collection = atlas._managers.entity.getById(ids[ids.length - 1]);
             feature.setForm(Feature.DisplayMode.MESH, collection);
             feature.setDisplayMode(Feature.DisplayMode.MESH);
             // collection.setCentroid(c3mlPoint);
