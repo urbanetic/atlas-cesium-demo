@@ -25,7 +25,7 @@ define([
    * @param {Number} [args.height=0] - The extruded height when displaying as a extruded polygon.
    * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of
    * the Mesh or Polygon.
-   * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when
+   * @param {Boolean} [args.show=true] - Whether the feature should be initially shown when
    * created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of
    * 'footprint', 'extrusion' or 'mesh'.
