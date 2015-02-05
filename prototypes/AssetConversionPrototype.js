@@ -18,7 +18,7 @@ define([
       var $dropzone = $('<div class="dropzone"></div>');
       $('body').append($dropzone);
       var dropzone = new Dropzone($dropzone[0], {
-        url: 'http://acs.urbanetic.net/convert',
+        url: 'http://localhost:8080/convert',
         dictDefaultMessage: 'Drop a file here or click to upload.',
         addRemoveLinks: false
       });
@@ -28,10 +28,31 @@ define([
       dropzone.on('error', function() {
         console.log('error', arguments);
       });
+      var uploadId = 0;
       dropzone.on('success', function(file, response, progress) {
+        // TODO(aramk) Append upload Id to all new entities or existing set of entities.
+        uploadId++;
         console.log('success', arguments);
-        atlas.publish('entity/create/bulk', {features: response.c3mls});
-        atlas.publish('camera/zoomTo', {position: response.c3mls[0].coordinates[0]});
+        atlas.publish('entity/create/bulk', {features: response.c3mls, callback: function(ids) {
+          atlas.publish('entity/create/bulk', {
+            features: [{
+              id: 'upload-' + uploadId,
+              type: 'collection',
+              children: ids
+            }],
+            callback: function(ids) {
+              var collection = atlas.getManager('entity').getById(ids[0]);
+              var boundingBox = collection.getBoundingBox();
+              if (boundingBox) {
+                boundingBox.scale(1.5);
+                atlas.publish('camera/zoomTo', {
+                  // position: collection.getCentroid(),
+                  rectangle: boundingBox
+                });
+              }
+            }
+          });
+        }});
       });
     }
 
