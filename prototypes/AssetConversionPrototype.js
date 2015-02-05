@@ -28,8 +28,10 @@ define([
       dropzone.on('error', function() {
         console.log('error', arguments);
       });
-      dropzone.on('success', function() {
+      dropzone.on('success', function(file, response, progress) {
         console.log('success', arguments);
+        atlas.publish('entity/create/bulk', {features: response.c3mls});
+        atlas.publish('camera/zoomTo', {position: response.c3mls[0].coordinates[0]});
       });
     }
 
