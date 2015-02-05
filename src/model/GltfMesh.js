@@ -45,7 +45,8 @@ define([
         id: this.getId(),
         baseUrl: this._baseUrl,
         modelMatrix: this._getModelMatrix(),
-        scale: this._uniformScale
+        scale: this._uniformScale,
+        allowPicking: this.isSelectable()
       };
 
       if (this._gltf) {

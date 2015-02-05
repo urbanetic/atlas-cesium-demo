@@ -50,8 +50,8 @@ module.exports = function(config) {
     coverageReporter: {
       dir: 'atlas-cesium/coverage/',
       reporters: [
-        { type: 'html', subdir: 'report-html' },
-        { type: 'lcovonly', subdir: '.', file: 'lcov.dat' }
+        {type: 'html', subdir: 'report-html'},
+        {type: 'lcovonly', subdir: '.', file: 'lcov.dat'}
       ]
     },
 
