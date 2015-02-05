@@ -1,14 +1,14 @@
 define([
   'atlas-cesium/model/Ellipse',
   'atlas-cesium/model/GltfMesh',
+  'atlas-cesium/model/Image',
   'atlas-cesium/model/Line',
   'atlas-cesium/model/Mesh',
   'atlas-cesium/model/Point',
   'atlas-cesium/model/Polygon',
-  'atlas-cesium/model/Image',
   // Base class
   'atlas/model/Feature'
-], function(Ellipse, GltfMesh, Line, Mesh, Point, Polygon, Image, Feature) {
+], function(Ellipse, GltfMesh, Image, Line, Mesh, Point, Polygon, Feature) {
   /**
    * @classdesc A Feature represents an entity that can be visualised either
    * as a 2D footprint, an 3D extrusion of said footprint, or a 3D mesh.
@@ -25,7 +25,7 @@ define([
    * @param {Number} [args.height=0] - The extruded height when displaying as a extruded polygon.
    * @param {Number} [args.elevation=0] - The elevation (from the terrain surface) to the base of
    * the Mesh or Polygon.
-   * @param {Boolean} [args.show=false] - Whether the feature should be initially shown when
+   * @param {Boolean} [args.show=true] - Whether the feature should be initially shown when
    * created.
    * @param {String} [args.displayMode='footprint'] - Initial display mode of feature, one of
    * 'footprint', 'extrusion' or 'mesh'.
@@ -35,34 +35,15 @@ define([
    */
   return Feature.extend(/** @lends atlas-cesium.model.Feature# */ {
 
-    _setup: function(id, data, args) {
-      // TODO(bpstudds) Replace this with a factory.
-      if (args.line) {
-        args.line = new Line(id + 'line', args.line, args);
-      }
-      if (args.ellipse) {
-        args.ellipse = new Ellipse(id + 'ellipse', args.ellipse, args);
-      }
-      if (args.point) {
-        args.point = new Point(id + 'point', args.point, args);
-      }
-      if (args.polygon) {
-        args.polygon = new Polygon(id + 'polygon', args.polygon, args);
-      }
-      if (args.mesh) {
-        var MeshConstructor;
-        // Check for GLTF mesh, otherwise assume C3ML mesh.
-        if (args.mesh.gltf || args.mesh.gltfUrl) {
-          MeshConstructor = GltfMesh;
-        } else {
-          MeshConstructor = Mesh;
-        }
-        args.mesh = new MeshConstructor(id + 'mesh', args.mesh, args);
-      }
-      if (args.image) {
-        args.image = new Image(id + 'image', args.image, args);
-      }
-      this._super(id, data, args);
+    _formConstructors: {
+      Line: Line,
+      Ellipse: Ellipse,
+      Polygon: Polygon,
+      Point: Point,
+      Mesh: Mesh,
+      GltfMesh: GltfMesh,
+      Image: Image,
+      test: 123
     }
 
   });
