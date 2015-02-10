@@ -1,4 +1,5 @@
 define([
+  'atlas/lib/utility/Strings',
   'atlas/model/Collection',
   'atlas/model/GeoEntity',
   'atlas-cesium/model/Ellipse',
@@ -11,7 +12,7 @@ define([
   'atlas-cesium/model/Mesh',
   // Base class
   'atlas/entity/EntityManager'
-], function(Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Point, Polygon, Mesh,
+], function(Strings, Collection, GeoEntity, Ellipse, Feature, GltfMesh, Image, Line, Point, Polygon, Mesh,
     EntityManagerCore) {
 
   /**
@@ -58,6 +59,21 @@ define([
         }
       }, this);
       return entities;
+    },
+
+    /**
+     * Overridden to handle glTF meshes.
+     */
+    createEntity: function(id, data, args) {
+      args = this._bindDeps(args);
+      var type = this._sanitizeType(data.type);
+      var Constructor;
+      if (type == 'mesh' && (data.gltf || data.gltfUrl)) {
+        Constructor = this._entityTypes['GltfMesh'];
+      } else {
+        Constructor = this._entityTypes[Strings.toTitleCase(type)];
+      }
+      return new Constructor(id, data, args);
     },
 
     /**
