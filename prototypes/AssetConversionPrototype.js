@@ -16,14 +16,19 @@ define([
       this.atlas = atlas;
       console.log('Starting ACS');
       var $dropzone = $('<div class="dropzone"></div>');
+      var $mergeBox = $('<input id="mergeBox" type="checkbox"/>');
+      var $clearBtn = $('<button id="clearBtn">Clear</button>');
+      $clearBtn.click(function() {atlas.publish('entity/remove/all');});
       $('body').append($dropzone);
+      $dropzone.append($mergeBox, $clearBtn);
       var dropzone = new Dropzone($dropzone[0], {
-        url: 'http://localhost:8080/convert',
+        url: 'http://144.6.226.73/convert',
         dictDefaultMessage: 'Drop a file here or click to upload.',
         addRemoveLinks: false
       });
-      dropzone.on('sending', function() {
-        console.log('sending', arguments);
+      dropzone.on('sending', function(file, xhr, formData) {
+        formData.append("merge", $mergeBox.is(':checked'));
+        console.log('sending (merge = ' + $mergeBox.is(':checked') + ')', arguments);
       });
       dropzone.on('error', function() {
         console.log('error', arguments);
@@ -47,6 +52,7 @@ define([
                 boundingBox.scale(1.5);
                 atlas.publish('camera/zoomTo', {
                   // position: collection.getCentroid(),
+                  //position: 
                   rectangle: boundingBox
                 });
               }
