@@ -119,15 +119,8 @@ define([
       flightArgs.destination = destination;
       if (position) {
         if (!args.direction && orientation) {
-          // TODO(aramk) This is still somewhat problematic - giving default tilt still causes
-          // strange angles and isn't stable when Cesium is loading. Just omit the orientation
-          // if you're using the default during loading for now.
-
           // Use the given orientation in place of the direction.
           var cesiumCamera = this._renderManager.getCesiumCamera().clone();
-          // cesiumCamera.position = this._getPositionAsCartesian(position);
-          // cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
-          // cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
           cesiumCamera.setView({
             position: this._getPositionAsCartesian(position),
             heading: AtlasMath.toRadians(orientation.bearing),
