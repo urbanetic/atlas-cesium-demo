@@ -29,8 +29,8 @@ define([
 
     getPosition: function() {
       // TODO(aramk) This is accessing the global camera, not the current camera.
-      var cesiumCamera = this._renderManager.getCesiumCamera(),
-          cartesian = cesiumCamera.position;
+      var cesiumCamera = this._renderManager.getCesiumCamera();
+      var cartesian = cesiumCamera.position;
       return this._renderManager.geoPointFromCartesian(cartesian);
     },
 
@@ -41,9 +41,10 @@ define([
 
     _getOrientationFromCesiumCamera: function(camera) {
       // TODO(aramk) Rotation not handled.
-      var bearing = AtlasMath.toDegrees(camera.heading),
-          tilt = AtlasMath.toDegrees(camera.tilt);
-      return {bearing: bearing, rotation: 0, tilt: tilt}
+      var bearing = AtlasMath.toDegrees(camera.heading);
+      var roll = AtlasMath.toDegrees(camera.roll);
+      var tilt = AtlasMath.toDegrees(camera.pitch);
+      return {bearing: bearing, roll: roll, tilt: tilt};
     },
 
     setDirection: function(direction) {
@@ -53,19 +54,19 @@ define([
     },
 
     getDirection: function() {
-      var camera = this._renderManager.getCesiumCamera(),
-          direction = camera.direction;
+      var camera = this._renderManager.getCesiumCamera();
+      var direction = camera.direction;
       return new Vertex(direction);
     },
 
     getUp: function() {
-      var camera = this._renderManager.getCesiumCamera(),
-          up = camera.up;
+      var camera = this._renderManager.getCesiumCamera();
+      var up = camera.up;
       return new Vertex(up);
     },
 
     _getPositionAsCartesian: function(position) {
-      var position = position.toRadians();
+      position = position.toRadians();
       var cartographic =
           new Cartographic(position.longitude, position.latitude, position.elevation);
       return this._renderManager.getEllipsoid().cartographicToCartesian(cartographic);
@@ -81,8 +82,8 @@ define([
      */
     pointAt: function(point) {
       point = point.toRadians();
-      var cesiumCamera = this._renderManager.getCesiumCamera(),
-          ellipsoid = this._renderManager.getEllipsoid();
+      var cesiumCamera = this._renderManager.getCesiumCamera();
+      var ellipsoid = this._renderManager.getEllipsoid();
       var targetCartographic = new Cartographic(point.longitude, point.latitude, point.elevation);
       var target = ellipsoid.cartographicToCartesian(targetCartographic);
       cesiumCamera.lookAt(cesiumCamera.position, target, cesiumCamera.up);
@@ -95,11 +96,11 @@ define([
     _animate: function(args) {
       args = Setter.mixin({}, args);
       // TODO(aramk) Rename position and rectangle to just "destination".
-      var position = args.position,
-          rectangle = args.rectangle,
-          orientation = args.orientation,
-          scene = this._renderManager.getScene(),
-          destination;
+      var position = args.position;
+      var rectangle = args.rectangle;
+      var orientation = args.orientation;
+      var scene = this._renderManager.getScene();
+      var destination;
       var flightArgs = {
         // Cesium uses duration in seconds.
         duration: args.duration / 1000 || 0,
@@ -118,18 +119,16 @@ define([
       flightArgs.destination = destination;
       if (position) {
         if (!args.direction && orientation) {
-          // TODO(aramk) This is still somewhat problematic - giving default tilt still causes
-          // strange angles and isn't stable when Cesium is loading. Just omit the orientation
-          // if you're using the default during loading for now.
-
           // Use the given orientation in place of the direction.
           var cesiumCamera = this._renderManager.getCesiumCamera().clone();
-          cesiumCamera.position = this._getPositionAsCartesian(position);
-          cesiumCamera.tilt = AtlasMath.toRadians(orientation.tilt);
-          cesiumCamera.heading = AtlasMath.toRadians(orientation.bearing);
+          cesiumCamera.setView({
+            position: this._getPositionAsCartesian(position),
+            heading: AtlasMath.toRadians(orientation.bearing),
+            pitch: AtlasMath.toRadians(orientation.tilt),
+            roll: AtlasMath.toRadians(orientation.rotation)
+          });
           flightArgs.direction = cesiumCamera.direction;
           flightArgs.up = cesiumCamera.up;
-          // TODO(aramk) Handle rotation.
         } else {
           flightArgs.direction = args.direction;
           flightArgs.up = args.up;
