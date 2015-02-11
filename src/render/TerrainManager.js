@@ -164,13 +164,14 @@ define([
      */
     _getTerrainShift: function(entity) {
       var df = Q.defer();
+      // Try to establish the footprint vertices, otherwise fall back on the centroid.
       var getGeopoints = entity.getVertices || entity._getFootprintVertices;
       var geoPoints = getGeopoints.bind(entity)();
 
       if (!geoPoints || geoPoints.length === 0) {
-        Log.warn('Tried to retrieve terrain shift for entity ' + entity.getId() + ', which has' +
+        Log.warn('Tried to retrieve terrain shift for entity ' + entity.getId() + ', which ' +
             'does not have a footprint');
-        df.resolve(0);
+        geoPoints = [entity.getCentroid()];
       }
 
       this._localTerrain.sampleTerrain(geoPoints).then(function(shift) {

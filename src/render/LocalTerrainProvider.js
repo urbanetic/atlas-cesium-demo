@@ -54,8 +54,10 @@ define([
     _init: function(args) {
       args = args || {};
       this._renderManager = Setter.require(args, 'renderManager');
-      args.localTerrain.renderManager = args.renderManager;
-      args.localTerrain && this.setLocalData(args.localTerrain);
+      if (args.localTerrain) {
+        this.setLocalData(args.localTerrain);
+        args.localTerrain.renderManager = args.renderManager;
+      }
 
       if (!this.isTrueLocal()) {
         this._initDelegation();
@@ -101,6 +103,8 @@ define([
      */
     sampleTerrain: function(geoPoints) {
       var df = Q.defer();
+      if (!geoPoints || geoPoints.length === 0) {return Q.resolve(null);}
+
       if (this.isTrueLocal()) {
         df.resolve(AtlasMath.max(this.getLocalData().sampleTerrain(geoPoints)));
       } else {
