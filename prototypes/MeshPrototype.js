@@ -24,12 +24,11 @@ define([
         atlas.publish('entity/create/bulk', {features: [c3ml]});
 
         var id = c3ml.id;
-        var meshFeature = entityManager.getById(id);
+        var mesh = entityManager.getById(id);
 
         var translation = new GeoPoint({latitude: 0.001, longitude: 0.001});
-        meshFeature.translate(translation);
+        mesh.translate(translation);
 
-        var mesh = meshFeature.getForm();
         var positions = mesh._getFootprintVertices();
         console.log('positions', positions);
         var centroid = mesh.getCentroid();
@@ -44,7 +43,7 @@ define([
           }
         });
 
-        var centroidHandle = new Handle(meshFeature._bindDependencies({target: centroid, owner: meshFeature}));
+        var centroidHandle = new Handle(mesh._bindDependencies({target: centroid, owner: mesh}));
         centroidHandle.show();
 
         atlas.publish('camera/zoomTo', {position: centroid});
@@ -64,9 +63,9 @@ define([
         c3ml.show = true;
         c3ml.color = 'blue';
         atlas.publish('entity/create/bulk', {features: [c3ml]});
-        var meshFeature = entityManager.getById(id2);
-        meshFeature.translate(translation);
-        meshFeature.translate(new GeoPoint({latitude: 0.00001, longitude: 0.00001}));
+        var mesh = entityManager.getById(id2);
+        mesh.translate(translation);
+        mesh.translate(new GeoPoint({latitude: 0.00001, longitude: 0.00001}));
 
       });
     }
