@@ -84,12 +84,15 @@
               './prototypes/CameraPrototype',
               './prototypes/DrawPrototype',
               './prototypes/GeocoderPrototype',
-              './prototypes/InputPrototype'
-            ], function(CameraPrototype, DrawPrototype, GeocoderPrototype, InputPrototype) {
-//          new CameraPrototype(cesiumAtlas);
-              new DrawPrototype(cesiumAtlas);
-//          new GeocoderPrototype(cesiumAtlas);
-//          new InputPrototype(cesiumAtlas);
+              './prototypes/InputPrototype',
+              './prototypes/AreaPrototype'
+            ], function(CameraPrototype, DrawPrototype, GeocoderPrototype, InputPrototype,
+                        AreaPrototype) {
+              // new CameraPrototype(cesiumAtlas);
+              // new DrawPrototype(cesiumAtlas);
+              // new GeocoderPrototype(cesiumAtlas);
+              // new InputPrototype(cesiumAtlas);
+              new AreaPrototype(cesiumAtlas);
             });
           }, 2000);
 

@@ -27,16 +27,28 @@
     require.config({
       baseUrl: '',
       packages: [
-        { name: 'atlas', location: 'atlas/src'},
-        { name: 'atlas/lib', location: 'atlas/lib'},
-        { name: 'atlas/lib/utility', location: 'atlas/lib/utility/src'},
-        { name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
-        { name: 'atlas-cesium', location: 'atlas-cesium/src'},
-        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-        { name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
-        { name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
-        { name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'},
-        { name: 'dropzone', location: 'lib/dropzone/dist', main: 'dropzone-amd-module'}
+        {name: 'atlas', location: 'atlas/src'},
+        {name: 'atlas/lib', location: 'atlas/lib'},
+        {name: 'atlas/lib/utility', location: 'atlas/lib/utility/src'},
+        {name: 'atlas/assets', location: 'atlas/assets'}, // Only need this for testing
+        {name: 'atlas-cesium', location: 'atlas-cesium/src'},
+        {name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        {name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
+        {name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
+        {name: 'dropzone', location: 'lib/dropzone/dist', main: 'dropzone-amd-module'},
+        {name: 'jquery', location: 'lib/jquery/dist', main: 'jquery.min'},
+
+        // These all belong to subdiv.
+        {name: 'atlas/lib/subdiv', location: 'atlas/lib/subdiv/src'},
+        {name: 'ConvexHullGrahamScan', location: 'atlas/lib/subdiv/lib', main: 'ConvexHullGrahamScan'},
+        {name: 'hull', location: 'atlas/lib/subdiv/lib', main: 'hull'},
+        {name: 'jsts', location: 'atlas/lib/subdiv/lib/jsts'},
+        {name: 'tinycolor', location: 'atlas/lib/subdiv/lib', main: 'tinycolor'},
+        {name: 'underscore', location: 'atlas/lib/subdiv/lib', main: 'underscore'},
+        {name: 'utility', location: 'atlas/lib/subdiv/lib/utility'},
+
+        // This is the expected name of utm-converter in subdiv.
+        {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
       ]
     });
 
@@ -114,6 +126,7 @@
           './prototypes/MaterialPrototype',
           './prototypes/PointPrototype',
           './prototypes/AssetConversionPrototype',
+          './prototypes/AreaPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
@@ -122,7 +135,7 @@
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
                     CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
                     PopupPrototype, PopupPrototype2, MaterialPrototype, PointPrototype,
-                    AssetConversionPrototype, Log) {
+                    AssetConversionPrototype, AreaPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
           // new DrawPrototype(cesiumAtlas);
@@ -131,7 +144,7 @@
           // new RotationPrototype(cesiumAtlas);
           // new ScalePrototype(cesiumAtlas);
           // new MeshPrototype(cesiumAtlas);
-          new MeshPrototype2(cesiumAtlas);
+          // new MeshPrototype2(cesiumAtlas);
           // new MeshPrototype3(cesiumAtlas);
           // new MeshPrototype4(cesiumAtlas);
           // new MeshPrototype5(cesiumAtlas);
@@ -152,6 +165,7 @@
           // new MaterialPrototype(cesiumAtlas);
           // new PointPrototype(cesiumAtlas);
           // new AssetConversionPrototype(cesiumAtlas);
+          new AreaPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 2000);
