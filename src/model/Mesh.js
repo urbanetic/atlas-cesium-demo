@@ -150,7 +150,8 @@ define([
           // where they overlap (from the camera's perspective). Try to update cesium to fix this.
           translucent: false
         }),
-        allowPicking: this.isSelectable()
+        allowPicking: this.isSelectable(),
+        asynchronous: false
       });
       return thePrimitive;
     },
