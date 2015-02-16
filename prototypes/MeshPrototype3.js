@@ -29,15 +29,14 @@ define([
       });
 
       var polyArgs = {
-        id: 'poly123',
-        show: false
+        id: 'poly123'
       };
       polyArgs.polygon = {
         vertices: testWKT[0],
         elevation: 0,
         height: 20
       };
-      cesiumAtlas.publish('entity/show', polyArgs);
+      cesiumAtlas.publish('entity/create', polyArgs);
       var feature = entityManager.getById('poly123');
       var polygon = feature.getForm();
       console.log('feature', feature);
@@ -65,7 +64,7 @@ define([
 
       return;
 
-      testMesh.show = false      
+      testMesh.show = false;
 
       atlas.publish('entity/create/bulk', {features: [testMesh]});
 

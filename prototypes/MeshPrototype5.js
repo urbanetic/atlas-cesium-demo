@@ -29,12 +29,12 @@ define([
         c3ml.show = true;
         console.log('c3ml', c3ml);
         atlas.publish('entity/create/bulk', {features: [c3ml]});
-        var feature = entityManager.getById(c3ml.id);
+        var mesh = entityManager.getById(c3ml.id);
         // feature.setForm(Feature.DisplayMode.MESH, meshFeature);
-        var mesh = feature.getForm(Feature.DisplayMode.MESH);
 
         mesh.setCentroid(targetPosition);
 
+        targetPosition.elevation = 2000;
         cesiumAtlas.publish('camera/zoomTo', {
           position: targetPosition
         });

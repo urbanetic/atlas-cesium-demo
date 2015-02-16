@@ -13,30 +13,30 @@ define([
 
     atlas: null,
 
-    _init: function(atlas) {
+    _init: function(atlas, location) {
       this.atlas = atlas;
 
-      var location = new GeoPoint({
+      this.location = location || {
         latitude: -37.924113,
         longitude: 144.886450,
         elevation: -1000
-      });
+      };
 
       atlas.publish('entity/create', {
         id: 'duck',
         mesh: {
           gltfUrl: './assets/duck-no-light.gltf',
           baseUrl: './assets',
-          uniformScale: 2000,
-          geoLocation: location
+          uniformScale: 20,
+          geoLocation: this.location
         },
         show: true
       });
       var mesh = atlas.getManager('entity').getById('duck');
 
-      location.elevation = 10000;
+      this.location.elevation = 2000;
       atlas.publish('camera/zoomTo', {
-        position: location
+        position: this.location
       });
 
       console.log('mesh json', mesh.toJson());

@@ -121,7 +121,7 @@ define([
             //   entity: feature,
             //   content: function(args) {
             //     var entity = args.entity;
-            //     return '<div>A brief description of the entity.</div>' + 
+            //     return '<div>A brief description of the entity.</div>' +
             //     '<div>Area: ' + entity.getArea() + '</div>';
             //   },
             //   title: function(args) {
