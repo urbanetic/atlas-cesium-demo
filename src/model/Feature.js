@@ -36,14 +36,13 @@ define([
   return Feature.extend(/** @lends atlas-cesium.model.Feature# */ {
 
     _formConstructors: {
-      Line: Line,
-      Ellipse: Ellipse,
-      Polygon: Polygon,
       Point: Point,
+      Line: Line,
+      Polygon: Polygon,
+      Ellipse: Ellipse,
       Mesh: Mesh,
       GltfMesh: GltfMesh,
-      Image: Image,
-      test: 123
+      Image: Image
     }
 
   });
