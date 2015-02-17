@@ -351,7 +351,17 @@ define([
      *     screen coordinates.
      */
     getAt: function(screenCoords) {
-      var pickedPrimitives = this.getScene().drillPick(screenCoords);
+      // Drill picking is currently not working with our primitives. The fix at
+      //   https://github.com/AnalyticalGraphicsInc/cesium/issues/2442
+      // causes it to break because we are not using ShowGeometryInstanceAttributes on our
+      // GeometryInstances.
+      // var pickedPrimitives = this.getScene().drillPick(screenCoords);
+
+      // Work around for above problem. This means only the top most entity (if multiple entites
+      // are stacked on each other) can be selected.
+      var pickedPrimitives = this.getScene().pick(screenCoords);
+      pickedPrimitives = pickedPrimitives ? [pickedPrimitives] : [];
+
       var pickedIds = [];
       pickedPrimitives.forEach(function(p) {
         // NOTE: This is the geometry ID assigned in the model implementations.
