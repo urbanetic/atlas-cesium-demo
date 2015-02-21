@@ -277,11 +277,6 @@ define([
     // GETTERS & SETTERS
     // -------------------------------------------
 
-    getOpenLayersGeometry: function() {
-      wkt = WKT.getInstance();
-      return wkt.openLayersPolylineFromGeoPoints(this._vertices);
-    },
-
     /**
      * @return {Boolean} Whether the geometry is a {@link PolylineGeometry} as opposed to a
      * {@link CorridorGeometry} or not existing.

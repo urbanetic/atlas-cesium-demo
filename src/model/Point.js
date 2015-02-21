@@ -56,11 +56,6 @@ define([
       billboards.remove(this._billboard);
     },
 
-    getOpenLayersGeometry: function() {
-      wkt = WKT.getInstance();
-      return wkt.openLayersPointsFromGeoPoints([this._position])[0];
-    },
-
     _updateVisibility: function(visible) {
       if (this._billboard) this._billboard.show = visible;
     },

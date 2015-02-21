@@ -284,10 +284,18 @@ define([
 
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
     // for now.
-    getOpenLayersGeometry: function() {
+    getOpenLayersGeometry: function(args) {
       // TODO(bpstudds): This function is not compatible with GLTF.
+      var wkt = WKT.getInstance();
       var vertices = this._getFootprintVertices();
-      return WKT.getInstance().openLayersPolygonFromGeoPoints(vertices);
+      if (args && args.utm) {
+        vertices = vertices.map(function(point) {
+          return point.toUtm().coord;
+        });
+        return wkt.openLayersPolygonFromVertices(vertices);
+      } else {
+        return wkt.openLayersPolygonFromGeoPoints(vertices);
+      }
     },
 
     /**
