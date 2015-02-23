@@ -278,14 +278,12 @@ define([
      * @private
      */
     _getFootprintVertices: function() {
-      // TODO(bpstudds): This function is not compatible with GLTF.
       return ConvexHullFactory.getInstance().fromVertices(this._calcVertices());
     },
 
     // TODO(aramk) Add support for this in Atlas - it needs matrix functions from _calcVertices
     // for now.
     getOpenLayersGeometry: function(args) {
-      // TODO(bpstudds): This function is not compatible with GLTF.
       var wkt = WKT.getInstance();
       var vertices = this._getFootprintVertices();
       if (args && args.utm) {

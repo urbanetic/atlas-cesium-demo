@@ -76,7 +76,7 @@ define([
     getOpenLayersGeometry: function(args) {
       var wkt = WKT.getInstance();
       if (args && args.utm) {
-        return wkt.openLayersPointsFromGeoPoints([this._position.toUtm().coord])[0];
+        return wkt.openLayersPointsFromVertices([this._position.toUtm().coord])[0];
       } else {
         return wkt.openLayersPointsFromGeoPoints([this._position])[0];
       }
