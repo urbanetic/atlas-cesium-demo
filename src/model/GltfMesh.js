@@ -73,9 +73,13 @@ define([
       throw new Error('Function _getFootprintVertices not supported by GltfMesh');
     },
 
-    getOpenLayersGeometry: function() {
-      wkt = WKT.getInstance();
-      return wkt.openLayersPointsFromGeoPoints([this._geoLocation])[0];
+    getOpenLayersGeometry: function(args) {
+      var wkt = WKT.getInstance();
+      if (args && args.utm) {
+        return wkt.openLayersPointsFromVertices([this._position.toUtm().coord])[0];
+      } else {
+        return wkt.openLayersPointsFromGeoPoints([this._position])[0];
+      }
     },
 
     getCentroid: function() {
