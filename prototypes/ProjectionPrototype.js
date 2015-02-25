@@ -50,7 +50,11 @@ define([
         ids: Object.keys(values),
         config: {
           title: 'Height Projection',
-          values: values
+          values: values,
+          codomain: {
+            startProj: 5,
+            endProj: 300
+          }
         }
       };
       atlas.publish('projection/add', args2);

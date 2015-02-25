@@ -12,9 +12,10 @@
   <link rel="stylesheet/less" href="atlas-cesium/resources/atlas-cesium.less">
   <link rel="stylesheet/less" href="prototypes/resources/dropzone.less">
   <style>
-    html, body, #cesium {
+    html, body {
       margin: 0;
       height: 100%;
+      width: 100%;
     }
   </style>
   <script src="atlas/lib/less/dist/less-1.7.0.min.js"></script>
@@ -45,7 +46,7 @@
         {name: 'jsts', location: 'atlas/lib/subdiv/lib/jsts'},
         {name: 'tinycolor', location: 'atlas/lib/subdiv/lib', main: 'tinycolor'},
         {name: 'underscore', location: 'atlas/lib/subdiv/lib', main: 'underscore'},
-        {name: 'utility', location: 'atlas/lib/subdiv/lib/utility'},
+        {name: 'utility', location: 'atlas/lib/subdiv/lib/utility/src'},
 
         // This is the expected name of utm-converter in subdiv.
         {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
@@ -156,8 +157,8 @@
           // new RenderPrototype(cesiumAtlas);
           // new StylePrototype(cesiumAtlas);
           // new EventPrototype(cesiumAtlas);
-          // new ProjectionPrototype(cesiumAtlas);
-          new CollectionPrototype(cesiumAtlas);
+          new ProjectionPrototype(cesiumAtlas);
+          // new CollectionPrototype(cesiumAtlas);
           // new SelectionPrototype(cesiumAtlas);
           // new PolygonTransformPrototype(cesiumAtlas);
           // new PopupPrototype(cesiumAtlas);
