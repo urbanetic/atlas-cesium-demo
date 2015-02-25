@@ -17,7 +17,7 @@ define([
       var featureIds = features.map(function(feature) {
         return feature.getId();
       });
-      var collection = entityManager.createCollection('c1', {entities: featureIds});
+      var collection = entityManager.createCollection('c1', {children: featureIds});
 
       // Rotating a collection should rotate around the collection's centroid rather than that of
       // each individual component.
@@ -49,17 +49,18 @@ define([
       var c2 = entityManager.getById('c2');
       console.log(c2);
       console.log('c2 json', c2.toJson());
-
-      // Removing an entity from a collection should remove it from the collection model as well.
-      console.log(c2.getEntity(collection.getId()));
-      collection.remove();
-      console.log(c2.getEntity(collection.getId()));
+      console.log('c2 bounding box', c2.getBoundingBox());
 
       // Removing the form of a feature should remove it from the feature model.
       var form = feature.getForm();
       console.log(feature.getForm(feature.getDisplayMode()));
       form.remove();
       console.log(feature.getForm(feature.getDisplayMode()));
+
+      // Removing an entity from a collection should remove it from the collection model as well.
+      console.log(c2.getEntity(collection.getId()));
+      collection.remove();
+      console.log(c2.getEntity(collection.getId()));
     }
 
   });
