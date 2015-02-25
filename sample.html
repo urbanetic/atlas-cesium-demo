@@ -119,6 +119,7 @@
           './prototypes/StylePrototype',
           './prototypes/EventPrototype',
           './prototypes/ProjectionPrototype',
+          './prototypes/DynamicProjectionPrototype',
           './prototypes/CollectionPrototype',
           './prototypes/SelectionPrototype',
           './prototypes/PolygonTransformPrototype',
@@ -134,9 +135,9 @@
                     MeshPrototype3, MeshPrototype4, MeshPrototype5, MeshCollectionPrototype,
                     GltfMeshPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    CollectionPrototype, SelectionPrototype, PolygonTransformPrototype,
-                    PopupPrototype, PopupPrototype2, MaterialPrototype, PointPrototype,
-                    AssetConversionPrototype, AreaPrototype, Log) {
+                    DynamicProjectionPrototype, CollectionPrototype, SelectionPrototype,
+                    PolygonTransformPrototype, PopupPrototype, PopupPrototype2, MaterialPrototype,
+                    PointPrototype, AssetConversionPrototype, AreaPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
           // new DrawPrototype(cesiumAtlas);
@@ -157,7 +158,8 @@
           // new RenderPrototype(cesiumAtlas);
           // new StylePrototype(cesiumAtlas);
           // new EventPrototype(cesiumAtlas);
-          new ProjectionPrototype(cesiumAtlas);
+          // new ProjectionPrototype(cesiumAtlas);
+          new DynamicProjectionPrototype(cesiumAtlas);
           // new CollectionPrototype(cesiumAtlas);
           // new SelectionPrototype(cesiumAtlas);
           // new PolygonTransformPrototype(cesiumAtlas);
