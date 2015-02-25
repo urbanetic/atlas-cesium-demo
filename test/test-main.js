@@ -42,7 +42,7 @@ requirejs.config({
     {name: 'jsts', location: 'atlas/lib/subdiv/lib/jsts'},
     {name: 'tinycolor', location: 'atlas/lib/subdiv/lib', main: 'tinycolor'},
     {name: 'underscore', location: 'atlas/lib/subdiv/lib', main: 'underscore'},
-    {name: 'utility', location: 'atlas/lib/subdiv/lib/utility'},
+    {name: 'utility', location: 'atlas/lib/subdiv/lib/utility/src'},
 
     // This is the expected name of utm-converter in subdiv.
     {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
