@@ -17,7 +17,7 @@ define([
       var featureIds = features.map(function(feature) {
         return feature.getId();
       });
-      var collection = entityManager.createCollection('c1', {children: featureIds});
+      var collection = entityManager.createCollection('c1', {children: featureIds.slice(0, 2)});
 
       // Rotating a collection should rotate around the collection's centroid rather than that of
       // each individual component.
