@@ -16,11 +16,12 @@ define([
       this.atlas = atlas;
       console.log('Starting ACS');
       var $dropzone = $('<div class="dropzone"></div>');
+      var $label = $('<label>Merge</label>');
       var $mergeBox = $('<input id="mergeBox" type="checkbox"/>');
       var $clearBtn = $('<button id="clearBtn">Clear</button>');
       $clearBtn.click(function() {atlas.publish('entity/remove/all');});
       $('body').append($dropzone);
-      $dropzone.append($mergeBox, $clearBtn);
+      $dropzone.append($label, $mergeBox, $clearBtn);
       var dropzone = new Dropzone($dropzone[0], {
         url: 'http://144.6.226.73/convert',
         // url: 'http://localhost:8090/convert',
