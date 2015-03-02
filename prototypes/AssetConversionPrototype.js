@@ -22,8 +22,8 @@ define([
       $('body').append($dropzone);
       $dropzone.append($mergeBox, $clearBtn);
       var dropzone = new Dropzone($dropzone[0], {
-        url: 'http://144.6.226.73/convert',
-        // url: 'http://localhost:8090/convert',
+        url: 'http://acs.urbanetic.net/convert',
+        //url: 'http://localhost:8090/convert',
         dictDefaultMessage: 'Drop a file here or click to upload.',
         addRemoveLinks: false
       });
