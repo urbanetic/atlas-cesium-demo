@@ -1,8 +1,8 @@
 define([
   'atlas/lib/utility/Class',
   'atlas/model/GeoEntity',
-  'jquery'
-], function(Class, GeoEntity, $) {
+  'atlas/model/GeoPoint'
+], function(Class, GeoEntity, GeoPoint) {
   return Class.extend({
 
     atlas: null,
@@ -13,65 +13,15 @@ define([
       var features = entityManager.getFeatures();
       var feature = features[0];
       var entity = feature.getForm();
-      setTimeout(function() {
-        console.log('starting test');
-
-        entity._build();
-
-//        setTimeout(function() {
-          entity.setDirty('model');
-//        entity.setDirty('style');
-          entity._build();
-//        }, 1000);
-
-//      entity.setStyle(GeoEntity.getSelectedStyle());
-
-//      feature.setSelected(true);
-//        entity.setSelected(true);
-//      entity.setDirty('model');
-
-//      entity.setDirty('style');
-//      entity.setDirty('model');
-//      feature.setDirty('model');
-//      feature.setDirty('style');
-
-//      entity.enableExtrusion();
-
-//      entity._build();
-//      entity.show();
-//      feature.show();
-//      feature.show();
-        return;
-        entity.show();
-
-//        var id = entity.getId();
-//        var entity2 = entityManager.getById(id);
-//        console.log('entity2', entity2, id);
-
-//        atlas.publish('entity/show', {id: id});
-
-//        return;
-        setTimeout(function() {
-          entity.setSelected(true);
-//          entity.setSelected(true);
-          setTimeout(function() {
-            // TODO(aramk) FAILS
-            entity.show();
-            return;
-            setTimeout(function() {
-              entity.setSelected(true);
-              setTimeout(function() {
-                entity.show();
-              }, 100);
-            }, 100);
-          }, 100);
-        }, 100);
-
-//        setTimeout(function() {
-//          console.debug('show', entity);
-//          entity.show();
-//        }, 4000);
-      }, 2000);
+      
+      var newEntityId = 'foo';
+      var entityJson = entity.toJson();
+      entityJson.height = 100;
+      entityJson.id = newEntityId;
+      console.log('entityJson', entityJson);
+      atlas.publish('entity/create/bulk', {features: [entityJson]});
+      var newEntity = entityManager.getById(newEntityId);
+      newEntity.translate(new GeoPoint(0.001, 0.001));
     }
 
   });

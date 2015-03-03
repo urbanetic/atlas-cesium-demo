@@ -41,7 +41,8 @@ define([
           {
             id: 'c2',
             type: 'collection',
-            children: ['c1']
+            children: ['c1'],
+            color: 'green'
           }
         ]
       });
@@ -57,10 +58,13 @@ define([
       form.remove();
       console.log(feature.getForm(feature.getDisplayMode()));
 
-      // Removing an entity from a collection should remove it from the collection model as well.
-      console.log(c2.getEntity(collection.getId()));
-      collection.remove();
-      console.log(c2.getEntity(collection.getId()));
+      // setTimeout(function() {
+      //   // Removing an entity from a collection should remove it from the collection model as well.
+      //   console.log(c2.getEntity(collection.getId()));
+      //   collection.remove();
+      //   console.log(c2.getEntity(collection.getId()));
+      // }, 5000);
+
     }
 
   });
