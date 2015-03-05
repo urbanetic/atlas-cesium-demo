@@ -50,42 +50,35 @@ module.exports = function(grunt) {
   grunt.initConfig({
 
     shell: {
+      options: {
+        stdout: true,
+        stderr: true,
+        failOnError: true
+      },
       // Installs all NodeJS dependencies.
       installNpmDep: {
-        options: {
-          stdout: true
-        },
         command: 'npm install --cache-min 999999999'
       },
 
       // Installs all Bower dependencies.
       installBowerDep: {
-        options: {
-          stdout: true
-        },
-        command: 'bower install'
+        command: 'bower install --allow-root'
       },
 
       // Updates all NodeJS dependencies.
       updateNpmDep: {
-        options: {
-          stdout: true
-        },
         command: 'npm update'
       },
 
       // Updates all Bower dependencies.
       updateBowerDep: {
-        options: {
-          stdout: true
-        },
-        command: 'bower update'
+        command: 'bower update --allow-root'
       },
 
       // Builds the Cesium source code.
       buildCesiumDev: {
         options: {
-          stdout: false, stderr: true
+          stdout: false
         },
         command: [
               'cd ' + cesiumPath(),
