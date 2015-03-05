@@ -17,10 +17,7 @@ define([
       var featureIds = features.map(function(feature) {
         return feature.getId();
       });
-      // TODO(aramk) Use dependendency injection or allow adding collections from entity manager.
-      // This is a hack!
-      var args = feature._bindDependencies({show: true});
-      var collection = new Collection('c1', {entities: featureIds}, args);
+      var collection = entityManager.createCollection('c1', {children: featureIds.slice(0, 2)});
 
       // Rotating a collection should rotate around the collection's centroid rather than that of
       // each individual component.
@@ -44,7 +41,8 @@ define([
           {
             id: 'c2',
             type: 'collection',
-            children: ['c1']
+            children: ['c1'],
+            color: 'green'
           }
         ]
       });
@@ -52,6 +50,20 @@ define([
       var c2 = entityManager.getById('c2');
       console.log(c2);
       console.log('c2 json', c2.toJson());
+      console.log('c2 bounding box', c2.getBoundingBox());
+
+      // Removing the form of a feature should remove it from the feature model.
+      var form = feature.getForm();
+      console.log(feature.getForm(feature.getDisplayMode()));
+      form.remove();
+      console.log(feature.getForm(feature.getDisplayMode()));
+
+      // setTimeout(function() {
+      //   // Removing an entity from a collection should remove it from the collection model as well.
+      //   console.log(c2.getEntity(collection.getId()));
+      //   collection.remove();
+      //   console.log(c2.getEntity(collection.getId()));
+      // }, 5000);
 
     }
 

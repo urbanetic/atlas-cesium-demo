@@ -15,13 +15,24 @@ define([
       var atlas = this.atlas;
       var entityManager = atlas._managers.entity;
       var features = entityManager.getFeatures();
-      // Generate dummy values for projection.
-      var values = {};
-      features.forEach(function(feature, i) {
-        var id = feature.getId();
-        values[id] = i;
-        feature.setHeight(0);
-      });
+      var timeSteps = 20;
+
+      var data = [];
+      var ids = [];
+      var stepValues;
+      var stepArgs;
+      for (var i = 0; i < timeSteps; i++) {
+        // Generate dummy values for projection.
+        stepValues = {};
+        stepArgs = {index: i, values: stepValues};
+        data.push(stepArgs);
+        features.forEach(function(feature, j) {
+          var id = feature.getId();
+          ids.push(id);
+          stepValues[id] = i + j;
+          feature.setHeight(0);
+        });
+      }
 
       // var opacity = 0.6;
       // var red = Color.RED.clone();
@@ -31,10 +42,10 @@ define([
 
       var args = {
         type: 'color',
-        ids: Object.keys(values),
+        ids: ids,
+        data: data,
         config: {
           title: 'Color Projection',
-          values: values,
           opacity: 0.6,
           // codomain: {
           //   startProj: red,
@@ -42,22 +53,22 @@ define([
           // }
         }
       };
-      atlas.publish('projection/add', args);
+      atlas.publish('projection/dynamic/add', args);
       atlas.publish('projection/render', {id: args.projection.getId()});
 
       var args2 = {
         type: 'height',
-        ids: Object.keys(values),
+        ids: ids,
+        data: data,
         config: {
           title: 'Height Projection',
-          values: values,
           codomain: {
             startProj: 5,
             endProj: 300
           }
         }
       };
-      atlas.publish('projection/add', args2);
+      atlas.publish('projection/dynamic/add', args2);
       atlas.publish('projection/render', {id: args2.projection.getId()});
     }
 
