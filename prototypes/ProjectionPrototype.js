@@ -59,6 +59,11 @@ define([
       };
       atlas.publish('projection/add', args2);
       atlas.publish('projection/render', {id: args2.projection.getId()});
+
+      setTimeout(function() {
+        atlas.publish('projection/remove', {id: args.projection.getId()});
+        atlas.publish('projection/remove', {id: args2.projection.getId()});
+      }, 5000);
     }
 
   });

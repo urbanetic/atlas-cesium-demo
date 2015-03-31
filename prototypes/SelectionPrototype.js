@@ -28,15 +28,23 @@ define([
         console.log('entity/deselect', arguments);
       });
 
-      var someFeature = features[0];
-      someFeature.setSelected(false);
+      var featureA = features[0];
+      featureA.setSelected(false);
       setTimeout(function() {
-        someFeature.setSelected(true);
+        featureA.setSelected(true);
         setTimeout(function() {
           // This should trigger deselect event.
-          someFeature.remove();
+          featureA.remove();
         }, 4000);
       }, 4000);
+
+      // Re-rendering a feature should keep the existing selection style.
+      var featureB = features[0];
+      featureB.setSelected(true);
+      setTimeout(function() {
+        featureB.setHeight(featureB.getHeight() + 10);
+      }, 4000);
+
     }
 
   });

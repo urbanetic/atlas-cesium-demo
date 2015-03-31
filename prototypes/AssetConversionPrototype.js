@@ -14,6 +14,8 @@ define([
 
     _init: function(atlas) {
       this.atlas = atlas;
+      var entityManager = atlas.getManager('entity');
+
       console.log('Starting ACS');
       var $dropzone = $('<div class="dropzone"></div>');
       var $label = $('<label>Merge</label>');
@@ -24,7 +26,7 @@ define([
       $dropzone.append($label, $mergeBox, $clearBtn);
       var dropzone = new Dropzone($dropzone[0], {
         url: 'http://acs.urbanetic.net/convert',
-        //url: 'http://localhost:8090/convert',
+        // url: 'http://localhost:8090/convert',
         dictDefaultMessage: 'Drop a file here or click to upload.',
         addRemoveLinks: false
       });
@@ -40,15 +42,23 @@ define([
         // TODO(aramk) Append upload Id to all new entities or existing set of entities.
         uploadId++;
         console.log('success', arguments);
+        // NOTE: Use copy(response.c3mls) in chrome to copy the content, else it will be malformed
+        // due to base64 being escaped.
         atlas.publish('entity/create/bulk', {features: response.c3mls, callback: function(ids) {
+          var rootIds = [];
+          ids.forEach(function(id) {
+            if (!entityManager.getById(id).getParent()) {
+              rootIds.push(id);
+            }
+          });
           atlas.publish('entity/create/bulk', {
             features: [{
               id: 'upload-' + uploadId,
               type: 'collection',
-              children: ids
+              children: rootIds
             }],
             callback: function(ids) {
-              var collection = atlas.getManager('entity').getById(ids[0]);
+              var collection = entityManager.getById(ids[0]);
               var boundingBox = collection.getBoundingBox();
               if (boundingBox) {
                 boundingBox.scale(1.5);
