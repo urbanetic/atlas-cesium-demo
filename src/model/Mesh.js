@@ -304,6 +304,14 @@ define([
       this._primitive && this._renderManager.getPrimitives().remove(this._primitive);
     },
 
+    ready: function() {
+      if (this._primitive) {
+        return this._whenPrimitiveReady(this._primitive).promise;
+      } else {
+        return Q.reject('No primitive rendered to be ready.');
+      }
+    },
+
     // -------------------------------------------
     // MODIFIERS
     // -------------------------------------------
