@@ -116,7 +116,18 @@ define([
       var model = this._primitive;
       var centroidCartesian = Matrix4.multiplyByPoint(model.modelMatrix,
         model.boundingSphere.center, new Cartesian3());
-      return this._renderManager.geoPointFromCartesian(centroidCartesian);
+      var centroid = this._renderManager.geoPointFromCartesian(centroidCartesian);
+      // Ensure elevation is ground-level.
+      centroid.elevation = 0;
+      return centroid;
+    },
+
+    setCentroid: function(centroid) {
+      this._super(centroid);
+      // Cache the centroid so getCentroid() returns it, since the GLTF mesh won't update
+      // immediately and calling getCentroid() in the meantime would return the old centroid, which
+      // will cause issues with subsequent transformations which rely on it (e.g. rotation).
+      this._centroid = centroid;
     }
 
   });
