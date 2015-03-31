@@ -90,10 +90,10 @@ define([
       delete metaData.coord;
       
       var rectangle = new Rectangle({
-        north: this._createEdgePointFromUtmCoord(utmCoord.x, utmCoord.y + radius, metaData),
-        south: this._createEdgePointFromUtmCoord(utmCoord.x, utmCoord.y - radius, metaData),
-        east: this._createEdgePointFromUtmCoord(utmCoord.x + radius, utmCoord.y, metaData),
-        west: this._createEdgePointFromUtmCoord(utmCoord.x - radius, utmCoord.y, metaData)
+        north: this.createGeoPointFromUtmCoord(utmCoord.x, utmCoord.y + radius, metaData),
+        south: this.createGeoPointFromUtmCoord(utmCoord.x, utmCoord.y - radius, metaData),
+        east: this.createGeoPointFromUtmCoord(utmCoord.x + radius, utmCoord.y, metaData),
+        west: this.createGeoPointFromUtmCoord(utmCoord.x - radius, utmCoord.y, metaData)
       });
       var points = rectangle.getCorners();
       if (args && args.utm) {
@@ -105,7 +105,7 @@ define([
       }
     },
 
-    _createEdgePointFromUtmCoord: function(x, y, metaData) {
+    createGeoPointFromUtmCoord: function(x, y, metaData) {
       return GeoPoint.fromUtm(Setter.merge({coord: {x: x, y: y}}, metaData));
     },
 
