@@ -4,9 +4,11 @@ define([
   'atlas/model/GeoPoint',
   'atlas/model/Rectangle',
   'atlas/util/WKT',
+  'atlas-cesium/cesium/Source/Core/Matrix4',
+  'atlas-cesium/cesium/Source/Core/Cartesian3',
   'atlas-cesium/cesium/Source/Scene/Model',
-  'atlas-cesium/model/Mesh'
-], function(Q, Setter, GeoPoint, Rectangle, WKT, CesiumModel, Mesh) {
+  'atlas-cesium/model/Mesh',
+], function(Q, Setter, GeoPoint, Rectangle, WKT, Matrix4, Cartesian3, CesiumModel, Mesh) {
 
   /**
    * @typedef {atlas-cesium.model.GltfMesh}
@@ -78,15 +80,54 @@ define([
       var centroid = this.getCentroid();
       if (!centroid) {
         return null;
-      } else if (args && args.utm) {
-        return wkt.openLayersPointsFromVertices([centroid.toUtm().coord])[0];
+      }
+      var model = this._primitive;
+      var radius = model.boundingSphere.radius;
+
+      var utmCentroid = centroid.toUtm();
+      var utmCoord = utmCentroid.coord;
+      var metaData = Setter.clone(utmCentroid);
+      delete metaData.coord;
+      
+      var rectangle = new Rectangle({
+        north: this.createGeoPointFromUtmCoord(utmCoord.x, utmCoord.y + radius, metaData),
+        south: this.createGeoPointFromUtmCoord(utmCoord.x, utmCoord.y - radius, metaData),
+        east: this.createGeoPointFromUtmCoord(utmCoord.x + radius, utmCoord.y, metaData),
+        west: this.createGeoPointFromUtmCoord(utmCoord.x - radius, utmCoord.y, metaData)
+      });
+      var points = rectangle.getCorners();
+      if (args && args.utm) {
+        return wkt.openLayersPolygonFromVertices(points.map(function(point) {
+          return point.toUtm().coord;
+        }));
       } else {
-        return wkt.openLayersPointsFromGeoPoints([centroid])[0];
+        return wkt.openLayersPolygonFromGeoPoints(points);
       }
     },
 
+    createGeoPointFromUtmCoord: function(x, y, metaData) {
+      return GeoPoint.fromUtm(Setter.merge({coord: {x: x, y: y}}, metaData));
+    },
+
+    /**
+     * @return {Promise} The centroid of this GLTF mesh.
+     */
     getCentroid: function() {
-      return this._geoLocation;
+      var model = this._primitive;
+      var centroidCartesian = Matrix4.multiplyByPoint(model.modelMatrix,
+        model.boundingSphere.center, new Cartesian3());
+      var centroid = this._renderManager.geoPointFromCartesian(centroidCartesian);
+      // Ensure elevation is ground-level.
+      centroid.elevation = 0;
+      return centroid;
+    },
+
+    setCentroid: function(centroid) {
+      this._super(centroid);
+      // Cache the centroid so getCentroid() returns it, since the GLTF mesh won't update
+      // immediately and calling getCentroid() in the meantime would return the old centroid, which
+      // will cause issues with subsequent transformations which rely on it (e.g. rotation).
+      this._centroid = centroid;
     }
 
   });
