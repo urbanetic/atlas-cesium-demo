@@ -59,15 +59,17 @@ define([
             }],
             callback: function(ids) {
               var collection = entityManager.getById(ids[0]);
-              var boundingBox = collection.getBoundingBox();
-              if (boundingBox) {
-                boundingBox.scale(1.5);
-                atlas.publish('camera/zoomTo', {
-                  // position: collection.getCentroid(),
-                  //position: 
-                  rectangle: boundingBox
-                });
-              }
+              collection.ready().then(function() {
+                var boundingBox = collection.getBoundingBox();
+                if (boundingBox) {
+                  boundingBox.scale(1.5);
+                  atlas.publish('camera/zoomTo', {
+                    // position: collection.getCentroid(),
+                    //position: 
+                    rectangle: boundingBox
+                  });
+                }
+              });
             }
           });
         }});
