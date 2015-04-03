@@ -81,7 +81,7 @@ define([
       if (!centroid) {
         return null;
       }
-      var model = this._primitive;
+      var model = this.getPrimitive();
       var radius = model.boundingSphere.radius;
 
       var utmCentroid = centroid.toUtm();
@@ -113,7 +113,7 @@ define([
      * @return {Promise} The centroid of this GLTF mesh.
      */
     getCentroid: function() {
-      var model = this._primitive;
+      var model = this.getPrimitive();
       var centroidCartesian = Matrix4.multiplyByPoint(model.modelMatrix,
         model.boundingSphere.center, new Cartesian3());
       var centroid = this._renderManager.geoPointFromCartesian(centroidCartesian);
