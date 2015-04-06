@@ -229,12 +229,18 @@ define([
     /**
      * @param {Primitive} primitive
      * @return {Q.Deferred} A deferred promise which is resolved when the given primitive is ready
-     * for rendering or modifiying.
+     *     for rendering or modifiying. This promise is rejected if the primitive is destroyed
+     *     before it is ready.
      */
     _whenPrimitiveReady: function(primitive) {
-      return Timers.waitUntil(function() {
+      var df = Timers.waitUntil(function() {
+        if (primitive.isDestroyed()) {
+          df.reject('Primitive was destroyed.');
+          return false;
+        }
         return primitive.ready;
       });
+      return df;
     },
 
     /**
@@ -310,6 +316,18 @@ define([
       } else {
         return Q.reject('No primitive rendered to be ready.');
       }
+    },
+
+    /**
+     * @return {Primitive} The Cesium Primitive. Throws an error if the primitive is not ready. Use
+     *     {@link #ready()} to wait until it is.
+     */
+    getPrimitive: function() {
+      var primitive = this._primitive;
+      if (!primitive.ready) {
+        throw new Error('Primitive not ready - use ready() to wait.');
+      }
+      return primitive;
     },
 
     // -------------------------------------------
