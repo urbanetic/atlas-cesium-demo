@@ -103,7 +103,7 @@ define([
           console.log('new entity centroid', entity.getCentroid());
         }, 5000);
         entityManager.remove('gtlf-centroid');
-        newCentroid.elevation = 20;
+        newCentroid.elevation = 5;
         // TODO(aramk) Rendering points at startup can crash Cesium.
         // setTimeout(function() {
         //   atlas.publish('entity/create/bulk', {
