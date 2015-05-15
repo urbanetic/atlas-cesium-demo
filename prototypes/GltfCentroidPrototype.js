@@ -50,9 +50,9 @@ define([
                   // atlas.publish('entity/create/bulk', {
                   //   features: [{id: 'gtlf-centroid', position: centroid, type: 'point'}]
                   // });
-                  // atlas.publish('camera/zoomTo', {
-                  //   position: centroid
-                  // });
+                  atlas.publish('camera/zoomTo', {
+                    position: centroid
+                  });
                   var boundingBox = collection.getBoundingBox();
                   if (boundingBox) {
                     boundingBox.scale(1.5);
