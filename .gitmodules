@@ -3,4 +3,4 @@
 url=https://bitbucket.org/urbanetic/atlas.git
 [submodule "atlas-cesium"]
 	path = atlas-cesium
-	url = https://bitbucket.org/mutopia/atlas-cesium.git
+url=https://bitbucket.org/urbanetic/atlas-cesium.git
