@@ -405,7 +405,7 @@ define([
      * @returns {atlas.model.GeoPoint} The given screen coordinates in cartographic degrees on the
      *     globe.
      */
-    geoPointFromScreenCoords: function(screenCoords) {
+    geoPointFromScreenCoord: function(screenCoords) {
       var ray = this.getCesiumCamera().getPickRay(screenCoords);
       var cartesian = this.getGlobe().pick(ray, this.getScene());
       if (!cartesian) {
