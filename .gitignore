@@ -4,9 +4,9 @@
 ###################
 coverage/*
 docs
-node_modules
-bower_components/
 lib
+node_modules
+bower_components
 /dist
 src/main.js
 .build*
