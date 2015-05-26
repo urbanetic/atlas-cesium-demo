@@ -496,10 +496,8 @@ define([
      * called before any code that uses it.
      */
     _initOrigVertices: function() {
-      if (!this._origVertices) {
-        this._origVertices = this._vertices;
-        this._origCentroid = this.getCentroid();
-      }
+      if (!this._origVertices) { this._origVertices = this._vertices };
+      if (!this._origCentroid) { this._origCentroid = this.getCentroid() };
       return this._origVertices;
     },
 
