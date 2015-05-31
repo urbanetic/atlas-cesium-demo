@@ -14,7 +14,7 @@ define([
       
       atlas.subscribe('input/leftup', function(args) {
         console.log('screen', args.position);
-        var point = renderManager.geoPointFromScreenCoords(args.position);
+        var point = renderManager.geoPointFromScreenCoord(args.position);
         console.log('point', point);
       });
 
