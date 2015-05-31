@@ -257,7 +257,7 @@ define([
           var positions = this._renderManager.cartesianArrayFromGeoPointArray(holeArray);
           holes.push({positions: positions});
         }
-      });
+      }, this);
       // Generate geometry data.
       var polygonHierarchy = {
         positions: this._cartesians,
