@@ -482,7 +482,7 @@ define([
       return Matrix4.fromTranslation(diffCartesian);
     },
 
-    _onTransform: function() {
+    _postTransform: function() {
       // Avoid setting "model" to dirty when transforming since we use the matrix transformations in
       // Cesium.
       this._invalidateGeometry();
