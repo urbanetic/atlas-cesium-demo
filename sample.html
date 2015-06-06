@@ -39,17 +39,6 @@
         {name: 'dropzone', location: 'lib/dropzone/dist', main: 'dropzone-amd-module'},
         {name: 'jquery', location: 'atlas/lib', main: 'jquery'},
         {name: 'underscore', location: 'atlas/lib/underscore', main: 'underscore'},
-
-        // These all belong to subdiv.
-        // {name: 'atlas/lib/subdiv', location: 'atlas/lib/subdiv/src'},
-        // {name: 'ConvexHullGrahamScan', location: 'atlas/lib/subdiv/lib',
-        //     main: 'ConvexHullGrahamScan'},
-        // {name: 'hull', location: 'atlas/lib/subdiv/lib', main: 'hull'},
-        // {name: 'jsts', location: 'atlas/lib/subdiv/lib/jsts'},
-        // {name: 'tinycolor', location: 'atlas/lib/subdiv/lib', main: 'tinycolor'},
-        // {name: 'utility', location: 'atlas/lib/subdiv/lib/utility/src'},
-
-        // This is the expected name of utm-converter in subdiv.
         {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
       ]
     });
@@ -79,6 +68,9 @@
           vertices: wkt,
           elevation: 0,
           height: 50,
+          // scale: [2, 2, 2],
+          // rotation: [0, 0, 45],
+          // translation: [0, 0, 100],
           style: {
             fillColor: '#ccc',
             // fillColor: 'rgba(0,255,0,0.5)',
@@ -143,7 +135,7 @@
                     PointPrototype, AssetConversionPrototype, AreaPrototype, HidePrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
-          new DrawPrototype(cesiumAtlas);
+          // new DrawPrototype(cesiumAtlas);
           // new LineDrawPrototype(cesiumAtlas);
           // new TranslatePrototype(cesiumAtlas);
           // new RotationPrototype(cesiumAtlas);
@@ -164,7 +156,7 @@
           // new EventPrototype(cesiumAtlas);
           // new ProjectionPrototype(cesiumAtlas);
           // new DynamicProjectionPrototype(cesiumAtlas);
-          // new CollectionPrototype(cesiumAtlas);
+          new CollectionPrototype(cesiumAtlas);
           // new SelectionPrototype(cesiumAtlas);
           // new PolygonTransformPrototype(cesiumAtlas);
           // new PopupPrototype(cesiumAtlas);

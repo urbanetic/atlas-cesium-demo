@@ -23,6 +23,7 @@ define([
       // each individual component.
       setInterval(function() {
         collection.rotate(new Vertex(0, 0, 15));
+        console.log('c1 json', collection.toJson())
       }, 1000);
 
       collection.setHeight(300);
