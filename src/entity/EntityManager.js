@@ -42,26 +42,6 @@ define([
     },
 
     /**
-     * Returns the GeoEntities that intersect the given screen coordinates.
-     * @param {atlas.model.Vertex} point - The screen coordinates.
-     * @returns {Array.<atlas.model.GeoEntity>} The GeoEntities located at the given screen
-     * coordinates.
-     */
-    getAt: function(point) {
-      // Get the Entities at the given screen coordinates.
-      var ids = this._managers.render.getAt(point);
-      // Translate entity IDs to entity objects.
-      var entities = [];
-      ids.forEach(function(id) {
-        var entity = this.getById(id);
-        if (entity instanceof GeoEntity) {
-          entities.push(entity);
-        }
-      }, this);
-      return entities;
-    },
-
-    /**
      * Overridden to handle glTF meshes.
      */
     createEntity: function(id, data, args) {
