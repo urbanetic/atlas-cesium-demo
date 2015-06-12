@@ -50,16 +50,6 @@ define([
       });
     }); // End 'will be constructed'
 
-    describe ('cannot be constructed', function() {
-      it ('without specifying the Render manager', function() {
-        var fails = function() {
-          delete args.renderManager;
-          new Ellipse('id', ellipseData, args);
-        };
-        expect(fails).toThrow();
-      });
-    }); // End 'cannot be constructed'
-
     describe ('when constructed', function() {
 
       beforeEach (function() {

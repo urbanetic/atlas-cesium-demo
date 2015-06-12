@@ -33,6 +33,8 @@ requirejs.config({
     {name: 'atlas-cesium/cesium', location: 'atlas-cesium/lib/cesium'},
     {name: 'atlas-cesium/lib', location: 'atlas-cesium/lib'},
     {name: 'atlas-cesium', location: 'atlas-cesium/src'},
+    // Provides access to test utilities.
+    {name: 'atlas-cesium/test/util', location: 'atlas-cesium/test/util'},
     {name: 'jquery', location: 'atlas/lib', main: 'jquery'},
     {name: 'underscore', location: 'atlas/lib/underscore', main: 'underscore'},
     {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
@@ -42,5 +44,22 @@ requirejs.config({
   deps: tests,
 
   // Start tests running once requirejs is done.
-  callback: window.__karma__.start
+  callback: function() {
+    // Add custom Jasmine matchers.
+    beforeEach(function() {
+      jasmine.addMatchers({
+        toDeepEqual: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var result = {};
+              result.pass = _.isEqual(actual, expected);
+              return result;
+            }
+          }
+        }
+      });
+    });
+
+    window.__karma__.start();
+  }
 });

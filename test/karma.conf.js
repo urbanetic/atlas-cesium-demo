@@ -8,7 +8,7 @@ module.exports = function(config) {
     basePath: '../..',
 
     // frameworks to use
-    frameworks: ['jasmine', 'requirejs'],
+    frameworks: ['jasmine', 'requirejs', 'phantomjs-shim'],
 
     // list of files / patterns to load in the browser
     files: [
@@ -19,7 +19,8 @@ module.exports = function(config) {
       {pattern: 'atlas-cesium/src/**/*.js', included: false},
       {pattern: 'atlas-cesium/lib/**/*.js', included: false},
       {pattern: 'atlas-cesium/lib/**/*.png', included: false},
-      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false}
+      {pattern: 'atlas-cesium/test/specs/**/*Spec.js', included: false},
+      {pattern: 'atlas-cesium/test/util/**/*.js', included: false}
       // {pattern: 'atlas-cesium/lib/cesium/Source/**/*.js', included: false}
     ],
 
@@ -80,7 +81,7 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Firefox'],
+    // browsers: ['Firefox'],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,

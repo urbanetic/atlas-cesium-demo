@@ -1,21 +1,17 @@
 define([
   'atlas/assets/testMesh',
+  'atlas/model/GeoPoint',
   // Code under test
   'atlas-cesium/model/Mesh',
-  'atlas-cesium/core/CesiumAtlas',
-  'atlas-cesium/render/RenderManager',
-  'atlas/model/GeoPoint'
-], function(testMesh, Mesh, CesiumAtlas, RenderManager, GeoPoint) {
+  'atlas-cesium/test/util/AtlasCesiumTestFactory'
+], function(testMesh, GeoPoint, Mesh, AtlasCesiumTestFactory) {
   describe('A Mesh', function() {
 
     var mesh, centroid, constructArgs;
 
     beforeEach(function() {
       centroid = new GeoPoint({longitude: 144.5, latitude: -37.8999, elevation: 0});
-      // TODO(aramk) Abstract this for use in other tests which need to full Atlas-Cesium
-      // environment set up.
-      var cesiumAtlas = new CesiumAtlas();
-      cesiumAtlas.attachTo(document.createElement('div'));
+      var cesiumAtlas = AtlasCesiumTestFactory.createAtlasCesium();
       var managers = cesiumAtlas._managers;
       constructArgs = {
         renderManager: managers.render,
