@@ -468,7 +468,7 @@ define([
       this._setModelMatrix(newModelMatrix);
     },
 
-    _onTransform: function() {
+    _postTransform: function() {
       // Avoids superclass from setting "model" to dirty when transforming since we use the matrix
       // transformations in Cesium.
       this._invalidateGeometry();

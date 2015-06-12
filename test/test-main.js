@@ -35,16 +35,6 @@ requirejs.config({
     {name: 'atlas-cesium', location: 'atlas-cesium/src'},
     {name: 'jquery', location: 'atlas/lib', main: 'jquery'},
     {name: 'underscore', location: 'atlas/lib/underscore', main: 'underscore'},
-
-    // These all belong to subdiv.
-    // {name: 'atlas/lib/subdiv', location: 'atlas/lib/subdiv/src'},
-    // {name: 'ConvexHullGrahamScan', location: 'atlas/lib/subdiv/lib', main: 'ConvexHullGrahamScan'},
-    // {name: 'hull', location: 'atlas/lib/subdiv/lib', main: 'hull'},
-    // {name: 'jsts', location: 'atlas/lib/subdiv/lib/jsts'},
-    // {name: 'tinycolor', location: 'atlas/lib/subdiv/lib', main: 'tinycolor'},
-    // {name: 'utility', location: 'atlas/lib/subdiv/lib/utility/src'},
-
-    // This is the expected name of utm-converter in subdiv.
     {name: 'utm-converter', location: 'atlas/lib', main: 'UtmConverter.js'}
   ],
 
