@@ -124,6 +124,7 @@
           './prototypes/AssetConversionPrototype',
           './prototypes/AreaPrototype',
           './prototypes/HidePrototype',
+          './prototypes/RenderBulkPrototype',
           'atlas/lib/utility/Log'
         ], function(CameraPrototype, EditPrototype, DrawPrototype, LineDrawPrototype, TranslatePrototype,
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
@@ -132,7 +133,8 @@
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
                     DynamicProjectionPrototype, CollectionPrototype, SelectionPrototype,
                     PolygonTransformPrototype, PopupPrototype, PopupPrototype2, MaterialPrototype,
-                    PointPrototype, AssetConversionPrototype, AreaPrototype, HidePrototype, Log) {
+                    PointPrototype, AssetConversionPrototype, AreaPrototype, HidePrototype,
+                    RenderBulkPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
           // new DrawPrototype(cesiumAtlas);
@@ -166,6 +168,7 @@
           // new AssetConversionPrototype(cesiumAtlas);
           // new AreaPrototype(cesiumAtlas);
           // new HidePrototype(cesiumAtlas);
+          new RenderBulkPrototype(cesiumAtlas);
           Log.setLevel('debug');
         });
       }, 5000);
