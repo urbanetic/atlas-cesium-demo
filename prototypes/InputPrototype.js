@@ -32,8 +32,18 @@ define([
       //   entityMouseover(event);
       // });
 
-      atlas.subscribe('entity/mousemove', function(event) {
+      entityManager.setHoverEnabled(true);
+
+      atlas.subscribe('entity/mousemove', function() {
         console.log('entity/mousemove', arguments);
+      });
+
+      atlas.subscribe('entity/mouseenter', function() {
+        console.log('entity/mouseenter', arguments);
+      });
+
+      atlas.subscribe('entity/mouseleave', function() {
+        console.log('entity/mouseleave', arguments);
       });
 
     }
