@@ -36,10 +36,10 @@ define([
           title: 'Color Projection',
           values: values,
           opacity: 0.6,
-          // codomain: {
-          //   startProj: red,
-          //   endProj: green
-          // }
+          codomain: {
+            startProj: '#00ff00',
+            endProj: '#ff0000'
+          }
         }
       };
       atlas.publish('projection/add', args);
@@ -63,7 +63,7 @@ define([
       setTimeout(function() {
         atlas.publish('projection/remove', {id: args.projection.getId()});
         atlas.publish('projection/remove', {id: args2.projection.getId()});
-      }, 5000);
+      }, 10000);
     }
 
   });
