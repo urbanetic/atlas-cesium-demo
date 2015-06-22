@@ -501,7 +501,7 @@ define([
     },
 
     _getFillColor: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var material = style.getFillMaterial();
       if (material instanceof ColorCore) {
         return Color.prototype.toCesiumColor.bind(material)();
