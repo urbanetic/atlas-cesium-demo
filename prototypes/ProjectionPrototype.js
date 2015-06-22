@@ -20,7 +20,7 @@ define([
       features.forEach(function(feature, i) {
         var id = feature.getId();
         values[id] = i;
-        feature.setHeight(0);
+        // feature.setHeight(0);
       });
 
       // var opacity = 0.6;
@@ -63,7 +63,7 @@ define([
       setTimeout(function() {
         atlas.publish('projection/remove', {id: args.projection.getId()});
         atlas.publish('projection/remove', {id: args2.projection.getId()});
-      }, 10000);
+      }, 5000);
     }
 
   });
