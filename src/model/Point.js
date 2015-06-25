@@ -26,7 +26,7 @@ define([
       var billboards = renderManager.getBillboards();
       var position = renderManager.cartesianFromGeoPoint(this.getPosition());
       var eyeOffset = new Cartesian3(0, this.getElevation(), 0);
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       if (this.isDirty('model') || this.isDirty('entity') || this.isDirty('style')) {
         var color = this._getFillColor();
@@ -61,7 +61,7 @@ define([
     },
 
     _getFillColor: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var material = style.getFillMaterial();
       if (material instanceof ColorCore) {
         return Color.prototype.toCesiumColor.bind(material)();

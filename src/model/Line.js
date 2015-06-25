@@ -81,7 +81,7 @@ define([
     // -------------------------------------------
 
     _build: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
         this.isDirty('model');
@@ -115,7 +115,7 @@ define([
      * @private
      */
     _createGeometry: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       var geometryId = this.getId();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
@@ -192,7 +192,7 @@ define([
      * @private
      */
     _createAppearance: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       var isStyleDirty = this.isDirty('style');
       // If the width is set from pixels to metres, the appearance must be changed to match the new
@@ -296,7 +296,7 @@ define([
     },
 
     _getFillColor: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var material = style.getFillMaterial();
       if (material instanceof ColorCore) {
         return Color.prototype.toCesiumColor.bind(material)();

@@ -121,7 +121,7 @@ define([
      * Cesium.
      */
     _build: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       var borderMaterial = style.getFillMaterial();
       var isModelDirty = this.isDirty('entity') || this.isDirty('vertices') ||
@@ -228,7 +228,7 @@ define([
      * @private
      */
     _createGeometry: function() {
-      var style = this.getStyle();
+      var style = this._style;
       var fillMaterial = style.getFillMaterial();
       var borderColor = this._getBorderColor();
       var geometryId = this.getId();
@@ -477,7 +477,7 @@ define([
     },
 
     _updateVisibility: function(visible) {
-      var style = this.getStyle();
+      var style = this._style;
       if (this._primitive) this._primitive.show = !!(visible && style.getFillMaterial());
       if (this._outlinePrimitive) this._outlinePrimitive.show =
           !!(visible && style.getBorderMaterial());
