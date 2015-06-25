@@ -32,7 +32,7 @@ define([
       //   entityMouseover(event);
       // });
 
-      entityManager.setHoverEnabled(true);
+      entityManager.setHighlightOnHover(true);
 
       atlas.subscribe('entity/mousemove', function() {
         console.log('entity/mousemove', arguments);
