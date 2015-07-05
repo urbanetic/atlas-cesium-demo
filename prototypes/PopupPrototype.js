@@ -37,10 +37,10 @@ define([
         var cornerYs = [];
         bBox.getCorners().forEach(function(corner) {
           corner.elevation = elevation;
-          cornerYs.push(renderManager.screenCoordsFromGeoPoint(corner).y);
+          cornerYs.push(renderManager.screenCoordFromGeoPoint(corner).y);
         });
         var minY = Math.min.apply(null, cornerYs);
-        var screenCoord = renderManager.screenCoordsFromGeoPoint(centroid);
+        var screenCoord = renderManager.screenCoordFromGeoPoint(centroid);
         console.log('centroid screenCoord', screenCoord);
         screenCoord.y = minY - yBuffer;
         console.log('new screenCoord', screenCoord);
