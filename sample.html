@@ -114,6 +114,7 @@
           './prototypes/EventPrototype',
           './prototypes/ProjectionPrototype',
           './prototypes/DynamicProjectionPrototype',
+          './prototypes/DiscreteProjectionPrototype',
           './prototypes/CollectionPrototype',
           './prototypes/SelectionPrototype',
           './prototypes/PolygonTransformPrototype',
@@ -131,10 +132,10 @@
                     MeshPrototype3, MeshPrototype4, MeshPrototype5, MeshCollectionPrototype,
                     GltfMeshPrototype, GltfCentroidPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
                     RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    DynamicProjectionPrototype, CollectionPrototype, SelectionPrototype,
-                    PolygonTransformPrototype, PopupPrototype, PopupPrototype2, MaterialPrototype,
-                    PointPrototype, AssetConversionPrototype, AreaPrototype, HidePrototype,
-                    RenderBulkPrototype, Log) {
+                    DynamicProjectionPrototype, DiscreteProjectionPrototype, CollectionPrototype,
+                    SelectionPrototype, PolygonTransformPrototype, PopupPrototype, PopupPrototype2, 
+                    MaterialPrototype, PointPrototype, AssetConversionPrototype, AreaPrototype,
+                    HidePrototype, RenderBulkPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
           // new DrawPrototype(cesiumAtlas);
@@ -157,6 +158,7 @@
           // new StylePrototype(cesiumAtlas);
           // new EventPrototype(cesiumAtlas);
           // new ProjectionPrototype(cesiumAtlas);
+          new DiscreteProjectionPrototype(cesiumAtlas);
           // new DynamicProjectionPrototype(cesiumAtlas);
           // new CollectionPrototype(cesiumAtlas);
           // new SelectionPrototype(cesiumAtlas);
@@ -165,7 +167,7 @@
           // new PopupPrototype2(cesiumAtlas);
           // new MaterialPrototype(cesiumAtlas);
           // new PointPrototype(cesiumAtlas);
-          new AssetConversionPrototype(cesiumAtlas);
+          // new AssetConversionPrototype(cesiumAtlas);
           // new AreaPrototype(cesiumAtlas);
           // new HidePrototype(cesiumAtlas);
           // new RenderBulkPrototype(cesiumAtlas);
