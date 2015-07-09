@@ -39,7 +39,7 @@ define([
           ],
           codomain: [
             {fixedProj: 'orange'},
-            {fixedProj: 'green'},
+            {fixedProj: null},
             {fixedProj: 'purple'}
           ]
         }

@@ -40,6 +40,7 @@ define([
       Log.time('bulk-render');
       atlas.publish('entity/create/bulk', {
         features: features,
+        // waitForReady: false,
         callbackPromise: true,
         callback: function(promise) {
           promise.then(function() {
