@@ -1,14 +1,26 @@
 define([
   'atlas/lib/utility/Class',
-  'atlas/material/Color'
-], function(Class, Color) {
+  'atlas/material/Color',
+  'atlas/material/Style'
+], function(Class, Color, Style) {
   return Class.extend({
 
     atlas: null,
 
     _init: function(atlas) {
       this.atlas = atlas;
-      setTimeout(this.runProjection.bind(this), 1000);
+
+      var entityManager = atlas._managers.entity;
+      var features = entityManager.getFeatures();
+      features.forEach(function(feature, i) {
+        var style = new Style({
+          fillMaterial: Color.RED,
+          borderMaterial: feature.getStyle().getBorderMaterial()
+        });
+        feature.setStyle(style);
+      });
+
+      setTimeout(this.runProjection.bind(this), 4000);
     },
 
     runProjection: function() {
@@ -65,10 +77,10 @@ define([
         atlas.publish('projection/add', args2);
         atlas.publish('projection/render', {id: args2.projection.getId()});
 
-        // setTimeout(function() {
-        //   atlas.publish('projection/remove', {id: args.projection.getId()});
-        //   atlas.publish('projection/remove', {id: args2.projection.getId()});
-        // }, 5000);
+        setTimeout(function() {
+          atlas.publish('projection/remove', {id: args.projection.getId()});
+          atlas.publish('projection/remove', {id: args2.projection.getId()});
+        }, 5000);
 
       }, 2000);
     }

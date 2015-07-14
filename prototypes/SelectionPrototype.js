@@ -13,7 +13,8 @@ define([
         return feature.getId();
       });
       atlas.publish('entity/select', {
-        ids: ids
+        ids: ids,
+        // triggerEvents: false
       });
 
       atlas.subscribe('entity/selection/change', function() {
