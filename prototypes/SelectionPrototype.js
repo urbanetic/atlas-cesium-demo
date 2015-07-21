@@ -11,6 +11,7 @@ define([
     _init: function(atlas) {
       this.atlas = atlas;
       var entityManager = atlas._managers.entity;
+      entityManager.setHighlightOnHover(true);
       var features = entityManager.getFeatures();
       var ids = features.map(function(feature) {
         return feature.getId();
