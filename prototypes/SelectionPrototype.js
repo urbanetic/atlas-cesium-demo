@@ -1,6 +1,9 @@
 define([
   'atlas/lib/utility/Class',
-], function(Class) {
+  'atlas/material/Color',
+  'atlas/model/GeoPoint',
+  'underscore'
+], function(Class, Color, GeoPoint, _) {
   return Class.extend({
 
     atlas: null,
@@ -13,7 +16,7 @@ define([
         return feature.getId();
       });
       atlas.publish('entity/select', {
-        ids: ids,
+        ids: ids.slice(0, 3)
         // triggerEvents: false
       });
 
@@ -46,6 +49,19 @@ define([
         featureB.setHeight(featureB.getHeight() + 10);
       }, 4000);
 
+      // Selecting a polygon should keep the same opacity.
+      var featureC = features[4];
+      var newColor = new Color(0, 1, 0, 0.2);
+      featureC.modifyStyle({fillMaterial: newColor});
+      setTimeout(function() {
+        // _.times(6, function(i) {
+        //   setTimeout(function() {
+        //     featureC.setSelected(true);
+        //     featureC.setSelected(false);
+        //     featureC.translate(new GeoPoint(0.0001, 0.0001));
+        //   }, i * 1000);
+        // });
+      }, 5000);
     }
 
   });

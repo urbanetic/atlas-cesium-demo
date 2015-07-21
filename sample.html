@@ -62,8 +62,10 @@
       args.show = true;
       args.displayMode = 'extrusion';
 
+      var ids = [];
       testWKT.forEach(function(wkt) {
         var id = args.id = i++;
+        ids.push(id);
         args.polygon = {
           vertices: wkt,
           elevation: 0,
@@ -80,11 +82,7 @@
         cesiumAtlas.publish('entity/create', args);
       });
       cesiumAtlas.publish('camera/zoomTo', {
-        position: {
-          latitude: -37.8,
-          longitude: 144.96,
-          elevation: 2000
-        }
+        ids: ids
       });
 
       // Prototypes for individual modules.
@@ -161,13 +159,13 @@
           // new DiscreteProjectionPrototype(cesiumAtlas);
           // new DynamicProjectionPrototype(cesiumAtlas);
           // new CollectionPrototype(cesiumAtlas);
-          // new SelectionPrototype(cesiumAtlas);
+          new SelectionPrototype(cesiumAtlas);
           // new PolygonTransformPrototype(cesiumAtlas);
           // new PopupPrototype(cesiumAtlas);
           // new PopupPrototype2(cesiumAtlas);
           // new MaterialPrototype(cesiumAtlas);
           // new PointPrototype(cesiumAtlas);
-          new AssetConversionPrototype(cesiumAtlas);
+          // new AssetConversionPrototype(cesiumAtlas);
           // new AreaPrototype(cesiumAtlas);
           // new HidePrototype(cesiumAtlas);
           // new RenderBulkPrototype(cesiumAtlas);
