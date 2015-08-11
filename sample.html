@@ -111,6 +111,7 @@
           './prototypes/StylePrototype',
           './prototypes/EventPrototype',
           './prototypes/ProjectionPrototype',
+          './prototypes/ProjectionLoopPrototype',
           './prototypes/DynamicProjectionPrototype',
           './prototypes/DiscreteProjectionPrototype',
           './prototypes/CollectionPrototype',
@@ -129,10 +130,10 @@
                     RotationPrototype, ScalePrototype, MeshPrototype, MeshPrototype2,
                     MeshPrototype3, MeshPrototype4, MeshPrototype5, MeshCollectionPrototype,
                     GltfMeshPrototype, GltfCentroidPrototype, LinePrototype, GeocoderPrototype, InputPrototype,
-                    RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype,
-                    DynamicProjectionPrototype, DiscreteProjectionPrototype, CollectionPrototype,
-                    SelectionPrototype, PolygonTransformPrototype, PopupPrototype, PopupPrototype2, 
-                    MaterialPrototype, PointPrototype, AssetConversionPrototype, AreaPrototype,
+                    RenderPrototype, StylePrototype, EventPrototype, ProjectionPrototype, 
+                    ProjectionLoopPrototype, DynamicProjectionPrototype, DiscreteProjectionPrototype, 
+                    CollectionPrototype, SelectionPrototype, PolygonTransformPrototype, PopupPrototype, 
+                    PopupPrototype2, MaterialPrototype, PointPrototype, AssetConversionPrototype, AreaPrototype,
                     HidePrototype, RenderBulkPrototype, Log) {
           // new CameraPrototype(cesiumAtlas);
           // new EditPrototype(cesiumAtlas);
@@ -156,10 +157,11 @@
           // new StylePrototype(cesiumAtlas);
           // new EventPrototype(cesiumAtlas);
           // new ProjectionPrototype(cesiumAtlas);
+          new ProjectionLoopPrototype(cesiumAtlas);
           // new DiscreteProjectionPrototype(cesiumAtlas);
           // new DynamicProjectionPrototype(cesiumAtlas);
           // new CollectionPrototype(cesiumAtlas);
-          new SelectionPrototype(cesiumAtlas);
+          // new SelectionPrototype(cesiumAtlas);
           // new PolygonTransformPrototype(cesiumAtlas);
           // new PopupPrototype(cesiumAtlas);
           // new PopupPrototype2(cesiumAtlas);
