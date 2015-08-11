@@ -20,6 +20,7 @@ define([
         feature.setStyle(style);
       });
 
+      entityManager.setHighlightOnHover(true);
       setInterval(this.runProjection.bind(this), 10000);
     },
 
