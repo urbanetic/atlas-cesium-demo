@@ -21,6 +21,7 @@ define([
     _init: function(atlas) {
       this.atlas = atlas;
       var entityManager = atlas._managers.entity;
+      entityManager.setHighlightOnHover(true);
 
       var features = entityManager.getFeatures();
       features.forEach(function(feature) {
@@ -92,6 +93,13 @@ define([
 //             });
 
             atlas.publish('camera/zoomTo', {position: centroid});
+
+            collection.setGroupSelect(true);
+            // setInterval(function() {
+            //   var groupSelect = !collection.getGroupSelect();
+            //   console.log('groupSelect', groupSelect);
+            //   collection.setGroupSelect(groupSelect);
+            // }, 5000);
 
             feature.setDisplayMode('mesh');
 
