@@ -480,7 +480,7 @@ define([
     // want to add this to RenderManager in Atlas if we depend on czml outside Cesium.
     createCzmlDataSource: function(czml) {
       var dataSource = new CzmlDataSource();
-      dataSource.load(czml, 'Built-in CZML');
+      dataSource.load(czml);
       return dataSource;
     },
 
