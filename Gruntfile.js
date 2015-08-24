@@ -273,6 +273,14 @@ module.exports = function(grunt) {
     });
   });
 
+  // TODO(aramk) Only works with non-minified build.
+  grunt.registerTask('fix-module-url', 'Fix the Cesium module URL', function() {
+    writeFile(distPath(MODULE_NAME + '.min.js'), function(data) {
+      // Ensure Module URL can be changed even in RequireJS environment.
+      return data.replace('= buildModuleUrlFromRequireToUrl', '= buildModuleUrlFromBaseUrl');
+    });
+  });
+
   grunt.registerTask('install', 'Installs dependencies.',
       ['shell:installNpmDep', 'shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('update', 'Updates dependencies.',
@@ -295,6 +303,7 @@ module.exports = function(grunt) {
     hasArgs('no-minify') ? addTasks('shell:build') : addTasks('shell:buildMinify');
     addTasks('build-workers', 'copy:workers', 'copy:resources', 'clean:resourcesLess', 'less',
         'fix-build-style');
+    hasArgs('module-url') && addTasks('fix-module-url');
     console.log('Running tasks', tasks);
     tasks.forEach(function(task) {
       grunt.task.run(task);
