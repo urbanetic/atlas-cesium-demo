@@ -43,8 +43,8 @@ define([
      */
     _billboards: null,
 
-    _init: function(managers) {
-      this._super(managers);
+    _init: function() {
+      this._super.apply(this, arguments);
       // TODO(aramk) Allow passing arguments for this.
       // TODO(aramk) Add docs for these.
       this._sleepMode = true;
@@ -76,7 +76,7 @@ define([
         return;
       }
       this._imageryShim();
-      this._widget = new Viewer(elem, {
+      this._widget = new Viewer(elem, Setter.merge({
         animation: false,
         baseLayerPicker: true,
         fullscreenButton: false,
@@ -86,7 +86,7 @@ define([
         timeline: false,
         navigationHelpButton: false,
         useDefaultRenderLoop: false
-      });
+      }, this._options.viewer));
       this._drawShim();
       this._render();
     },
