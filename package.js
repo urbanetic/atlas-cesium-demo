@@ -3,7 +3,7 @@ Package.describe({
   name: 'urbanetic:atlas-cesium',
   version: '0.8.2',
   summary: 'An AGI Cesium <cesiumjs.org> implementation of the Atlas rendering API.',
-  git: 'https://bitbucket.org/mutopia/atlas-cesium.git'
+  git: 'https://bitbucket.org/urbanetic/atlas-cesium.git'
 });
 
 Package.onUse(function(api) {

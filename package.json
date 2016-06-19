@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@bitbucket.org/mutopia/atlas-cesium"
+    "url": "ssh://git@bitbucket.org/urbanetic/atlas-cesium"
   },
   "devDependencies": {
     "bower": "~1.2.8",
