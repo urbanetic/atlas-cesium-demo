@@ -48,7 +48,7 @@ define([
     },
 
     setDirection: function(direction) {
-      var cesiumCamera = this._renderManager.getCesiumCamera().clone();
+      var cesiumCamera = this._renderManager.getCesiumCamera();
       cesiumCamera.direction = direction;
       this.setOrientation(this._getOrientationFromCesiumCamera(cesiumCamera));
     },
@@ -86,7 +86,7 @@ define([
       var ellipsoid = this._renderManager.getEllipsoid();
       var targetCartographic = new Cartographic(point.longitude, point.latitude, point.elevation);
       var target = ellipsoid.cartographicToCartesian(targetCartographic);
-      cesiumCamera.lookAt(cesiumCamera.position, target, cesiumCamera.up);
+      cesiumCamera.lookAt(target, cesiumCamera.position);
     },
 
     // -------------------------------------------
@@ -120,7 +120,7 @@ define([
       if (position) {
         if (!args.direction && orientation) {
           // Use the given orientation in place of the direction.
-          var cesiumCamera = this._renderManager.getCesiumCamera().clone();
+          var cesiumCamera = this._renderManager.getCesiumCamera();
           cesiumCamera.setView({
             position: this._getPositionAsCartesian(position),
             heading: AtlasMath.toRadians(orientation.bearing),
@@ -137,7 +137,7 @@ define([
         scene.camera.flyTo(flightArgs);
         Log.debug('Animating camera to position', position, orientation);
       } else {
-        scene.camera.flyToRectangle(flightArgs);
+        scene.camera.flyTo(flightArgs);
         Log.debug('Animating camera to rectangle', rectangle);
       }
     }
