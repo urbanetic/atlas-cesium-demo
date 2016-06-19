@@ -62,10 +62,6 @@ define([
      */
     _entityShifts: null,
 
-    _init: function(managers) {
-      this._super(managers);
-    },
-
     setup: function() {
       this._super();
       this._entityShifts = {};
@@ -216,6 +212,8 @@ define([
      */
     _setupCesiumTerrainPicker: function() {
       var baseLayerPicker = this._managers.render._widget.baseLayerPicker;
+      // Base layer picker may be inactive depending on options passed to Viewer.
+      if (!baseLayerPicker) return;
       var blpViewModels = baseLayerPicker.viewModel;
       var terrainProviderViewModels = [
         this._getEllipsoidProviderViewModel(),
