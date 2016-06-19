@@ -1,5 +1,6 @@
 define([
   'atlas/lib/utility/Log',
+  'atlas/lib/utility/Setter',
   'atlas/model/GeoPoint',
   'atlas/model/Vertex',
   // Cesium imports.
@@ -14,7 +15,7 @@ define([
   'atlas-cesium/cesium/Source/DataSources/CzmlDataSource',
   // Base class
   'atlas/render/RenderManager'
-], function(Log, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame,
+], function(Log, Setter, GeoPoint, Vertex, Cartesian3, Cartographic, requestAnimationFrame,
             BillboardCollection, Imagery, ImageryState, SceneTransforms, Viewer, CzmlDataSource,
             RenderManagerCore) {
 
