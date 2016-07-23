@@ -15,6 +15,7 @@
     "opts": {
         "private": true,
         "recurse": true,
-        "destination": "./docs/"
+        "lenient": true,
+        "destination": "jsdocs/"
     }
 }

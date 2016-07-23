@@ -23,6 +23,12 @@
     "type": "git",
     "url": "ssh://git@bitbucket.org/urbanetic/atlas-cesium"
   },
+  "scripts": {
+    "postinstall": "grunt install",
+    "build": "npm install && grunt build",
+    "buildDev": "npm install && grunt build:no-minify",
+    "test": "grunt test"
+  },
   "devDependencies": {
     "bower": "~1.2.8",
     "glob": "^4.0.2",
@@ -35,7 +41,7 @@
     "grunt-karma": "^0.9.0",
     "grunt-sed": "^0.1.1",
     "grunt-shell": "~1.1.2",
-    "jsdoc": "~3.2.2",
+    "jsdoc": "^3.4.0",
     "karma": "~0.12.14",
     "karma-coverage": "^0.2.6",
     "karma-firefox-launcher": "^0.1.3",

@@ -3,7 +3,7 @@
 # Generated files #
 ###################
 coverage/*
-docs
+jsdocs
 lib
 node_modules
 bower_components

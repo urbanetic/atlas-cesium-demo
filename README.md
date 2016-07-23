@@ -1,33 +1,42 @@
 # Atlas-Cesium
 
-** An implementation of [Atlas](https://bitbucket.org/urbanetic/atlas) in
-[Cesium](http://cesiumjs.org/). **
+An implementation of [Atlas][atlas] in [Cesium][cesium].
 
 ## About
 
-[More Info](http://urbanetic.net/atlas/atlas-cesium/)
+[More Info][info]
 
 ## Install
-```
-npm install
-grunt install
-```
+
+    npm install
+
+Requires Java to be installed and `JAVA_HOME` set.
+
 
 ## Build
+
 Atlas-Cesium can be built into compressed JavaScript and CSS resources:
 
-```
-grunt build
-```
+    npm run build
+
+To build without minification (for development):
+
+    npm run buildDev
+
 See `dist/` for the output.
 
 ## Docs
+
 Generate JSDocs in `docs/` with:
 
-```
-grunt doc
-```
+    grunt doc
 
 ## Contact
+
 * Issues: <https://bitbucket.org/urbanetic/atlas-cesium/issues>
 * Email: <support@urbanetic.net>
+
+
+[atlas]: https://bitbucket.org/urbanetic/atlas
+[cesium]: http://cesiumjs.org/
+[info]: http://urbanetic.net/atlas/atlas-cesium/

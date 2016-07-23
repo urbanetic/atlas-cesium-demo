@@ -282,7 +282,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('install', 'Installs dependencies.',
-      ['shell:installNpmDep', 'shell:installBowerDep', 'shell:buildCesiumDev']);
+      ['shell:installBowerDep', 'shell:buildCesiumDev']);
   grunt.registerTask('update', 'Updates dependencies.',
       ['shell:updateNpmDep', 'shell:updateBowerDep']);
   grunt.registerTask('build', 'Builds the app into a distributable package.', function() {
