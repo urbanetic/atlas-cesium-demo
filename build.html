@@ -31,13 +31,38 @@
 
         require([
           'atlas-cesium/core/CesiumAtlas',
+          'atlas-cesium/cesium/Source/Widgets/BaseLayerPicker/ProviderViewModel',
+          'atlas-cesium/cesium/Source/Scene/OpenStreetMapImageryProvider',
+          'atlas-cesium/cesium/Source/Scene/MapboxImageryProvider',
           'atlas/assets/testWKT',
           'atlas/material/Color',
           'atlas/material/Style',
           'atlas/lib/utility/Setter'
-        ], function(CesiumAtlas, testWKT, Color, Style, Setter) {
+        ], function(CesiumAtlas, ProviderViewModel, OpenStreetMapImageryProvider, 
+            MapboxImageryProvider, testWKT, Color, Style, Setter) {
           console.debug('Creating atlas-cesium');
-          cesiumAtlas = new CesiumAtlas();
+          cesiumAtlas = new CesiumAtlas({
+            managers: {
+              render: {
+                viewer: {
+                  // Bing Maps imagery (the default) has recently broken.
+                  selectedImageryProviderViewModel: new ProviderViewModel({
+                    name: 'Open Street Map',
+                    tooltip: 'Open Street Map',
+                    iconUrl: '',
+                    creationFunction: function() {
+                      // return new OpenStreetMapImageryProvider({
+                      //   url: '//a.tile.openstreetmap.org/'
+                      // });
+                      return new MapboxImageryProvider({
+                        mapId: 'mapbox.satellite',
+                      });
+                    }
+                  })
+                }
+              }
+            }
+          });
           cesiumAtlas.attachTo('cesium');
 
           cesiumAtlas.publish('debugMode', true);
