@@ -1,6 +1,6 @@
 [submodule "atlas"]
 	path = atlas
-url=https://bitbucket.org/urbanetic/atlas.git
+	url=https://github.com/urbanetic/atlas.git
 [submodule "atlas-cesium"]
 	path = atlas-cesium
-url=https://bitbucket.org/urbanetic/atlas-cesium.git
+	url=https://github.com/urbanetic/atlas-cesium.git
